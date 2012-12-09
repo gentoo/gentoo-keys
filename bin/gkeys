@@ -39,7 +39,7 @@ except KeyboardInterrupt:
     sys.exit(1)
 
 
-from gentoo-keys.cli import Main
+from gkeys.cli import Main
 
 root = None
 try:

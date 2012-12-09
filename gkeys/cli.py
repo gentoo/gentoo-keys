@@ -10,7 +10,7 @@
     @license: GNU GPL2, see COPYING for details.
 """
 
-from gentookeys.log import logger
+from gkeys.log import logger
 
 class Main(object):
     '''Main command line interface class'''

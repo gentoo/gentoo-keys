@@ -42,7 +42,7 @@ class GKeysConfig(GPGConfig):
         if config:
             self.defaults['config'] = config
             self.defaults['configdir'] = os.path.dirname(config)
-        else
+        else:
             self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gentoo-keys'])
             self.defaults['config'] = '%(configdir)s/gkeys.conf'
         self.configparser = None
@@ -54,8 +54,10 @@ class GKeysConfig(GPGConfig):
     def _add_gkey_defaults(self):
         self.defaults['keysdir'] = path([self.root, EPREFIX, '/var/gentoo/gkeys'])
         self.defaults['devkeydir'] = '%(keysdir)s/devs'
-        self.defaults['releasekeydir'] = '%(keysdir)s/release')
+        self.defaults['releasekeydir'] = '%(keysdir)s/release'
         self.defaults['knownkeysfile'] = '%(keysdir)s/knownkeys'
+        self.fedualts['releaseseedfile'] = '%(configdir)s/release.seeds'
+        self.fedualts['devseedfile'] = '%(configdir)s/developer.seeds'
 
 
 
@@ -79,7 +81,19 @@ class GKeysConfig(GPGConfig):
 
 
 class GKEY(namedtuple('GKEY', ['name', 'keyid', 'longkeyid',
-    'fingerprint', 'keyring']):
+    'fingerprint', 'keyring'])):
     '''Class to hold the relavent info about a key'''
 
+    __slots__ = ()
+
+    def values(self):
+        '''Returns a list of the field values'''
+        v = []
+        for f in self._fields:
+            v.append(getattr(self, f))
+        return v
+
+    def value_string(self):
+        '''Returns a space separated string of the field values'''
+        return ' '.join([str(x) for x in self.values()])
 

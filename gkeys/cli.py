@@ -68,6 +68,8 @@ class Main(object):
         # options
         parser.add_argument('-c', '--config', dest='config', default=None,
             help='The path to an alternate config file')
+        parser.add_argument('-d', '--dest', dest='destination', default=None,
+            help='The destination seed file or keyring for move, copy operations')
         parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
             help='The fingerprint of the the key')
         parser.add_argument('-n', '--name', dest='name', default=None,
@@ -78,10 +80,10 @@ class Main(object):
             help='The longkeyid of the the key')
         parser.add_argument('-r', '--keyring',
             choices=['release', 'dev', 'overlays'], dest='keyring', default=None,
-            help='The keyring to use')
+            help='The keyring to use or update')
         parser.add_argument('-s', '--seeds',
             choices=['release', 'dev'], dest='seeds', default=None,
-            help='The seeds file to update')
+            help='The seeds file to use or update')
         parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
             help='The seedfile path to use')
 
@@ -106,6 +108,7 @@ class Main(object):
         func = getattr(self, '_action_%s' % args.action)
         logger.debug('Found action: %s' % args.action)
         results = func(args)
+        # super simple output for the time being
         if self.print_results:
             print('\n\nGkey results:')
             print("\n".join([str(x) for x in results]))
@@ -182,7 +185,7 @@ class Main(object):
         seeds = self._load_seeds(args.seeds)
         gkeys = self._action_listseed(args)
         if len(gkeys) == 1:
-            logger.debug("_action_removekey(); now deleting gkey: %s" % str(gkeys[0]))
+            logger.debug("_action_removeseed(); now deleting gkey: %s" % str(gkeys[0]))
             success = seeds.delete(gkeys[0])
             if success:
                 success = seeds.save()
@@ -198,7 +201,41 @@ class Main(object):
 
     def _action_moveseed(self, args):
         '''Action moveseed method'''
-        pass
+        parts = self.build_gkeylist(args)
+        searchkey = GKEY._make(parts)
+        logger.debug("_action_moveseed(); gkey: %s" % str(searchkey))
+        seeds = self._load_seeds(args.seeds)
+        kwargs = self.build_gkeydict(args)
+        sourcekeys = seeds.list(**kwargs)
+        dest = self._load_seeds(args.destination)
+        destkeys = dest.list(**kwargs)
+        messages = []
+        if len(sourcekeys) == 1 and destkeys == []:
+            logger.debug("_action_moveseed(); now adding destination gkey: %s"
+                % str(sourcekeys[0]))
+            success = dest.add(sourcekeys[0])
+            logger.debug("_action_moveseed(); success: %s" %str(success))
+            logger.debug("_action_moveseed(); now deleting sourcekey: %s" % str(sourcekeys[0]))
+            success = seeds.delete(sourcekeys[0])
+            if success:
+                success = dest.save()
+                logger.debug("_action_moveseed(); destination saved... %s" %str(success))
+                success = seeds.save()
+            messages.extend(["Successfully Moved %s seed: %s"
+                % (args.seeds, str(success)), sourcekeys[0]])
+            return messages
+        elif len(sourcekeys):
+            messages = ["Too many seeds found to remove"]
+            messages.extend(sourcekeys)
+            return messages
+        messages.append("Failed to Move seed:")
+        messages.append(searchkey)
+        messages.append('\n')
+        messages.append("Source seeds found...")
+        messages.extend(sourcekeys or ["None\n"])
+        messages.append("Destination seeds found...")
+        messages.extend(destkeys or ["None\n"])
+        return messages
 
 
     def _action_listkey(self, args):

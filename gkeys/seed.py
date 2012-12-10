@@ -39,7 +39,7 @@ class Seeds(object):
         if not self.filename:
             logger.debug("Seed.load() Not a valid filename: '%s'" % str(self.filename))
             return False
-        logger.debug("Begin loading seed file %s" % self.filename)
+        logger.debug("Seeds: Begin loading seed file %s" % self.filename)
         seedlines = None
         self.seeds = []
         try:
@@ -74,7 +74,8 @@ class Seeds(object):
                 seedfile.write("\n")
         except IOError as err:
             self._error(err)
-            return
+            return False
+        return True
 
 
     def add(self, gkey):

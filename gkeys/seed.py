@@ -66,7 +66,7 @@ class Seeds(object):
         if not self.filename:
             logger.debug("Seed.load() Not a valid filename: '%s'" % str(self.filename))
             return False
-        logger.debug("Begin loading seed file %s" % self.filename)
+        logger.debug("Begin saving seed file %s" % self.filename)
         try:
             with open(self.filename, 'w') as seedfile:
                 seedlines = [x.value_string() for x in self.seeds]

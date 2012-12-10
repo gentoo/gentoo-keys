@@ -34,7 +34,7 @@ class GKeysConfig(GPGConfig):
     """ Configuration superclass which holds our gentoo-keys
     config settings for pygpg """
 
-    def __init__ (self, config=None, root=None):
+    def __init__ (self, config=None, root=None, read_configfile=False):
         """ Class initialiser """
         GPGConfig.__init__(self)
 
@@ -46,18 +46,18 @@ class GKeysConfig(GPGConfig):
             self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gentoo-keys'])
             self.defaults['config'] = '%(configdir)s/gkeys.conf'
         self.configparser = None
-
-        # read our config file overrides
-        self.read_config()
+        if read_configfile:
+            self.read_config()
 
 
     def _add_gkey_defaults(self):
-        self.defaults['keysdir'] = path([self.root, EPREFIX, '/var/gentoo/gkeys'])
-        self.defaults['devkeydir'] = '%(keysdir)s/devs'
-        self.defaults['releasekeydir'] = '%(keysdir)s/release'
-        self.defaults['knownkeysfile'] = '%(keysdir)s/knownkeys'
-        self.fedualts['releaseseedfile'] = '%(configdir)s/release.seeds'
-        self.fedualts['devseedfile'] = '%(configdir)s/developer.seeds'
+        self.defaults['key-sdir'] = path([self.root, EPREFIX, '/var/gentoo/gkeys'])
+        self.defaults['dev-keydir'] = '%(keysdir)s/devs'
+        self.defaults['release-keydir'] = '%(keysdir)s/release'
+        self.defaults['overlays-keydir'] = '%(keysdir)s/overlays'
+        self.defaults['known-keysfile'] = '%(keysdir)s/knownkeys'
+        self.defaults['release-seedfile'] = '%(configdir)s/release.seeds'
+        self.defaults['dev-seedfile'] = '%(configdir)s/developer.seeds'
 
 
 
@@ -73,11 +73,20 @@ class GKeysConfig(GPGConfig):
         self.configparser.add_section('MAIN')
         self.configparser.read(defaults['config'])
 
+
+    def get_key(self, key):
+        return self._get_(key)
+
+
     def _get_(self, key):
         if self.configparser and self.configparser.has_option('MAIN', key):
             return self.configparser.get('MAIN', key)
-        else:
-            super('GKeysConfig', self)._get_(key)
+        elif key in self.options:
+            return self.options[key]
+        elif key in self.defaults:
+            return self.defaults[key]
+        logger.error("GKeysConfig: _get_(); didn't find :", key)
+        return None
 
 
 class GKEY(namedtuple('GKEY', ['name', 'keyid', 'longkeyid',

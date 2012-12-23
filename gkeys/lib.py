@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#
 #-*- coding:utf-8 -*-
 
 '''Gentoo-keys - lib.py
@@ -97,7 +97,4 @@ class GkeysGPG(GPG):
         '''Verify the file specified at filepath
         '''
         pass
-
-
-    def
 

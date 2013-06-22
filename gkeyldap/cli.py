@@ -194,7 +194,7 @@ class Main(object):
     @staticmethod
     def build_gkeylist(info):
         keyinfo = []
-        logger.debug("build_gkeylist, info = %s" % str(info))
+        #logger.debug("build_gkeylist, info = %s" % str(info))
         for x in GKEY._fields:
             field = gkey2ldap_map[x]
             if not field:
@@ -206,6 +206,9 @@ class Main(object):
                     value = values[0]
                 else:
                     value = values
+                if 'undefined' in values:
+                    logger.error('%s = "undefined" for %s, %s'
+                        %(field, info['uid'][0], info['cn'][0]))
                 keyinfo.append(value)
             except KeyError:
                 logger.error("Missing %s for %s, %s"

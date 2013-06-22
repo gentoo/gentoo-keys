@@ -12,6 +12,6 @@
 # $ esearch some-package
 
 
-export PATH="$(dirname $BASH_SOURCE[0])../pyGPG/bin:$(dirname $BASH_SOURCE[0])/bin:${PATH}"
+export PATH="$(dirname $BASH_SOURCE[0])/../pyGPG/bin:$(dirname $BASH_SOURCE[0])/bin:${PATH}"
 
-export PYTHONPATH="$(dirname $BASH_SOURCE[0])../pyGPG/:$(dirname $BASH_SOURCE[0])/:${PYTHONPATH}"
+export PYTHONPATH="$(dirname $BASH_SOURCE[0])/../pyGPG/:$(dirname $BASH_SOURCE[0])/:${PYTHONPATH}"

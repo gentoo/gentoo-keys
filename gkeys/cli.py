@@ -110,6 +110,10 @@ class Main(object):
         func = getattr(self, '_action_%s' % args.action)
         logger.debug('Found action: %s' % args.action)
         results = func(args)
+        if not results:
+            print("No results found.  Check your configuration and that the",
+                "seed file exists.")
+            return
         # super simple output for the time being
         if self.print_results:
             print('\n\nGkey results:')
@@ -142,6 +146,8 @@ class Main(object):
 
 
     def _load_seeds(self, filename):
+        if not filename:
+            return None
         filepath = self.config.get_key(filename + "-seedfile")
         logger.debug("_load_seeds(); seeds filepath to load: "
             "%s" % filepath)
@@ -155,8 +161,10 @@ class Main(object):
         kwargs = self.build_gkeydict(args)
         logger.debug("_action_listseed(); kwargs: %s" % str(kwargs))
         seeds = self._load_seeds(args.seeds)
-        results = seeds.list(**kwargs)
-        return results
+        if seeds:
+            results = seeds.list(**kwargs)
+            return results
+        return None
 
 
     def _action_addseed(self, args):

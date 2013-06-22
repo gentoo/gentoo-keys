@@ -7,7 +7,10 @@ import sys
 import os
 import argparse
 
+from gkeys import log
+log.set_logger('gkeyldap')
 from gkeys.log import logger
+
 from gkeys.config import GKeysConfig, GKEY
 from gkeys.seed import Seeds
 from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)

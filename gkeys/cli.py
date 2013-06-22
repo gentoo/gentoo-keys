@@ -16,7 +16,10 @@ from __future__ import print_function
 import argparse
 import sys
 
+from gkeys import log
+log.set_logger('gkeys')
 from gkeys.log import logger
+
 from gkeys.config import GKeysConfig, GKEY
 from gkeys.seed import Seeds
 

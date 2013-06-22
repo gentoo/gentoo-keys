@@ -14,5 +14,15 @@ import logging
 
 logging.basicConfig()
 
-logger = logging.getLogger('gentoo-keys')
+NAMESPACE = 'gentoo-keys'
+logger = None
+
+def set_logger(namespace=None):
+    global logger, NAMESPACE
+    if not namespace:
+        namespace = Namespace
+    else:
+        NAMESPACE = namespace
+    logger = logging.getLogger(namespace)
+
 

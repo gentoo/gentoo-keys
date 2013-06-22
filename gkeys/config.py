@@ -17,6 +17,7 @@ from collections import namedtuple
 
 from pygpg.config import GPGConfig
 
+from gkeys.log import logger
 from gkeys.utils import path
 
 
@@ -74,7 +75,7 @@ class GKeysConfig(GPGConfig):
         self.configparser.read(defaults['config'])
 
 
-    def get_key(self, key):
+    def get_key(self, key, subkey=None):
         return self._get_(key)
 
 
@@ -89,8 +90,8 @@ class GKeysConfig(GPGConfig):
         return None
 
 
-class GKEY(namedtuple('GKEY', ['name', 'keyid', 'longkeyid',
-    'fingerprint', 'keyring'])):
+class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
+    'keyring', 'fingerprint'])):
     '''Class to hold the relavent info about a key'''
 
     __slots__ = ()
@@ -102,7 +103,7 @@ class GKEY(namedtuple('GKEY', ['name', 'keyid', 'longkeyid',
             v.append(getattr(self, f))
         return v
 
-    def value_string(self):
+    def value_string(self, separator=' '):
         '''Returns a space separated string of the field values'''
-        return ' '.join([str(x) for x in self.values()])
+        return separator.join([str(x) for x in self.values()])
 

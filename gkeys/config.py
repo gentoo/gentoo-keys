@@ -86,7 +86,7 @@ class GKeysConfig(GPGConfig):
             return self.options[key]
         elif key in self.defaults:
             return self.defaults[key]
-        logger.error("GKeysConfig: _get_(); didn't find :", key)
+        logger.error("GKeysConfig: _get_; didn't find :", key)
         return None
 
 

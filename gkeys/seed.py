@@ -39,7 +39,7 @@ class Seeds(object):
         if filename:
             self.filename = filename
         if not self.filename:
-            logger.debug("Seed.load() Not a valid filename: '%s'" % str(self.filename))
+            logger.debug("Seed: load; Not a valid filename: '%s'" % str(self.filename))
             return False
         logger.debug("Seeds: Begin loading seed file %s" % self.filename)
         seedlines = None
@@ -57,7 +57,7 @@ class Seeds(object):
                 self.seeds.append(GKEY._make(parts))
             except Exception as err:
                 self._error(err)
-        logger.debug("Completed loading seed file %s" % self.filename)
+        logger.debug("Seed: load; Completed loading seed file %s" % self.filename)
         return True
 
 
@@ -66,9 +66,9 @@ class Seeds(object):
         if filename:
             self.filename = filename
         if not self.filename:
-            logger.debug("Seed.load() Not a valid filename: '%s'" % str(self.filename))
+            logger.debug("Seed: save; Not a valid filename: '%s'" % str(self.filename))
             return False
-        logger.debug("Begin saving seed file %s" % self.filename)
+        logger.debug("Seed: save; Begin saving seed file %s" % self.filename)
         try:
             with open(self.filename, 'w') as seedfile:
                 seedlines = [x.value_string(self.separator) for x in self.seeds]
@@ -141,8 +141,8 @@ class Seeds(object):
 
     def _error(self, err):
         '''Class error logging function'''
-        logger.error("Error processing seed file %s" % self.filename)
-        logger.error("Error was: %s" % str(err))
+        logger.error("Seed: Error processing seed file %s" % self.filename)
+        logger.error("Seed: Error was: %s" % str(err))
 
 
     @staticmethod

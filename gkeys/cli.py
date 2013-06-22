@@ -41,7 +41,6 @@ class Main(object):
 
 
     def __call__(self, args=None):
-        logger.debug("Main:__call__()")
         if args:
             self.run(self.parse_args(args))
         else:
@@ -54,7 +53,7 @@ class Main(object):
         @param args: list
         @returns argparse.Namespace object
         '''
-        logger.debug('args: %s' % args)
+        logger.debug('MAIN: parse_args; args: %s' % args)
         actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'listkey',
             'addkey', 'removekey', 'movekey']
         parser = argparse.ArgumentParser(
@@ -98,17 +97,17 @@ class Main(object):
         @param args: list or argparse.Namespace object
         '''
         if not args:
-            logger.error("Main.run() invalid args argument passed in")
+            logger.error("Main: run; invalid args argument passed in")
         if isinstance(args, list):
             args = self.parse_args(args)
         if args.config:
-            logger.debug("Found alternate config request: %s" % args.config)
+            logger.debug("Main: run; Found alternate config request: %s" % args.config)
             self.config.defaults['config'] = args.config
         # now make it load the config file
         self.config.read_config()
 
         func = getattr(self, '_action_%s' % args.action)
-        logger.debug('Found action: %s' % args.action)
+        logger.debug('Main: run; Found action: %s' % args.action)
         results = func(args)
         if not results:
             print("No results found.  Check your configuration and that the",
@@ -149,7 +148,7 @@ class Main(object):
         if not filename:
             return None
         filepath = self.config.get_key(filename + "-seedfile")
-        logger.debug("_load_seeds(); seeds filepath to load: "
+        logger.debug("MAIN: _load_seeds; seeds filepath to load: "
             "%s" % filepath)
         seeds = Seeds()
         seeds.load(filepath)
@@ -159,7 +158,7 @@ class Main(object):
     def _action_listseed(self, args):
         '''Action listseed method'''
         kwargs = self.build_gkeydict(args)
-        logger.debug("_action_listseed(); kwargs: %s" % str(kwargs))
+        logger.debug("MAIN: _action_listseed; kwargs: %s" % str(kwargs))
         seeds = self._load_seeds(args.seeds)
         if seeds:
             results = seeds.list(**kwargs)
@@ -171,11 +170,11 @@ class Main(object):
         '''Action addseed method'''
         parts = self.build_gkeylist(args)
         gkey = GKEY._make(parts)
-        logger.debug("_action_addseed(); new gkey: %s" % str(gkey))
+        logger.debug("MAIN: _action_addseed; new gkey: %s" % str(gkey))
         seeds = self._load_seeds(args.seeds)
         gkeys = self._action_listseed(args)
         if len(gkeys) == 0:
-            logger.debug("_action_addkey(); now adding gkey: %s" % str(gkey))
+            logger.debug("MAIN: _action_addkey; now adding gkey: %s" % str(gkey))
             success = seeds.add(gkey)
             if success:
                 success = seeds.save()
@@ -191,11 +190,11 @@ class Main(object):
         '''Action removeseed method'''
         parts = self.build_gkeylist(args)
         searchkey = GKEY._make(parts)
-        logger.debug("_action_removeseed(); gkey: %s" % str(searchkey))
+        logger.debug("MAIN: _action_removeseed; gkey: %s" % str(searchkey))
         seeds = self._load_seeds(args.seeds)
         gkeys = self._action_listseed(args)
         if len(gkeys) == 1:
-            logger.debug("_action_removeseed(); now deleting gkey: %s" % str(gkeys[0]))
+            logger.debug("MAIN: _action_removeseed; now deleting gkey: %s" % str(gkeys[0]))
             success = seeds.delete(gkeys[0])
             if success:
                 success = seeds.save()
@@ -213,7 +212,7 @@ class Main(object):
         '''Action moveseed method'''
         parts = self.build_gkeylist(args)
         searchkey = GKEY._make(parts)
-        logger.debug("_action_moveseed(); gkey: %s" % str(searchkey))
+        logger.debug("MAIN: _action_moveseed; gkey: %s" % str(searchkey))
         seeds = self._load_seeds(args.seeds)
         kwargs = self.build_gkeydict(args)
         sourcekeys = seeds.list(**kwargs)
@@ -221,15 +220,15 @@ class Main(object):
         destkeys = dest.list(**kwargs)
         messages = []
         if len(sourcekeys) == 1 and destkeys == []:
-            logger.debug("_action_moveseed(); now adding destination gkey: %s"
+            logger.debug("MAIN: _action_moveseed; now adding destination gkey: %s"
                 % str(sourcekeys[0]))
             success = dest.add(sourcekeys[0])
-            logger.debug("_action_moveseed(); success: %s" %str(success))
-            logger.debug("_action_moveseed(); now deleting sourcekey: %s" % str(sourcekeys[0]))
+            logger.debug("MAIN: _action_moveseed; success: %s" %str(success))
+            logger.debug("MAIN: _action_moveseed; now deleting sourcekey: %s" % str(sourcekeys[0]))
             success = seeds.delete(sourcekeys[0])
             if success:
                 success = dest.save()
-                logger.debug("_action_moveseed(); destination saved... %s" %str(success))
+                logger.debug("MAIN: _action_moveseed; destination saved... %s" %str(success))
                 success = seeds.save()
             messages.extend(["Successfully Moved %s seed: %s"
                 % (args.seeds, str(success)), sourcekeys[0]])

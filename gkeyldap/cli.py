@@ -46,7 +46,7 @@ class Main(object):
         @param args: list
         @returns argparse.Namespace object
         '''
-        logger.debug('args: %s' % args)
+        logger.debug('MAIN: parse_args; args: %s' % args)
         actions = ['ldapsearch', 'updateseeds']
         parser = argparse.ArgumentParser(
             prog='gkeys',
@@ -83,17 +83,18 @@ class Main(object):
         @param args: list or argparse.Namespace object
         '''
         if not args:
-            logger.error("Main.run() invalid args argument passed in")
+            logger.error("Main: run; invalid args argument passed in")
         if isinstance(args, list):
             args = self.parse_args(args)
         if args.config:
-            logger.debug("Found alternate config request: %s" % args.config)
+            logger.debug("Main: run; Found alternate config request: %s"
+                % args.config)
             self.config.defaults['config'] = args.config
         # now make it load the config file
         self.config.read_config()
 
         func = getattr(self, '_action_%s' % args.action)
-        logger.debug('Found action: %s' % args.action)
+        logger.debug('Main: run; Found action: %s' % args.action)
         results = func(args)
         return results
 
@@ -103,7 +104,7 @@ class Main(object):
         if not l.connect():
             print("Aborting Search...Connection failed")
             return False
-        logging.debug("args = %s" % str(args))
+        logger.debug("MAIN: _action_ldapsearch; args = %s" % str(args))
         x, target, search_field = self.get_args(args)
         results = l.search(target, search_field)
         devs = l.result2dict(results, gkey2ldap_map[x])
@@ -121,19 +122,26 @@ class Main(object):
             return False
         results = l.search('*', UID)
         info = l.result2dict(results, 'uid')
-        logger.debug("_action_updateseeds, got results :) converted to info")
+        logger.debug(
+            "MAIN: _action_updateseeds; got results :) converted to info")
         if not self.create_seedfile(info):
             logger.error("Dev seed file update failure: "
                 "Original seed file is intact & untouched.")
         old = self.config['dev-seedfile'] + '.old'
         try:
             if os.path.exists(old):
-                logger.debug("Removing 'old' seed file: %s" % old)
+                logger.debug(
+                    "MAIN: _action_updateseeds; Removing 'old' seed file: %s"
+                    % old)
                 os.unlink(old)
             if os.path.exists(self.config['dev-seedfile']):
-                logger.debug("Renaming current seed file to: %s" % old)
+                logger.debug(
+                    "MAIN: _action_updateseeds; Renaming current seed file to: "
+                    "%s" % old)
                 os.rename(self.config['dev-seedfile'], old)
-            logger.debug("Renaming 'new' seed file to: %s" % self.config['dev-seedfile']))
+            logger.debug(
+                "MAIN: _action_updateseeds; Renaming '.new' seed file to: %s"
+                % self.config['dev-seedfile'])
             os.rename(self.config['dev-seedfile'] + '.new',
                 self.config['dev-seedfile'])
         except IOError:
@@ -150,12 +158,14 @@ class Main(object):
         for dev in sorted(devs):
             if devs[dev]['gentooStatus'][0] not in ['active']:
                 continue
-            #logger.debug("create_seedfile, dev = %s, %s" % (str(dev), str(devs[dev])))
+            #logger.debug("create_seedfile, dev = "
+            #   "%s, %s" % (str(dev), str(devs[dev])))
             new_gkey = GKEY._make(self.build_gkeylist(devs[dev]))
             self.seeds.add(new_gkey)
             count += 1
         print("Total number of seeds created:", count)
-        logger.debug("MAIN: create_seedfile; seeds created...saving file: %s" % filename)
+        logger.debug("MAIN: create_seedfile; seeds created...saving file: %s"
+            % filename)
         return self.seeds.save()
 
 
@@ -193,7 +203,7 @@ class Main(object):
     @staticmethod
     def build_gkeylist(info):
         keyinfo = []
-        #logger.debug("build_gkeylist, info = %s" % str(info))
+        #logger.debug("MAIN: build_gkeylist; info = %s" % str(info))
         for x in GKEY._fields:
             field = gkey2ldap_map[x]
             if not field:

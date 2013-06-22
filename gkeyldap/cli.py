@@ -148,6 +148,8 @@ class Main(object):
         filename = self.config['dev-seedfile'] + '.new'
         self.seeds = Seeds(filename)
         for dev in devs:
+            if devs[dev]['gentooStatus'][0] not in ['active']:
+                continue
             logger.debug("create_seedfile, dev = %s, %s" % (str(dev), str(devs[dev])))
             new_gkey = GKEY._make(self.build_gkeylist(devs[dev]))
             self.seeds.add(new_gkey)

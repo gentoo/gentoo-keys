@@ -148,7 +148,7 @@ class Main(object):
         filename = self.config['dev-seedfile'] + '.new'
         self.seeds = Seeds(filename)
         count = 0
-        for dev in devs:
+        for dev in sorted(devs):
             if devs[dev]['gentooStatus'][0] not in ['active']:
                 continue
             #logger.debug("create_seedfile, dev = %s, %s" % (str(dev), str(devs[dev])))

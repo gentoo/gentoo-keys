@@ -18,19 +18,23 @@ with gentoo-keys specific convienience functions.
 
 
 from pygpg.gpg import GPG
+from gkeys.log import logger
 
 
 class GkeysGPG(GPG):
     '''Gentoo-keys primary gpg class'''
 
 
-    def __init__(self, config):
+    def __init__(self, config, keyring):
         '''class init function
 
         @param config: GKeysConfig config instance to use
+        @param keyring: string, the path to the keyring to be used
+                        for all operations.
         '''
         GPG.__init__(self, config)
         self.config = config
+        self.keyring = keyring
 
 
     def add_key(self, gkey):
@@ -38,6 +42,7 @@ class GkeysGPG(GPG):
 
         @param gkey: GKEY namedtuple with (name, keyid/longkeyid, fingerprint)
         '''
+
         pass
 
 

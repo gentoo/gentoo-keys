@@ -119,6 +119,7 @@ class Main(object):
 
 
     def _action_updateseeds(self, args):
+        print("Beginning ldap search...")
         l = LdapSearch()
         if not l.connect():
             print("Aborting Update...Connection failed")
@@ -132,6 +133,7 @@ class Main(object):
                 "Original seed file is intact & untouched.")
         old = self.config['dev-seedfile'] + '.old'
         try:
+            print("Backing up existing file...")
             if os.path.exists(old):
                 logger.debug(
                     "MAIN: _action_updateseeds; Removing 'old' seed file: %s"
@@ -154,7 +156,7 @@ class Main(object):
 
 
     def create_seedfile(self, devs):
-        logger.debug("create_seedfile, arrived")
+        print("Creating seeds from ldap data...")
         filename = self.config['dev-seedfile'] + '.new'
         self.seeds = Seeds(filename)
         count = 0
@@ -167,8 +169,7 @@ class Main(object):
             self.seeds.add(new_gkey)
             count += 1
         print("Total number of seeds created:", count)
-        logger.debug("MAIN: create_seedfile; seeds created...saving file: %s"
-            % filename)
+        print("Seeds created...saving file: %s" % filename)
         return self.seeds.save()
 
 

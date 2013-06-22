@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-import ldap
+
 import sys
 import os
 import argparse
@@ -10,8 +10,7 @@ import argparse
 from gkeys.log import logger
 from gkeys.config import GKeysConfig, GKEY
 from gkeys.seed import Seeds
-from gkeyldap.search import (LdapSearch, UID, CN, STATUS, GPGKEY,
-    MAIL, GPGFINGERPRINT, gkey2ldap_map, gkey2SEARCH)
+from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
 
 
 # set debug level to max
@@ -35,7 +34,6 @@ class Main(object):
 
 
     def __call__(self, args=None):
-        logger.debug("Main:__call__()")
         if args:
             self.run(self.parse_args(args))
         else:
@@ -97,6 +95,7 @@ class Main(object):
         func = getattr(self, '_action_%s' % args.action)
         logger.debug('Found action: %s' % args.action)
         results = func(args)
+        return results
 
 
     def _action_ldapsearch(self, args):
@@ -111,7 +110,7 @@ class Main(object):
         for dev in sorted(devs):
             print(dev, devs[dev])
         print("============================================")
-        print "Total number of devs in results:", len(devs)
+        print("Total number of devs in results:", len(devs))
         return True
 
 
@@ -134,7 +133,7 @@ class Main(object):
             if os.path.exists(self.config['dev-seedfile']):
                 logger.debug("Renaming current seed file to: %s" % old)
                 os.rename(self.config['dev-seedfile'], old)
-            logger.debug("Renaming 'new' seed file to: %s" % self.config['dev-seedfile'])
+            logger.debug("Renaming 'new' seed file to: %s" % self.config['dev-seedfile']))
             os.rename(self.config['dev-seedfile'] + '.new',
                 self.config['dev-seedfile'])
         except IOError:

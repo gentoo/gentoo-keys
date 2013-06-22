@@ -1,5 +1,4 @@
 import ldap
-import sys
 
 from gkeys.log import logger
 from gkeys.config import GKEY

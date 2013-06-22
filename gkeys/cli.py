@@ -24,8 +24,8 @@ from gkeys.config import GKeysConfig, GKEY
 from gkeys.seed import Seeds
 
 
-# set debug level to max
-logger.setLevel(1)
+# set debug level to min
+logger.setLevel(0)
 
 
 class Main(object):
@@ -56,7 +56,7 @@ class Main(object):
         @param args: list
         @returns argparse.Namespace object
         '''
-        logger.debug('MAIN: parse_args; args: %s' % args)
+        #logger.debug('MAIN: parse_args; args: %s' % args)
         actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'listkey',
             'addkey', 'removekey', 'movekey']
         parser = argparse.ArgumentParser(
@@ -90,6 +90,8 @@ class Main(object):
             help='The seeds file to use or update')
         parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
             help='The seedfile path to use')
+        parser.add_argument('-D', '--debug', default=0,
+            help='The logging level to use and report with')
 
         return parser.parse_args(args)
 
@@ -103,6 +105,9 @@ class Main(object):
             logger.error("Main: run; invalid args argument passed in")
         if isinstance(args, list):
             args = self.parse_args(args)
+        if args.debug:
+            logger.setLevel(int(args.debug))
+            logger.debug("MAIN: run; Found alternate debug setting: %s" % str(args.debug))
         if args.config:
             logger.debug("Main: run; Found alternate config request: %s" % args.config)
             self.config.defaults['config'] = args.config

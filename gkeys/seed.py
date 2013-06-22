@@ -23,6 +23,8 @@ from gkeys.config import GKEY
 class Seeds(object):
     '''Handles all seed key file operations'''
 
+    separator = '|'
+
     def __init__(self, filepath=None):
         '''Seeds class init function
 
@@ -69,7 +71,7 @@ class Seeds(object):
         logger.debug("Begin saving seed file %s" % self.filename)
         try:
             with open(self.filename, 'w') as seedfile:
-                seedlines = [x.value_string() for x in self.seeds]
+                seedlines = [x.value_string(self.separator) for x in self.seeds]
                 seedfile.write('\n'.join(seedlines))
                 seedfile.write("\n")
         except IOError as err:
@@ -147,7 +149,7 @@ class Seeds(object):
     def _split_seed(seed):
         '''Splits the seed string and
         replaces all occurances of 'None' with the python type None'''
-        iterable = seed.split()
+        iterable = seed.split(self.separator)
         for i in range(len(iterable)):
             if iterable[i] == 'None':
                 iterable[i] = None

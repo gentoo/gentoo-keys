@@ -19,7 +19,7 @@ gkey2ldap_map = {
     'nick': 'uid',
     'name': 'cn',
     'keyid': 'gpgkey',
-    'longkeyid': '',
+    'longkeyid': 'gpgkey',
     'keyring': '',
     'fingerprint': 'gpgfingerprint'
 }

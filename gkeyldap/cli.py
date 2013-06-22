@@ -20,6 +20,32 @@ from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
 logger.setLevel(0)
 
 
+# set some defaults
+KEY_LEN = {
+    'keyid': 8,
+    'longkeyid': 16,
+}
+
+
+def get_key_ids(key, info):
+    '''Small utility function to return only keyid (short)
+    or longkeyid's
+
+    @param key: string, the key lenght desired
+    @param info: list of keysid's to process
+    @return list of the desired key lengh id's
+    '''
+    result = []
+    for x in info:
+        if x.startswith('0x'):
+            mylen = KEY_LEN[key] + 2
+        else:
+            mylen = KEY_LEN[key]
+        if len(x) == mylen:
+            result.append(x)
+    return result
+
+
 class Main(object):
     '''Main command line interface class'''
 
@@ -188,7 +214,6 @@ class Main(object):
         return (x, target, search_field)
 
 
-
     @staticmethod
     def build_gkeydict(info):
         keyinfo = {}
@@ -222,6 +247,9 @@ class Main(object):
                 values = info[field]
                 if values and field in ['uid', 'cn' ]:
                     value = values[0]
+                # separate out short/long key id's
+                elif values and x in ['keyid', 'longkeyid']:
+                    value = get_key_ids(x, values)
                 else:
                     value = values
                 if 'undefined' in values:
@@ -233,11 +261,4 @@ class Main(object):
                     %(field, info['uid'][0], info['cn'][0]))
                 keyinfo.append(None)
         return keyinfo
-
-
-if __name__ == '__main__':
-
-    Main()
-
-
 

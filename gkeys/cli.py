@@ -72,8 +72,10 @@ class Main(object):
             help='The destination seed file or keyring for move, copy operations')
         parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
             help='The fingerprint of the the key')
-        parser.add_argument('-n', '--name', dest='name', default=None,
+        parser.add_argument('-N', '--name', dest='name', default=None,
             help='The name of the the key')
+        parser.add_argument('-n', '--nick', dest='nick', default=None,
+            help='The nick associated with the the key')
         parser.add_argument('-k', '--keyid', dest='keyid', default=None,
             help='The keyid of the the key')
         parser.add_argument('-l', '--longkeyid', dest='longkeyid', default=None,
@@ -225,7 +227,7 @@ class Main(object):
                 % (args.seeds, str(success)), sourcekeys[0]])
             return messages
         elif len(sourcekeys):
-            messages = ["Too many seeds found to remove"]
+            messages = ["Too many seeds found to move"]
             messages.extend(sourcekeys)
             return messages
         messages.append("Failed to Move seed:")

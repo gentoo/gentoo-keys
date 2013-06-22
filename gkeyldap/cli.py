@@ -147,13 +147,16 @@ class Main(object):
         logger.debug("create_seedfile, arrived")
         filename = self.config['dev-seedfile'] + '.new'
         self.seeds = Seeds(filename)
+        count = 0
         for dev in devs:
             if devs[dev]['gentooStatus'][0] not in ['active']:
                 continue
-            logger.debug("create_seedfile, dev = %s, %s" % (str(dev), str(devs[dev])))
+            #logger.debug("create_seedfile, dev = %s, %s" % (str(dev), str(devs[dev])))
             new_gkey = GKEY._make(self.build_gkeylist(devs[dev]))
             self.seeds.add(new_gkey)
-        logger.debug("create_seedfile, seeds created...saving file: %s" % filename)
+            count += 1
+        print("Total number of seeds created:", count)
+        logger.debug("MAIN: create_seedfile; seeds created...saving file: %s" % filename)
         return self.seeds.save()
 
 
@@ -177,7 +180,7 @@ class Main(object):
                 continue
             try:
                 values = info[field]
-                if values and values in ['uid' ]:
+                if values and values in ['uid', 'cn' ]:
                     value = values[0]
                 else:
                     value = values
@@ -199,12 +202,14 @@ class Main(object):
                 continue
             try:
                 values = info[field]
-                if values and field in ['uid', 'name' ]:
+                if values and field in ['uid', 'cn' ]:
                     value = values[0]
                 else:
                     value = values
                 keyinfo.append(value)
             except KeyError:
+                logger.error("Missing %s for %s, %s"
+                    %(field, info['uid'][0], info['cn'][0]))
                 keyinfo.append(None)
         return keyinfo
 

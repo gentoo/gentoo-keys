@@ -245,6 +245,8 @@ class Main(object):
     @staticmethod
     def build_gkeylist(info):
         keyinfo = []
+        keyid_found = False
+        keyid_missing = False
         #logger.debug("MAIN: build_gkeylist; info = %s" % str(info))
         for x in GKEY._fields:
             field = gkey2ldap_map[x]
@@ -259,6 +261,8 @@ class Main(object):
                 # separate out short/long key id's
                 elif values and x in ['keyid', 'longkeyid']:
                     value = get_key_ids(x, values)
+                    if len(value):
+                        keyid_found = True
                 else:
                     value = values
                 if 'undefined' in values:
@@ -268,6 +272,16 @@ class Main(object):
             except KeyError:
                 logger.error("Missing %s (%s) for %s, %s"
                     %(field, x, info['uid'][0], info['cn'][0]))
+                if x in ['keyid', 'longkeyid']:
+                    keyid_missing = True
                 keyinfo.append(None)
+        if not keyid_found and not keyid_missing:
+            try:
+                gpgkey = info[gkey2ldap_map['longkeyid']]
+            except KeyError:
+                gpgkey = 'Missing from ldap info'
+            logger.error("A valid keyid or longkeyid was not found for")
+            logger.error("developer: %s, %s : gpgkey = %s"
+                %(info['uid'][0], info['cn'][0], gpgkey))
         return keyinfo
 

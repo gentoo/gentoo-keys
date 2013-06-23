@@ -41,21 +41,24 @@ class Seeds(object):
         if not self.filename:
             logger.debug("Seed: load; Not a valid filename: '%s'" % str(self.filename))
             return False
-        logger.debug("Seeds: Begin loading seed file %s" % self.filename)
+        logger.debug("Seeds: load; Begin loading seed file %s" % self.filename)
         seedlines = None
         self.seeds = []
         try:
             with open(self.filename) as seedfile:
                 seedlines = seedfile.readlines()
         except IOError as err:
+            logger.debug("Seed: load; IOError occurred while loading file")
             self._error(err)
             return False
 
         for seed in seedlines:
             try:
-                parts = self._split_seed(seed)
+                parts = self._split_seed(seed, self.separator)
                 self.seeds.append(GKEY._make(parts))
             except Exception as err:
+                logger.debug("Seed: load; Error splitting seed: %s" % seed)
+                logger.debug("Seed: load; ...............parts: %s" % str(parts))
                 self._error(err)
         logger.debug("Seed: load; Completed loading seed file %s" % self.filename)
         return True
@@ -146,10 +149,10 @@ class Seeds(object):
 
 
     @staticmethod
-    def _split_seed(seed):
+    def _split_seed(seed, separator):
         '''Splits the seed string and
         replaces all occurances of 'None' with the python type None'''
-        iterable = seed.split(self.separator)
+        iterable = seed.split(separator)
         for i in range(len(iterable)):
             if iterable[i] == 'None':
                 iterable[i] = None

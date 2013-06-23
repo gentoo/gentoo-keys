@@ -24,7 +24,9 @@ gkey2ldap_map = {
     'name': 'cn',
     'keyid': 'gpgkey',
     'longkeyid': 'gpgkey',
-    'keyring': '',
+    # map the uid to keyring, since we want
+    # dev keyrings to be separate from each other
+    'keyring': 'uid',
     'fingerprint': 'gpgfingerprint'
 }
 # Sanity check they are in sync

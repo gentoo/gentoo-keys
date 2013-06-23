@@ -245,8 +245,10 @@ class Main(object):
                 continue
             try:
                 values = info[field]
+                # strip errant line feeds
+                values = [x.strip('\n') for x in values]
                 if values and field in ['uid', 'cn' ]:
-                    value = values[0]
+                    value = values[0].strip('\n')
                 # separate out short/long key id's
                 elif values and x in ['keyid', 'longkeyid']:
                     value = get_key_ids(x, values)

@@ -1,3 +1,7 @@
+#
+#-*- coding:utf-8 -*-
+
+
 import ldap
 
 from gkeys.log import logger

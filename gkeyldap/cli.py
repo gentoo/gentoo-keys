@@ -257,8 +257,8 @@ class Main(object):
                         %(field, info['uid'][0], info['cn'][0]))
                 keyinfo.append(value)
             except KeyError:
-                logger.error("Missing %s for %s, %s"
-                    %(field, info['uid'][0], info['cn'][0]))
+                logger.error("Missing %s (%s) for %s, %s"
+                    %(field, x, info['uid'][0], info['cn'][0]))
                 keyinfo.append(None)
         return keyinfo
 

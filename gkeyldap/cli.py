@@ -223,11 +223,18 @@ class Main(object):
             if not field:
                 continue
             try:
-                values = info[field]
+                # strip errant line feeds
+                values = [y.strip('\n') for y in info[field]]
                 if values and values in ['uid', 'cn' ]:
                     value = values[0]
+                # separate out short/long key id's
+                elif values and x in ['keyid', 'longkeyid']:
+                    value = get_key_ids(x, values)
                 else:
                     value = values
+                if 'undefined' in values:
+                    logger.error('%s = "undefined" for %s, %s'
+                        %(field, info['uid'][0], info['cn'][0]))
                 if value:
                     keyinfo[x] = value
             except KeyError:
@@ -245,11 +252,10 @@ class Main(object):
                 keyinfo.append(None)
                 continue
             try:
-                values = info[field]
                 # strip errant line feeds
-                values = [x.strip('\n') for x in values]
+                values = [y.strip('\n') for y in info[field]]
                 if values and field in ['uid', 'cn' ]:
-                    value = values[0].strip('\n')
+                    value = values[0]
                 # separate out short/long key id's
                 elif values and x in ['keyid', 'longkeyid']:
                     value = get_key_ids(x, values)

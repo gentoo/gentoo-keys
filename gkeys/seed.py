@@ -54,6 +54,7 @@ class Seeds(object):
 
         for seed in seedlines:
             try:
+                seed = seed.strip('\n')
                 parts = self._split_seed(seed, self.separator)
                 self.seeds.append(GKEY._make(parts))
             except Exception as err:

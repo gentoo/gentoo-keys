@@ -23,7 +23,6 @@ from gkeys.config import GKEY
 class Seeds(object):
     '''Handles all seed key file operations'''
 
-    separator = '|'
 
     def __init__(self, filepath=None):
         '''Seeds class init function
@@ -53,14 +52,13 @@ class Seeds(object):
             return False
 
         for seed in seedlines:
-            try:
-                seed = seed.strip('\n')
-                parts = self._split_seed(seed, self.separator)
-                self.seeds.append(GKEY._make(parts))
-            except Exception as err:
-                logger.debug("Seed: load; Error splitting seed: %s" % seed)
-                logger.debug("Seed: load; ...............parts: %s" % str(parts))
-                self._error(err)
+            #try:
+            seed = seed.strip('\n')
+            self.seeds.append(GKEY.make_packed(seed))
+            #except Exception as err:
+                #logger.debug("Seed: load; Error splitting seed: %s" % seed)
+                #logger.debug("Seed: load; ...............parts: %s" % str(parts))
+                #self._error(err)
         logger.debug("Seed: load; Completed loading seed file %s" % self.filename)
         return True
 
@@ -75,7 +73,7 @@ class Seeds(object):
         logger.debug("Seed: save; Begin saving seed file %s" % self.filename)
         try:
             with open(self.filename, 'w') as seedfile:
-                seedlines = [x.value_string(self.separator) for x in self.seeds]
+                seedlines = [x.packed_string for x in self.seeds]
                 seedfile.write('\n'.join(seedlines))
                 seedfile.write("\n")
         except IOError as err:
@@ -147,15 +145,4 @@ class Seeds(object):
         '''Class error logging function'''
         logger.error("Seed: Error processing seed file %s" % self.filename)
         logger.error("Seed: Error was: %s" % str(err))
-
-
-    @staticmethod
-    def _split_seed(seed, separator):
-        '''Splits the seed string and
-        replaces all occurances of 'None' with the python type None'''
-        iterable = seed.split(separator)
-        for i in range(len(iterable)):
-            if iterable[i] == 'None':
-                iterable[i] = None
-        return iterable
 

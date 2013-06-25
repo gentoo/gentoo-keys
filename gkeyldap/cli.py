@@ -263,6 +263,8 @@ class Main(object):
                     value = get_key_ids(x, values)
                     if len(value):
                         keyid_found = True
+                elif values and x in ['fingerprint']:
+                    value = [v.replace(' ', '') for v in values]
                 else:
                     value = values
                 if 'undefined' in values:

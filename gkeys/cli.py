@@ -22,6 +22,7 @@ from gkeys.log import logger
 
 from gkeys.config import GKeysConfig, GKEY
 from gkeys.seed import Seeds
+from gkeys.lib import GkeysGPG
 
 
 # set debug level to min
@@ -41,6 +42,7 @@ class Main(object):
         self.config = config or GKeysConfig(root=root)
         self.print_results = print_results
         self.args = None
+        self.seeds = None
 
 
     def __call__(self, args=None):
@@ -114,6 +116,7 @@ class Main(object):
         # now make it load the config file
         self.config.read_config()
 
+        # run the action
         func = getattr(self, '_action_%s' % args.action)
         logger.debug('Main: run; Found action: %s' % args.action)
         results = func(args)
@@ -121,11 +124,16 @@ class Main(object):
             print("No results found.  Check your configuration and that the",
                 "seed file exists.")
             return
-        # super simple output for the time being
-        if self.print_results:
-            print('\n\nGkey results:')
-            print("\n".join([str(x) for x in results]))
+        if self.print_results and 'done' not in list(results):
+            self.output_results(results, '\n Gkey task results:')
             print()
+
+
+    @staticmethod
+    def output_results(results, header):
+        # super simple output for the time being
+        print(header)
+        print("\n".join([str(x) for x in results]))
 
 
     @staticmethod
@@ -167,9 +175,10 @@ class Main(object):
         '''Action listseed method'''
         kwargs = self.build_gkeydict(args)
         logger.debug("MAIN: _action_listseed; kwargs: %s" % str(kwargs))
-        seeds = self._load_seeds(args.seeds)
-        if seeds:
-            results = seeds.list(**kwargs)
+        if not self.seeds:
+            self.seeds = self._load_seeds(args.seeds)
+        if self.seeds:
+            results = self.seeds.list(**kwargs)
             return results
         return None
 
@@ -179,13 +188,12 @@ class Main(object):
         parts = self.build_gkeylist(args)
         gkey = GKEY._make(parts)
         logger.debug("MAIN: _action_addseed; new gkey: %s" % str(gkey))
-        seeds = self._load_seeds(args.seeds)
         gkeys = self._action_listseed(args)
         if len(gkeys) == 0:
             logger.debug("MAIN: _action_addkey; now adding gkey: %s" % str(gkey))
-            success = seeds.add(gkey)
+            success = self.seeds.add(gkey)
             if success:
-                success = seeds.save()
+                success = self.seeds.save()
                 return ["Successfully Added new seed: %s" % str(success), gkey]
         else:
             messages = ["Matching seeds found in seeds file",
@@ -199,13 +207,12 @@ class Main(object):
         parts = self.build_gkeylist(args)
         searchkey = GKEY._make(parts)
         logger.debug("MAIN: _action_removeseed; gkey: %s" % str(searchkey))
-        seeds = self._load_seeds(args.seeds)
         gkeys = self._action_listseed(args)
         if len(gkeys) == 1:
             logger.debug("MAIN: _action_removeseed; now deleting gkey: %s" % str(gkeys[0]))
-            success = seeds.delete(gkeys[0])
+            success = self.seeds.delete(gkeys[0])
             if success:
-                success = seeds.save()
+                success = self.seeds.save()
             return ["Successfully Removed seed: %s" % str(success),
                 gkeys[0]]
         elif len(gkeys):
@@ -221,9 +228,10 @@ class Main(object):
         parts = self.build_gkeylist(args)
         searchkey = GKEY._make(parts)
         logger.debug("MAIN: _action_moveseed; gkey: %s" % str(searchkey))
-        seeds = self._load_seeds(args.seeds)
+        if not self.seeds:
+            self.seeds = self._load_seeds(args.seeds)
         kwargs = self.build_gkeydict(args)
-        sourcekeys = seeds.list(**kwargs)
+        sourcekeys = self.seeds.list(**kwargs)
         dest = self._load_seeds(args.destination)
         destkeys = dest.list(**kwargs)
         messages = []
@@ -233,11 +241,11 @@ class Main(object):
             success = dest.add(sourcekeys[0])
             logger.debug("MAIN: _action_moveseed; success: %s" %str(success))
             logger.debug("MAIN: _action_moveseed; now deleting sourcekey: %s" % str(sourcekeys[0]))
-            success = seeds.delete(sourcekeys[0])
+            success = self.seeds.delete(sourcekeys[0])
             if success:
                 success = dest.save()
                 logger.debug("MAIN: _action_moveseed; destination saved... %s" %str(success))
-                success = seeds.save()
+                success = self.seeds.save()
             messages.extend(["Successfully Moved %s seed: %s"
                 % (args.seeds, str(success)), sourcekeys[0]])
             return messages
@@ -262,7 +270,59 @@ class Main(object):
 
     def _action_addkey(self, args):
         '''Action addkey method'''
-        pass
+        kwargs = self.build_gkeydict(args)
+        logger.debug("MAIN: _action_listseed; kwargs: %s" % str(kwargs))
+        self.seeds = self._load_seeds(args.seeds)
+        if self.seeds:
+            # get the desired seed
+            keyresults = self.seeds.list(**kwargs)
+            if keyresults and not args.nick == '*':
+                self.output_results(keyresults, "\n Found GKEY seeds:")
+            elif keyresults:
+                self.output_results(['all'], "\n Installing seeds:")
+            else:
+                logger.info("MAIN: _action_addkey; "
+                    "Matching seed entry not found")
+                if args.nick:
+                    return {"Search failed for: %s" % args.nick: False}
+                elif args.name:
+                    return {"Search failed for: %s" % args.name: False}
+                else:
+                    return {"Search failed for search term": False}
+            # get confirmation
+            # fill in code here
+            keydir = self.config.get_key(args.seeds + "-keydir")
+            logger.debug("MAIN: _action_addkey; keysdir = %s" % keydir)
+            self.gpg = GkeysGPG(self.config, keydir)
+            results = {}
+            failed = []
+            for key in keyresults:
+                if not key.keyid and not key.longkeyid and not args.nick == '*':
+                    logger.debug("MAIN: _action_addkey; NO key id's to add... Ignoring")
+                    return {"Failed: No keyid's found for %s" % key.name : ''}
+                elif not key.keyid and not key.longkeyid:
+                    print("No keyid's found for:", key.nick, key.name, "Skipping...")
+                    failed.append(key)
+                    continue
+                logger.debug("MAIN: _action_addkey; adding key:")
+                logger.debug("MAIN: " + str(key))
+                results[key.name] = self.gpg.add_key(key)
+                for result in results[key.name]:
+                    logger.debug("MAIN: _action_addkey; result.failed = " +
+                        str(result.failed))
+                if self.print_results:
+                    for result in results[key.name]:
+                        print("key desired:", key.name, ", key added:",
+                            result.username, ", succeeded:",
+                            not result.failed, ", keyid:", result.keyid,
+                            ", fingerprint:", result.fingerprint)
+                        logger.debug("stderr_out: " + str(result.stderr_out))
+                        if result.failed:
+                            failed.append(key)
+            if failed:
+                self.output_results(failed, "\n Failed to install:")
+            return {'Completed'}
+        return {"No seeds to search or install": False}
 
 
     def _action_removekey(self, args):
@@ -275,7 +335,15 @@ class Main(object):
         pass
 
 
+    def user_confirm(self, message):
+        '''Get input from the user to confirm to proceed
+        with the desired action
+
+        @param message: string, user promt message to display
+        @return boolean: confirmation to proceed or abort
+        '''
+        pass
 
 
-
-
+    def output_failed(self, failed):
+        pass

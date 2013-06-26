@@ -170,4 +170,4 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
         @param packed_string: string of data separated by field_separator
         @return new GKEY instance containing the data
         '''
-        return self._make(self._unpack_string(packed_string))
+        return GKEY._make(self._unpack_string(packed_string))

@@ -51,10 +51,12 @@ class Seeds(object):
             self._error(err)
             return False
 
+        # initialize a dummy instance, so it can make new ones
+        gkey = GKEY._make([None,None,None,None,None,None])
         for seed in seedlines:
             #try:
             seed = seed.strip('\n')
-            self.seeds.append(GKEY.make_packed(seed))
+            self.seeds.append(gkey.make_packed(seed))
             #except Exception as err:
                 #logger.debug("Seed: load; Error splitting seed: %s" % seed)
                 #logger.debug("Seed: load; ...............parts: %s" % str(parts))
@@ -115,6 +117,9 @@ class Seeds(object):
         '''
         if not kwargs:
             return self.seeds
+        if kwargs['nick'] == '*':
+            return self.seeds[:]
+        # proceed with the search
         # discard any invalid keys
         keys = set(list(kwargs)).intersection(GKEY._fields)
         result = self.seeds[:]

@@ -4,13 +4,10 @@
 
 import ldap
 
-from gkeys.log import logger
+from gkeys import log
 from gkeys.config import GKEY
 
-
-# set debug level to max
-logger.setLevel(1)
-
+logger = log.logger
 
 default_server = 'ldap://ldap1.gentoo.org'
 # add uid to the results so you don't have to
@@ -79,7 +76,7 @@ class LdapSearch(object):
             self.ldap_connection.start_tls_s()
             self.ldap_connection.simple_bind_s()
         except Exception as e:
-            logger.error('LdapSearch: connect; failed to connect ot server: %s' % self.server)
+            logger.error('LdapSearch: connect; failed to connect to server: %s' % self.server)
             logger.error("Exception was: %s" % str(e))
             return False
         logger.debug('LdapSearch: connect; connection: %s' % self.ldap_connection)

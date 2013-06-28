@@ -17,16 +17,17 @@ import argparse
 import sys
 
 from gkeys import log
-log.set_logger('gkeys')
-from gkeys.log import logger
+from gkeys.log import log_levels, set_logger
+
+from gkeys import config
+from gkeys import seed
+from gkeys import lib
 
 from gkeys.config import GKeysConfig, GKEY
 from gkeys.seed import Seeds
 from gkeys.lib import GkeysGPG
 
 
-# set debug level to min
-logger.setLevel(0)
 
 
 class Main(object):
@@ -92,8 +93,9 @@ class Main(object):
             help='The seeds file to use or update')
         parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
             help='The seedfile path to use')
-        parser.add_argument('-D', '--debug', default=0,
-            help='The logging level to use and report with')
+        parser.add_argument('-D', '--debug', default='DEBUG',
+            choices=list(log_levels),
+            help='The logging level to set for the logfile')
 
         return parser.parse_args(args)
 
@@ -103,18 +105,30 @@ class Main(object):
 
         @param args: list or argparse.Namespace object
         '''
+        global logger
+        message = None
         if not args:
-            logger.error("Main: run; invalid args argument passed in")
+            message = "Main: run; invalid args argument passed in"
         if isinstance(args, list):
             args = self.parse_args(args)
-        if args.debug:
-            logger.setLevel(int(args.debug))
-            logger.debug("MAIN: run; Found alternate debug setting: %s" % str(args.debug))
         if args.config:
-            logger.debug("Main: run; Found alternate config request: %s" % args.config)
             self.config.defaults['config'] = args.config
         # now make it load the config file
         self.config.read_config()
+
+        # establish our logger and update it in the imported files
+        logger = set_logger('gkeys', self.config['logdir'], args.debug)
+        config.logger = logger
+        seed.logger = logger
+        lib.logger = logger
+
+        if message:
+            logger.error(message)
+
+        # now that we have a logger, record the alternate config setting
+        if args.config:
+            logger.debug("Main: run; Found alternate config request: %s"
+                % args.config)
 
         # run the action
         func = getattr(self, '_action_%s' % args.action)

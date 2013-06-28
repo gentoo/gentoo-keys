@@ -9,17 +9,17 @@ import os
 import argparse
 
 from gkeys import log
-log.set_logger('gkeyldap')
-from gkeys.log import logger
+from gkeys.log import log_levels, set_logger
+
+from gkeys import config
+from gkeys import seed
 
 from gkeys.config import GKeysConfig, GKEY
 from gkeys.seed import Seeds
+from gkeyldap import search
 from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
 
-
-# set debug level to min
-logger.setLevel(0)
-
+logger = log.logger
 
 # set some defaults
 KEY_LEN = {
@@ -103,8 +103,9 @@ class Main(object):
             help='The gpg fingerprint to search for')
         parser.add_argument('-S', '--status', default=False,
             help='The seedfile path to use')
-        parser.add_argument('-D', '--debug', default=0,
-            help='The logging level to use and report with')
+        parser.add_argument('-D', '--debug', default='DEBUG',
+            choices=list(log_levels),
+            help='The logging level to set for the logfile')
 
         return parser.parse_args(args)
 
@@ -114,19 +115,32 @@ class Main(object):
 
         @param args: list or argparse.Namespace object
         '''
+        global logger
+        message = None
         if not args:
-            logger.error("Main: run; invalid args argument passed in")
+            message = "Main: run; invalid args argument passed in"
         if isinstance(args, list):
             args = self.parse_args(args)
-        if args.debug:
-            logger.setLevel(int(args.debug))
-            logger.debug("MAIN: run; Found alternate debug setting: %s" % str(args.debug))
         if args.config:
-            logger.debug("Main: run; Found alternate config request: %s"
-                % args.config)
             self.config.defaults['config'] = args.config
         # now make it load the config file
         self.config.read_config()
+
+        # establish our logger and update it in the imported files
+        logger = set_logger('gkeyldap', self.config['logdir'], args.debug)
+        config.logger = logger
+        seed.logger = logger
+        search.logger = logger
+
+        if message:
+            logger.error(message)
+
+        # now that we have a logger, record the alternate config setting
+        if args.config:
+            logger.debug("Main: run; Found alternate config request: %s"
+                % args.config)
+
+        logger.info("Begin running action: %s" % args.action)
 
         func = getattr(self, '_action_%s' % args.action)
         logger.debug('Main: run; Found action: %s' % args.action)
@@ -136,7 +150,10 @@ class Main(object):
 
     def _action_ldapsearch(self, args):
         l = LdapSearch()
+        logger.info("Search...establishing connection")
+        print("Search...establishing connection")
         if not l.connect():
+            logger.info("Aborting Search...Connection failed")
             print("Aborting Search...Connection failed")
             return False
         logger.debug("MAIN: _action_ldapsearch; args = %s" % str(args))
@@ -151,6 +168,7 @@ class Main(object):
 
 
     def _action_updateseeds(self, args):
+        logger.info("Beginning ldap search...")
         print("Beginning ldap search...")
         l = LdapSearch()
         if not l.connect():

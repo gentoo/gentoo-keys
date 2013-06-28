@@ -17,8 +17,10 @@ from collections import namedtuple
 
 from pygpg.config import GPGConfig
 
-from gkeys.log import logger
+from gkeys import log
 from gkeys.utils import path
+
+logger = log.logger
 
 
 # establish the eprefix, initially set so eprefixify can
@@ -84,10 +86,11 @@ class GKeysConfig(GPGConfig):
 
     def _get_(self, key, subkey=None):
         if self.configparser and self.configparser.has_option('MAIN', key):
-            logger.debug("Found %s in configparser... %s"
-                % (key, str(self.configparser.get('MAIN', key))))
-            logger.debug("type(key)= %s"
-                % str(type(self.configparser.get('MAIN', key))))
+            if logger:
+                logger.debug("Found %s in configparser... %s"
+                    % (key, str(self.configparser.get('MAIN', key))))
+                #logger.debug("type(key)= %s"
+                #    % str(type(self.configparser.get('MAIN', key))))
             return self.configparser.get('MAIN', key)
         else:
             return super(GKeysConfig, self)._get_(key, subkey)

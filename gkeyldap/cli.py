@@ -303,5 +303,15 @@ class Main(object):
             logger.error("A valid keyid or longkeyid was not found for")
             logger.error("developer: %s, %s : gpgkey = %s"
                 %(info['uid'][0], info['cn'][0], gpgkey))
+        else:
+            for x in [2, 3]:
+                if not keyinfo[x]:
+                    continue
+                for y in keyinfo[x]:
+                    index = len(y.lstrip('0x'))
+                    if y.lstrip('0x') not in [x[-index:] for x in keyinfo[5]]:
+                        logger.error('GPGKey and/or fingerprint error in' +
+                            ' ladap info for: ' + info['uid'][0])
+                        logger.error(str(keyinfo))
         return keyinfo
 

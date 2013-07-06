@@ -32,9 +32,9 @@ def get_key_ids(key, info):
     '''Small utility function to return only keyid (short)
     or longkeyid's
 
-    @param key: string, the key lenght desired
+    @param key: string, the key length desired
     @param info: list of keysid's to process
-    @return list of the desired key lengh id's
+    @return list of the desired key length id's
     '''
     result = []
     for x in info:

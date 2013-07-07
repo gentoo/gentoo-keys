@@ -94,18 +94,6 @@ class GKeysConfig(GPGConfig):
             return self.configparser.get('MAIN', key)
         else:
             return super(GKeysConfig, self)._get_(key, subkey)
-        #elif key in self.options:
-            #logger.debug("Found %s in options... %s"
-                #% (key, str(self.options[key])))
-            #return self.options[key]
-        #elif key in self.defaults:
-            #logger.debug("type(key)= %s" %str(type(self.defaults[key])))
-            #logger.debug("Found %s in defaults... %s"
-                #% (key, str(self.defaults[key])))
-            #logger.debug("type(key)= %s" %str(type(self.defaults[key])))
-            #return self.defaults[key]
-        #logger.error("GKeysConfig: _get_; didn't find :", key)
-        #return None
 
 
 class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',

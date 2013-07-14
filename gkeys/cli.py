@@ -24,7 +24,7 @@ from gkeys import seed
 from gkeys import lib
 
 from gkeys.config import GKeysConfig
-from gkeys.actions import Actions
+from gkeys.actions import Actions, Avialable_Actions
 
 
 
@@ -59,8 +59,7 @@ class Main(object):
         @returns argparse.Namespace object
         '''
         #logger.debug('MAIN: parse_args; args: %s' % args)
-        actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'listkey',
-            'addkey', 'removekey', 'movekey']
+        actions = Avialable_Actions
         parser = argparse.ArgumentParser(
             prog='gkeys',
             description='Gentoo-keys manager program',
@@ -150,6 +149,7 @@ class Main(object):
         # super simple output for the time being
         print(header)
         print("\n".join([str(x) for x in results]))
+        print()
 
 
 

@@ -10,19 +10,22 @@
     @license: GNU GPL2, see COPYING for details.
 """
 
+from __future__ import print_function
+
 
 from gkeys.config import GKEY
 from gkeys.lib import GkeysGPG
 from gkeys.seed import Seeds
 
 
-
+Avialable_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'listkey',
+            'addkey', 'removekey', 'movekey', 'installed']
 
 
 class Actions(object):
     '''Primary api actions'''
 
-    def __init__(self, config, output, logger=None):
+    def __init__(self, config, output=None, logger=None):
         self.config = config
         self.output = output
         self.logger = logger
@@ -165,9 +168,9 @@ class Actions(object):
             kwargs = self.build_gkeydict(args)
             # get the desired seed
             keyresults = self.seeds.list(**kwargs)
-            if keyresults and not args.nick == '*':
+            if keyresults and not args.nick == '*' and self.output:
                 self.output(keyresults, "\n Found GKEY seeds:")
-            elif keyresults:
+            elif keyresults and self.output:
                 self.output(['all'], "\n Installed seeds:")
             else:
                 self.logger.info("ACTIONS: listkey; "
@@ -181,27 +184,31 @@ class Actions(object):
             # get confirmation
             # fill in code here
             keydir = self.config.get_key(args.seeds + "-keydir")
-            self.logger.debug("ACTIONS: addkey; keysdir = %s" % keydir)
+            self.logger.debug("ACTIONS: listkey; keysdir = %s" % keydir)
             self.gpg = GkeysGPG(self.config, keydir)
             results = {}
             #failed = []
+            print(" GPG output:")
             for key in keyresults:
                 if not key.keyring and not args.nick == '*':
                     self.logger.debug("ACTIONS: listkey; NO keyring... Ignoring")
                     return {"Failed: No keyid's found for %s" % key.name : ''}
-                self.logger.debug("ACTIONS: listkey; listing keyring:")
-                self.logger.debug("ACTIONS: " + str(key.keyring))
+                self.logger.debug("ACTIONS: listkey; listing keyring:"
+                    + str(key.keyring))
                 results[key.name] = self.gpg.list_keys(key.keyring)
-                for result in results[key.name]:
-                    self.logger.debug("ACTIONS: listkey; result.failed = " +
-                        str(result.failed))
                 if self.config.options['print_results']:
-                    for result in results[key.name]:
-                        print("key desired:", key.name, ", keyring listed:",
-                            result.username, ", keyid:", result.keyid,
-                            ", fingerprint:", result.fingerprint)
-                        self.logger.debug("stderr_out: " + str(result.stderr_out))
-        return {"No keyrings to list": False}
+                    print(results[key.name].output)
+                    self.logger.debug("data output:\n" +
+                        str(results[key.name].output))
+                    #for result in results[key.name].status.data:
+                        #print("key desired:", key.name, ", keyring listed:",
+                            #result)
+                        #self.logger.debug("data record: " + str(result))
+                else:
+                    return results
+            return {'done': True}
+        else:
+            return {"No keyrings to list": False}
 
 
     def addkey(self, args):
@@ -212,9 +219,9 @@ class Actions(object):
         if self.seeds:
             # get the desired seed
             keyresults = self.seeds.list(**kwargs)
-            if keyresults and not args.nick == '*':
+            if keyresults and not args.nick == '*' and self.output:
                 self.output(keyresults, "\n Found GKEY seeds:")
-            elif keyresults:
+            elif keyresults and self.output:
                 self.output(['all'], "\n Installing seeds:")
             else:
                 self.logger.info("ACTIONS: addkey; "
@@ -255,7 +262,7 @@ class Actions(object):
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
                         if result.failed:
                             failed.append(key)
-            if failed:
+            if failed and self.output:
                 self.output(failed, "\n Failed to install:")
             return {'Completed'}
         return {"No seeds to search or install": False}
@@ -268,6 +275,12 @@ class Actions(object):
 
     def movekey(self, args):
         '''Action movekey method'''
+        pass
+
+
+    def installed(self, args):
+        '''Action installed method.
+        lists the installed key directories'''
         pass
 
 

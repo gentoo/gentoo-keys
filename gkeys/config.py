@@ -15,7 +15,7 @@ import ConfigParser
 from collections import namedtuple
 
 
-from pygpg.config import GPGConfig
+from pyGPG.config import GPGConfig
 
 from gkeys import log
 from gkeys.utils import path

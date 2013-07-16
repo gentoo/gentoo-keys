@@ -18,7 +18,7 @@ with gentoo-keys specific convienience functions.
 
 from os.path import join as pjoin
 
-from pygpg.gpg import GPG
+from pyGPG.gpg import GPG
 from gkeys.log import logger
 
 

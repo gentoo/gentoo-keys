@@ -67,12 +67,12 @@ class Main(object):
                 be hazardous to your system!''')
         # actions
         parser.add_argument('action', choices=actions, nargs='?',
-            default='listseeds', help='Add to seed file or keyring')
+            default='listseeds', help='List the seeds in the file')
         # options
         parser.add_argument('-c', '--config', dest='config', default=None,
             help='The path to an alternate config file')
         parser.add_argument('-d', '--dest', dest='destination', default=None,
-            help='The destination seed file or keyring for move, copy operations')
+            help='The destination seed file or keydir for move, copy operations')
         parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
             help='The fingerprint of the the key')
         parser.add_argument('-N', '--name', dest='name', default=None,
@@ -83,9 +83,9 @@ class Main(object):
             help='The keyid of the the key')
         parser.add_argument('-l', '--longkeyid', dest='longkeyid', default=None,
             help='The longkeyid of the the key')
-        parser.add_argument('-r', '--keyring',
-            choices=['release', 'dev', 'overlays'], dest='keyring', default=None,
-            help='The keyring to use or update')
+        parser.add_argument('-r', '--keydir',
+            choices=['release', 'dev', 'overlays'], dest='keydir', default=None,
+            help='The keydir to use or update')
         parser.add_argument('-s', '--seeds',
             choices=['release', 'dev'], dest='seeds', default=None,
             help='The seeds file to use or update')

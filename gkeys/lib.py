@@ -30,12 +30,13 @@ class GkeysGPG(GPG):
         '''class init function
 
         @param config: GKeysConfig config instance to use
-        @param keyring: string, the path to the keydir to be used
+        @param keydir: string, the path to the keydir to be used
                         for all operations.
         '''
         GPG.__init__(self, config)
         self.config = config
-        self.keydir = keydir
+        self.basedir = keydir
+        self.keydir = None
         self.task = None
         self.task_value = None
 
@@ -60,13 +61,20 @@ class GkeysGPG(GPG):
             self.task_value = None
 
 
+    def set_keydir(self, keydir):
+        logger.debug("basedir: %s, keydir: %s" % (self.basedir, keydir))
+        self.task = task
+        self.keydir = pjoin(self.basedir, keydir)
+        return
+
+
     def add_key(self, gkey):
-        '''Add the specified key to the specified keyring
+        '''Add the specified key to the specified keydir
 
         @param gkey: GKEY namedtuple with
-            (name, keyid/longkeyid, keyring, fingerprint,)
+            (name, keyid/longkeyid, keydir, fingerprint,)
         '''
-        self.set_keypath(gkey.keyring, self.config['tasks']['recv-keys'])
+        self.set_keydir(gkey.keydir)
 
         # prefer the longkeyid if available
         #logger.debug("LIB: add_key; keyids %s, %s"
@@ -105,60 +113,60 @@ class GkeysGPG(GPG):
         return results
 
 
-    def del_key(self, gkey, keyring):
-        '''Delete the specified key to the specified keyring
+    def del_key(self, gkey, keydir):
+        '''Delete the specified key in the specified keydir
 
         @param gkey: GKEY namedtuple with (name, keyid/longkeyid, fingerprint)
         '''
         return []
 
 
-    def del_keyring(self, keyring):
-        '''Delete the specified key to the specified keyring
+    def del_keydir(self, keydir):
+        '''Delete the specified keydir
         '''
         return []
 
 
-    def update_key(self, gkey, keyring):
-        '''Update the specified key in the specified keyring
+    def update_key(self, gkey, keydir):
+        '''Update the specified key in the specified keydir
 
         @param key: tuple of (name, keyid, fingerprint)
-        @param keyring: the keyring to add the key to
+        @param keydir: the keydir to add the key to
         '''
         return []
 
 
-    def list_keys(self, keyring):
-        '''List all keys in the specified keyring or
-        all key in all keyrings if keyring=None
+    def list_keys(self, keydir):
+        '''List all keys in the specified keydir or
+        all keys in all keydir if keydir=None
 
-        @param keyring: the keyring to add the key to
+        @param keydir: the keydir to list the keys for
         '''
-        if not keyring:
-            logger.debug("LIB: list_keys(), invalid keyring parameter: %s"
-                % str(keyring))
+        if not keydir:
+            logger.debug("LIB: list_keys(), invalid keydir parameter: %s"
+                % str(keydir))
             return []
         if '--with-colons' in self.config['tasks']['list-keys']:
             self.config['tasks']['list-keys'].remove('--with-colons')
 
-        self.set_keypath(keyring, self.config['tasks']['list-keys'])
+        self.set_keydir(keydir)
         logger.debug("** Calling runGPG with Running 'gpg %s --list-keys %s'"
-            % (' '.join(self.config['tasks']['list-keys']), keyring)
+            % (' '.join(self.config['tasks']['list-keys']), keydir)
             )
-        result = self.runGPG(task='list-keys', inputfile=keyring)
+        result = self.runGPG(task='list-keys')
         logger.info('GPG return code: ' + str(result.returncode))
-        self.reset_task()
+        #self.reset_task()
         return result
 
 
-    def list_keyrings(self):
-        '''List all available keyrings
+    def list_keydirs(self):
+        '''List all available keydirs
         '''
         return []
 
 
     def verify_key(self, gkey):
-        '''verify the specified key from the specified keyring
+        '''verify the specified key from the specified keydir
 
         @param gkey: GKEY namedtuple with (name, keyid/longkeyid, fingerprint)
         '''

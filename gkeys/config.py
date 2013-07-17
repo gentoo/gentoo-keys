@@ -97,11 +97,11 @@ class GKeysConfig(GPGConfig):
 
 
 class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
-    'keyring', 'fingerprint'])):
+    'keydir', 'fingerprint'])):
     '''Class to hold the relavent info about a key'''
 
     field_types = {'nick': str, 'name': str, 'keyid': list,
-        'longkeyid': list, 'keyring': str, 'fingerprint': list}
+        'longkeyid': list, 'keydir': str, 'fingerprint': list}
     field_separator = "|"
     list_separator = ":"
     __slots__ = ()

@@ -190,25 +190,25 @@ class Actions(object):
             #failed = []
             print(" GPG output:")
             for key in keyresults:
-                if not key.keyring and not args.nick == '*':
-                    self.logger.debug("ACTIONS: listkey; NO keyring... Ignoring")
+                if not key.keydir and not args.nick == '*':
+                    self.logger.debug("ACTIONS: listkey; NO keydir... Ignoring")
                     return {"Failed: No keyid's found for %s" % key.name : ''}
-                self.logger.debug("ACTIONS: listkey; listing keyring:"
-                    + str(key.keyring))
-                results[key.name] = self.gpg.list_keys(key.keyring)
+                self.logger.debug("ACTIONS: listkey; listing keydir:"
+                    + str(key.keydir))
+                results[key.name] = self.gpg.list_keys(key.keydir)
                 if self.config.options['print_results']:
                     print(results[key.name].output)
                     self.logger.debug("data output:\n" +
                         str(results[key.name].output))
                     #for result in results[key.name].status.data:
-                        #print("key desired:", key.name, ", keyring listed:",
+                        #print("key desired:", key.name, ", keydir listed:",
                             #result)
                         #self.logger.debug("data record: " + str(result))
                 else:
                     return results
             return {'done': True}
         else:
-            return {"No keyrings to list": False}
+            return {"No keydirs to list": False}
 
 
     def addkey(self, args):

@@ -16,6 +16,7 @@ with gentoo-keys specific convienience functions.
 
 '''
 
+import os
 from os.path import join as pjoin
 
 from pyGPG.gpg import GPG
@@ -33,38 +34,52 @@ class GkeysGPG(GPG):
         @param keydir: string, the path to the keydir to be used
                         for all operations.
         '''
-        GPG.__init__(self, config)
+        GPG.__init__(self, config, logger)
         self.config = config
         self.basedir = keydir
         self.keydir = None
-        self.task = None
-        self.task_value = None
+        self.server = None
 
 
-    def set_keypath(self, keyring, task=None):
-        logger.debug("keydir: %s, keyring: %s" % (self.keydir, keyring))
-        self.task = task
-        keypath = pjoin(self.keydir, keyring)
-        # --keyring file |  Note that this adds a keyring to the current list.
-        # If the intent is to use the specified keyring alone,
-        # use  --keyring  along with --no-default-keyring.
-        self.task_value = ['--no-default-keyring', '--keyring', keypath]
-        task.extend(self.task_value)
+    def set_keyserver(self, server=None):
+        '''Set the keyserver and add the --keyserver option to the gpg defaults
+        '''
+        if self.server and not server:
+            return
+        self.server = server or self.config['keyserver']
+        self.config.options['gpg_defaults'] = self.config.defaults['gpg_defaults'][:]
+        logger.debug("keyserver: %s" % (self.server))
+        server_value = ['--keyserver', self.server]
+        self.config.options['gpg_defaults'].extend(server_value)
+        logger.debug("self.config.options['gpg_defaults']: %s"
+            % (self.config.options['gpg_defaults']))
         return
 
 
-    def reset_task(self):
-        if self.task:
-            for item in self.task_value:
-                self.task.remove(item)
-            self.task = None
-            self.task_value = None
+    def set_keyring(self, keyring, task, reset=True):
+        '''Sets the keyring to use as well as related task options
+        '''
+        logger.debug("keydir: %s, keyring: %s" % (self.keydir, keyring))
+        if reset:
+            self.config.options['tasks'][task] =  self.config.defaults['tasks'][task][:]
+        # --keyring file |  Note that this adds a keyring to the current list.
+        # If the intent is to use the specified keyring alone,
+        # use  --keyring  along with --no-default-keyring.
+        task_value = ['--no-default-keyring', '--keyring', keyring]
+        self.config.options['tasks'][task].extend(task_value)
+        logger.debug("set_keyring: New task options: %s" %str(self.config.options['tasks'][task]))
+        return
 
 
-    def set_keydir(self, keydir):
+    def set_keydir(self, keydir, task, reset=True):
         logger.debug("basedir: %s, keydir: %s" % (self.basedir, keydir))
-        self.task = task
         self.keydir = pjoin(self.basedir, keydir)
+        self.task = task
+        if reset:
+            self.config.options['tasks'][task] = self.config.defaults['tasks'][task][:]
+        task_value = ['--homedir', self.keydir]
+        self.config.options['tasks'][task].extend(task_value)
+        logger.debug("set_keydir: New task options: %s" %str(self.config.options['tasks'][task]))
         return
 
 
@@ -74,7 +89,11 @@ class GkeysGPG(GPG):
         @param gkey: GKEY namedtuple with
             (name, keyid/longkeyid, keydir, fingerprint,)
         '''
-        self.set_keydir(gkey.keydir)
+        self.set_keyserver()
+        self.set_keydir(gkey.keydir, 'recv-keys', reset=True)
+        self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
+        if not os.path.exists(self.keydir):
+            os.makedirs(self.keydir, mode=0700)
 
         # prefer the longkeyid if available
         #logger.debug("LIB: add_key; keyids %s, %s"
@@ -89,7 +108,7 @@ class GkeysGPG(GPG):
         for keyid in keyids:
             logger.debug("LIB: add_key; final keyids" + keyid)
             logger.debug("** Calling runGPG with Running 'gpg %s --recv-keys %s' for: %s"
-                % (' '.join(self.config['tasks']['recv-keys']),
+                % (' '.join(self.config.get_key('tasks', 'recv-keys')),
                     keyid, gkey.name)
                 )
             result = self.runGPG(task='recv-keys', inputfile=keyid)
@@ -149,13 +168,12 @@ class GkeysGPG(GPG):
         if '--with-colons' in self.config['tasks']['list-keys']:
             self.config['tasks']['list-keys'].remove('--with-colons')
 
-        self.set_keydir(keydir)
+        self.set_keydir(keydir, 'list-keys')
         logger.debug("** Calling runGPG with Running 'gpg %s --list-keys %s'"
             % (' '.join(self.config['tasks']['list-keys']), keydir)
             )
-        result = self.runGPG(task='list-keys')
+        result = self.runGPG(task='list-keys', inputfile=keydir)
         logger.info('GPG return code: ' + str(result.returncode))
-        #self.reset_task()
         return result
 
 

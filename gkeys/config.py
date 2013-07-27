@@ -61,6 +61,7 @@ class GKeysConfig(GPGConfig):
         self.defaults['known-keysfile'] = '%(keysdir)s/knownkeys'
         self.defaults['release-seedfile'] = '%(configdir)s/release.seeds'
         self.defaults['dev-seedfile'] = '%(configdir)s/developer.seeds'
+        self.defaults['keyserver'] = 'pool.sks-keyservers.net'
 
 
 

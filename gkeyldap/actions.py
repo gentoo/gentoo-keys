@@ -11,6 +11,7 @@
 """
 
 import os
+import re
 
 from gkeys.config import GKEY
 from gkeys.seed import Seeds
@@ -54,6 +55,7 @@ class Actions(object):
         self.output = output
         self.logger = logger
         self.seeds = None
+        self.fingerprint_re = re.compile('[0-9A-Fa-f]{40}')
 
 
     def ldapsearch(self, args):
@@ -193,12 +195,15 @@ class Actions(object):
                 else:
                     value = values
                 if 'undefined' in values:
-                    self.logger.error('%s = "undefined" for %s, %s'
-                        %(field, info['uid'][0], info['cn'][0]))
+                    self.logger.error('ERROR in ldap info for: %s, %s'
+                        %(info['uid'][0],info['cn'][0]))
+                    self.logger.error('  %s = "undefined"' %(field))
                 keyinfo.append(value)
             except KeyError:
-                self.logger.error("Missing %s (%s) for %s, %s"
-                    %(field, x, info['uid'][0], info['cn'][0]))
+                self.logger.error('ERROR in ldap info for: %s, %s'
+                    %(info['uid'][0],info['cn'][0]))
+                self.logger.error('  MISSING or EMPTY ldap field ' +
+                    '[%s] GPGKey field [%s]' %(field, x))
                 if x in ['keyid', 'longkeyid']:
                     keyid_missing = True
                 keyinfo.append(None)
@@ -207,18 +212,45 @@ class Actions(object):
                 gpgkey = info[gkey2ldap_map['longkeyid']]
             except KeyError:
                 gpgkey = 'Missing from ldap info'
-            self.logger.error("A valid keyid or longkeyid was not found for")
-            self.logger.error("developer: %s, %s : gpgkey = %s"
-                %(info['uid'][0], info['cn'][0], gpgkey))
+            self.logger.error('ERROR in ldap info for: %s, %s'
+                %(info['uid'][0],info['cn'][0]))
+            self.logger.error('  A valid keyid or longkeyid was not found '
+                "%s : gpgkey = %s" %(info['cn'][0], gpgkey))
         else:
-            for x in [2, 3]:
-                if not keyinfo[x]:
-                    continue
-                for y in keyinfo[x]:
-                    index = len(y.lstrip('0x'))
-                    if y.lstrip('0x') not in [x[-index:] for x in keyinfo[5]]:
-                        self.logger.error('GPGKey and/or fingerprint error in' +
-                            ' ladap info for: ' + info['uid'][0])
-                        self.logger.error(str(keyinfo))
+            if keyinfo[5]: # fingerprints exist check
+                self._check_fingerprint_integrity(info, keyinfo)
+                self._check_id_fingerprint_match(info, keyinfo)
         return keyinfo
 
+
+    def _check_id_fingerprint_match(self, info, keyinfo):
+        for x in [2, 3]:
+            # skip blank id field
+            if not keyinfo[x]:
+                continue
+            for y in keyinfo[x]:
+                index = len(y.lstrip('0x'))
+                if y.lstrip('0x').lower() not in [x[-index:].lower() for x in keyinfo[5]]:
+                    self.logger.error('ERROR in ldap info for: %s, %s'
+                        %(info['uid'][0],info['cn'][0]))
+                    self.logger.error('  ' + str(keyinfo))
+                    self.logger.error('  GPGKey id %s not found in the '
+                        % y.lstrip('0x') + 'listed fingerprint(s)')
+        return
+
+
+    def _check_fingerprint_integrity(self, info, keyinfo):
+        for x in keyinfo[5]:
+            # check fingerprint integrity
+            if len(x) != 40:
+                self.logger.error('ERROR in ldap info for: %s, %s'
+                    %(info['uid'][0],info['cn'][0]))
+                self.logger.error('  GPGKey incorrect fingerprint ' +
+                    'length (%s) for fingerprint: %s' %(len(x), x))
+                continue
+            if not self.fingerprint_re.match(x):
+                self.logger.error('ERROR in ldap info for: %s, %s'
+                    %(info['uid'][0],info['cn'][0]))
+                self.logger.error('  GPGKey: Non hexadecimal digits in ' +
+                    'fingerprint for fingerprint: ' + x)
+        return

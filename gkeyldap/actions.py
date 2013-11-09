@@ -125,9 +125,11 @@ class Actions(object):
                 continue
             #self.logger.debug("create_seedfile, dev = "
             #   "%s, %s" % (str(dev), str(devs[dev])))
-            new_gkey = GKEY._make(self.build_gkeylist(devs[dev]))
-            self.seeds.add(new_gkey)
-            count += 1
+            keyinfo = self.build_gkeylist(devs[dev])
+            if keyinfo:
+                new_gkey = GKEY._make(keyinfo)
+                self.seeds.add(new_gkey)
+                count += 1
         self.output("Total number of seeds created:", count)
         self.output("Seeds created...saving file: %s" % filename)
         return self.seeds.save()
@@ -174,6 +176,8 @@ class Actions(object):
         keyinfo = []
         keyid_found = False
         keyid_missing = False
+        # assume it's good until found an error is found
+        is_good = True
         #self.logger.debug("MAIN: build_gkeylist; info = %s" % str(info))
         for x in GKEY._fields:
             field = gkey2ldap_map[x]
@@ -198,6 +202,7 @@ class Actions(object):
                     self.logger.error('ERROR in ldap info for: %s, %s'
                         %(info['uid'][0],info['cn'][0]))
                     self.logger.error('  %s = "undefined"' %(field))
+                    is_good = False
                 keyinfo.append(value)
             except KeyError:
                 self.logger.error('ERROR in ldap info for: %s, %s'
@@ -207,6 +212,7 @@ class Actions(object):
                 if x in ['keyid', 'longkeyid']:
                     keyid_missing = True
                 keyinfo.append(None)
+                is_good = False
         if not keyid_found and not keyid_missing:
             try:
                 gpgkey = info[gkey2ldap_map['longkeyid']]
@@ -216,14 +222,21 @@ class Actions(object):
                 %(info['uid'][0],info['cn'][0]))
             self.logger.error('  A valid keyid or longkeyid was not found '
                 "%s : gpgkey = %s" %(info['cn'][0], gpgkey))
+            is_good = False
         else:
             if keyinfo[5]: # fingerprints exist check
-                self._check_fingerprint_integrity(info, keyinfo)
-                self._check_id_fingerprint_match(info, keyinfo)
-        return keyinfo
+                is_ok = self._check_fingerprint_integrity(info, keyinfo)
+                is_match = self._check_id_fingerprint_match(info, keyinfo)
+                if not is_ok or not is_match:
+                    is_good = False
+        if is_good:
+            return keyinfo
+        return None
 
 
     def _check_id_fingerprint_match(self, info, keyinfo):
+        # assume it's good until found an error is found
+        is_good = True
         for x in [2, 3]:
             # skip blank id field
             if not keyinfo[x]:
@@ -236,10 +249,13 @@ class Actions(object):
                     self.logger.error('  ' + str(keyinfo))
                     self.logger.error('  GPGKey id %s not found in the '
                         % y.lstrip('0x') + 'listed fingerprint(s)')
-        return
+                    is_good = False
+        return is_good
 
 
     def _check_fingerprint_integrity(self, info, keyinfo):
+        # assume it's good until found an error is found
+        is_good = True
         for x in keyinfo[5]:
             # check fingerprint integrity
             if len(x) != 40:
@@ -247,10 +263,12 @@ class Actions(object):
                     %(info['uid'][0],info['cn'][0]))
                 self.logger.error('  GPGKey incorrect fingerprint ' +
                     'length (%s) for fingerprint: %s' %(len(x), x))
+                is_good = False
                 continue
             if not self.fingerprint_re.match(x):
                 self.logger.error('ERROR in ldap info for: %s, %s'
                     %(info['uid'][0],info['cn'][0]))
                 self.logger.error('  GPGKey: Non hexadecimal digits in ' +
                     'fingerprint for fingerprint: ' + x)
-        return
+                is_good = False
+        return is_good

@@ -74,6 +74,8 @@ class Actions(object):
             self.output(dev, devs[dev])
         self.output("============================================")
         self.output("Total number of devs in results:", len(devs))
+        self.logger.info("============================================")
+        self.logger.info("Total number of devs in results: %d" % len(devs))
         return True
 
 
@@ -83,6 +85,7 @@ class Actions(object):
         l = LdapSearch()
         if not l.connect():
             self.output("Aborting Update...Connection failed")
+            self.logger.info("Aborting Update...Connection failed")
             return False
         results = l.search('*', UID)
         info = l.result2dict(results, 'uid')
@@ -91,24 +94,25 @@ class Actions(object):
         if not self.create_seedfile(info):
             self.logger.error("Dev seed file update failure: "
                 "Original seed file is intact & untouched.")
-        old = self.config['dev-seedfile'] + '.old'
+        filename = self.config['dev-seedfile']
+        old = filename + '.old'
         try:
             self.output("Backing up existing file...")
+            self.logger.info("Backing up existing file...")
             if os.path.exists(old):
                 self.logger.debug(
                     "MAIN: _action_updateseeds; Removing 'old' seed file: %s"
                     % old)
                 os.unlink(old)
-            if os.path.exists(self.config['dev-seedfile']):
+            if os.path.exists(filename):
                 self.logger.debug(
                     "MAIN: _action_updateseeds; Renaming current seed file to: "
                     "%s" % old)
-                os.rename(self.config['dev-seedfile'], old)
+                os.rename(filename, old)
             self.logger.debug(
                 "MAIN: _action_updateseeds; Renaming '.new' seed file to: %s"
-                % self.config['dev-seedfile'])
-            os.rename(self.config['dev-seedfile'] + '.new',
-                self.config['dev-seedfile'])
+                % filename)
+            os.rename(filename + '.new', filename)
         except IOError:
             raise
         self.output("Developer Seed file updated")
@@ -132,6 +136,8 @@ class Actions(object):
                 count += 1
         self.output("Total number of seeds created:", count)
         self.output("Seeds created...saving file: %s" % filename)
+        self.logger.info("Total number of seeds created: %d" % count)
+        self.logger.info("Seeds created...saving file: %s" % filename)
         return self.seeds.save()
 
 

@@ -2,7 +2,17 @@
 #-*- coding:utf-8 -*-
 
 
-import ldap
+try:
+    import ldap
+except ImportError:
+    import sys
+    # py3.2
+    if sys.hexversion >= 0x30200f0:
+        print('To run "ldap-seeds" in python 3, it requires a python3 '
+            'compatible version of dev-python/python-ldap be installed')
+        print('Currently only dev-python/python-ldap-9999 has that capability')
+        raise
+
 
 from gkeys import log
 from gkeys.config import GKEY

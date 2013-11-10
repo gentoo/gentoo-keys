@@ -11,7 +11,14 @@
 """
 
 import os
-import ConfigParser
+import sys
+
+# py3.2
+if sys.hexversion >= 0x30200f0:
+    import configparser as ConfigParser
+else:
+    import ConfigParser
+
 from collections import namedtuple
 
 

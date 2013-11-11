@@ -104,6 +104,16 @@ class GKeysConfig(GPGConfig):
             return super(GKeysConfig, self)._get_(key, subkey)
 
 
+# some constants used in gkeyldap/actions.py
+# they map the index values of the GKEY input data fields
+NICK = 0
+NAME = 1
+KEYID = 2
+LONGKEYID = 3
+KEYDIR = 4
+FINGERPRINT = 5
+
+
 class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
     'keydir', 'fingerprint'])):
     '''Class to hold the relavent info about a key'''

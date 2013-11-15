@@ -65,11 +65,18 @@ class GKeysConfig(GPGConfig):
         self.defaults['dev-keydir'] = '%(keysdir)s/devs'
         self.defaults['release-keydir'] = '%(keysdir)s/release'
         self.defaults['overlays-keydir'] = '%(keysdir)s/overlays'
+        # known-keysfile is a repositories.xml like file of gpg seeds
+        # distributed through api.g.o for convenience
         self.defaults['known-keysfile'] = '%(keysdir)s/knownkeys'
         self.defaults['release-seedfile'] = '%(configdir)s/release.seeds'
         self.defaults['dev-seedfile'] = '%(configdir)s/developer.seeds'
+        # local directory to scan for seed files installed via ebuild, layman
+        # or manual install.
+        self.defaults['installable-seeddir'] = '%(configdir)s/installable.seeds'
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
-
+        self.defaults['dev-seedurl'] = 'http://dev.gentoo.org/~dolsen/gkey-seeds/developer.seeds'
+        self.defaults['release-seedurl'] = 'http://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds'
+        self.defaults['known-seedurl'] = 'http://dev.gentoo.org/~dolsen/gkey-seeds/known.seeds'
 
 
     def read_config(self):

@@ -124,6 +124,7 @@ class Actions(object):
         filename = self.config['dev-seedfile'] + '.new'
         self.seeds = Seeds(filename)
         count = 0
+        error_count = 0
         for dev in sorted(devs):
             if devs[dev]['gentooStatus'][0] not in ['active']:
                 continue
@@ -134,10 +135,14 @@ class Actions(object):
                 new_gkey = GKEY._make(keyinfo)
                 self.seeds.add(new_gkey)
                 count += 1
+            else:
+                error_count += 1
         self.output("Total number of seeds created:", count)
         self.output("Seeds created...saving file: %s" % filename)
+        self.output("Total number of Dev's with gpg errors:", error_count)
         self.logger.info("Total number of seeds created: %d" % count)
         self.logger.info("Seeds created...saving file: %s" % filename)
+        self.logger.info("Total number of Dev's with gpg errors: %d" % error_count)
         return self.seeds.save()
 
 

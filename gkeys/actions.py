@@ -13,7 +13,7 @@
 from __future__ import print_function
 
 
-from gkeys.config import GKEY
+from gkeys.seedhandler import SeedHandler
 from gkeys.lib import GkeysGPG
 from gkeys.seed import Seeds
 
@@ -32,30 +32,6 @@ class Actions(object):
         self.seeds = None
 
 
-    @staticmethod
-    def build_gkeydict(args):
-        keyinfo = {}
-        for x in GKEY._fields:
-            try:
-                value = getattr(args, x)
-                if value:
-                    keyinfo[x] = value
-            except AttributeError:
-                pass
-        return keyinfo
-
-
-    @staticmethod
-    def build_gkeylist(args):
-        keyinfo = []
-        for x in GKEY._fields:
-            try:
-                keyinfo.append(getattr(args, x))
-            except AttributeError:
-                keyinfo.append(None)
-        return keyinfo
-
-
     def load_seeds(self, filename):
         if not filename:
             self.logger.debug("ACTIONS: load_seeds; no filename to load: "
@@ -71,7 +47,8 @@ class Actions(object):
 
     def listseed(self, args):
         '''Action listseed method'''
-        kwargs = self.build_gkeydict(args)
+        handler = SeedHandler(self.logger)
+        kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
             self.seeds = self.load_seeds(args.seeds)
@@ -83,9 +60,8 @@ class Actions(object):
 
     def addseed(self, args):
         '''Action addseed method'''
-        parts = self.build_gkeylist(args)
-        gkey = GKEY._make(parts)
-        self.logger.debug("ACTIONS: addseed; new gkey: %s" % str(gkey))
+        handler = SeedHandler(self.logger)
+        gkey = handler.new(args)
         gkeys = self.listseed(args)
         if len(gkeys) == 0:
             self.logger.debug("ACTIONS: addkey; now adding gkey: %s" % str(gkey))
@@ -102,10 +78,13 @@ class Actions(object):
 
     def removeseed(self, args):
         '''Action removeseed method'''
-        parts = self.build_gkeylist(args)
-        searchkey = GKEY._make(parts)
+        handler = SeedHandler(self.logger)
+        searchkey = handler.new(args, needkeyid=False, checkintegrity=False)
         self.logger.debug("ACTIONS: removeseed; gkey: %s" % str(searchkey))
         gkeys = self.listseed(args)
+        if not gkeys:
+            return ["Failed to Removed seed: No gkeys returned from listseed()",
+                None]
         if len(gkeys) == 1:
             self.logger.debug("ACTIONS: removeseed; now deleting gkey: %s" % str(gkeys[0]))
             success = self.seeds.delete(gkeys[0])
@@ -123,12 +102,12 @@ class Actions(object):
 
     def moveseed(self, args):
         '''Action moveseed method'''
-        parts = self.build_gkeylist(args)
-        searchkey = GKEY._make(parts)
+        handler = SeedHandler(self.logger)
+        searchkey = handler.new(args, needkeyid=False, checkintegrity=False)
         self.logger.debug("ACTIONS: moveseed; gkey: %s" % str(searchkey))
         if not self.seeds:
             self.seeds = self.load_seeds(args.seeds)
-        kwargs = self.build_gkeydict(args)
+        kwargs = handler.build_gkeydict(args)
         sourcekeys = self.seeds.list(**kwargs)
         dest = self.load_seeds(args.destination)
         destkeys = dest.list(**kwargs)
@@ -165,7 +144,8 @@ class Actions(object):
         '''Action listskey method'''
         self.seeds = self.load_seeds(args.seeds)
         if self.seeds:
-            kwargs = self.build_gkeydict(args)
+            handler = SeedHandler(self.logger)
+            kwargs = handler.build_gkeydict(args)
             # get the desired seed
             keyresults = self.seeds.list(**kwargs)
             if keyresults and not args.nick == '*' and self.output:
@@ -213,7 +193,8 @@ class Actions(object):
 
     def addkey(self, args):
         '''Action addkey method'''
-        kwargs = self.build_gkeydict(args)
+        handler = SeedHandler(self.logger)
+        kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         self.seeds = self.load_seeds(args.seeds)
         if self.seeds:

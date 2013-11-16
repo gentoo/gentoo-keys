@@ -22,10 +22,17 @@ Utility functions'''
 
 
 
-import types, re, os
+import types
+import re
+import os
 import sys
 import locale
 import codecs
+
+try:
+    StringTypes = types.StringTypes
+except AttributeError:
+    StringTypes = [str]
 
 
 def encoder(text, _encoding_):
@@ -132,7 +139,7 @@ def path(path_elements):
     '''
     pathname = ''
 
-    if type(path_elements) in types.StringTypes:
+    if type(path_elements) in StringTypes:
         path_elements = [path_elements]
 
     # Concatenate elements and seperate with /

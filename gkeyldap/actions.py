@@ -13,16 +13,9 @@
 import os
 import re
 
-from gkeys.config import GKEY, KEYID, LONGKEYID, FINGERPRINT
+from gkeys.config import GKEY, KEYID, LONGKEYID, FINGERPRINT, KEY_LEN
 from gkeys.seed import Seeds
 from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
-
-
-# set some defaults
-KEY_LEN = {
-    'keyid': 8,
-    'longkeyid': 16,
-}
 
 
 Avialable_Actions = ['ldapsearch', 'updateseeds']
@@ -187,9 +180,9 @@ class Actions(object):
         keyinfo = []
         keyid_found = False
         keyid_missing = False
-        # assume it's good until found an error is found
+        # assume it's good until an error is found
         is_good = True
-        #self.logger.debug("MAIN: build_gkeylist; info = %s" % str(info))
+        #self.logger.debug("Actions: build_gkeylist; info = %s" % str(info))
         for x in GKEY._fields:
             field = gkey2ldap_map[x]
             if not field:

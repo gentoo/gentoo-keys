@@ -120,6 +120,12 @@ LONGKEYID = 3
 KEYDIR = 4
 FINGERPRINT = 5
 
+# set some defaults
+KEY_LEN = {
+    'keyid': 8,
+    'longkeyid': 16,
+}
+
 
 class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
     'keydir', 'fingerprint'])):

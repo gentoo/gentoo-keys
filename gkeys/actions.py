@@ -264,7 +264,7 @@ class Actions(object):
                             failed.append(key)
             if failed and self.output:
                 self.output(failed, "\n Failed to install:")
-            return {'Completed'}
+            return {'Completed': True}
         return {"No seeds to search or install": False}
 
 

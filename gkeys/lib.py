@@ -16,6 +16,10 @@ with gentoo-keys specific convienience functions.
 
 '''
 
+# for py 2.6 compatibility
+from __future__ import print_function
+
+
 import os
 from os.path import join as pjoin
 
@@ -93,7 +97,7 @@ class GkeysGPG(GPG):
         self.set_keydir(gkey.keydir, 'recv-keys', reset=True)
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
         if not os.path.exists(self.keydir):
-            os.makedirs(self.keydir, mode=0700)
+            os.makedirs(self.keydir, mode=0x0700)
 
         # prefer the longkeyid if available
         #logger.debug("LIB: add_key; keyids %s, %s"
@@ -128,7 +132,7 @@ class GkeysGPG(GPG):
                 message += "\n     gkey..: %s" %(str(gkey.fingerprint))
                 logger.error(message)
             results.append(result)
-            print result.stderr_out
+            print(result.stderr_out)
         return results
 
 

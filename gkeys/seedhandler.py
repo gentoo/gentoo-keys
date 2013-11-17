@@ -22,12 +22,18 @@ class SeedHandler(object):
     def __init__(self,logger):
         self.logger = logger
         self.fingerprint_re = re.compile('[0-9A-Fa-f]{40}')
+        self.finerprint_re2 = re.compile('[0-9A-Fa-f]{4}( [0-9A-Fa-f]{4}){9}')
 
 
     def new(self, args, needkeyid=True, checkintegrity=True):
         parts = self.build_gkeylist(args, needkeyid, checkintegrity)
-        gkey = GKEY._make(parts)
-        self.logger.debug("SeedHandler: new() new gkey: %s" % str(gkey))
+        if parts:
+            gkey = GKEY._make(parts)
+            self.logger.debug("SeedHandler: new() new gkey: %s" % str(gkey))
+        else:
+            self.logger.debug("SeedHandler: new() FAILED to et parts from: %s"
+                % str(args))
+            return None
         return gkey
 
 
@@ -58,7 +64,8 @@ class SeedHandler(object):
                     value = None
             elif GKEY.field_types[x] is list:
                 try:
-                    value = [y for y in getattr(args, x).split()]
+                    values = [y for y in getattr(args, x).split(':')]
+                    value = [v.replace(' ', '') for v in values]
                 except AttributeError:
                     value = None
             keyinfo.append(value)
@@ -107,12 +114,25 @@ class SeedHandler(object):
                 index = len(y.lstrip('0x'))
                 if y.lstrip('0x').upper() not in \
                         [x[-index:].upper() for x in keyinfo[FINGERPRINT]]:
-                    self.logger.error('ERROR in ldap info for: %s, %s'
+                    self.logger.error('ERROR in keyinfo for: %s, %s'
                         %(keyinfo[NICK], keyinfo[NAME]))
                     self.logger.error('  ' + str(keyinfo))
                     self.logger.error('  GPGKey id %s not found in the '
                         % y.lstrip('0x') + 'listed fingerprint(s)')
                     is_good = False
+            ids = 0
+            for x in [KEYID, LONGKEYID]:
+                if keyinfo[x]:
+                    ids = ids + len(keyinfo[x])
+            if ids != len(keyinfo[FINGERPRINT]):
+                self.logger.error('ERROR in keyinfo for: %s, %s'
+                    %(keyinfo[NICK], keyinfo[NAME]))
+                self.logger.error('  ' + str(keyinfo))
+                self.logger.error('  GPGKey the number of ids %d DO NOT match '
+                    'the number of listed fingerprint(s), {%s,%s}, %s'
+                    % (ids, keyinfo[KEYID], keyinfo[LONGKEYID], keyinfo[FINGERPRINT]))
+                is_good = False
+
         return is_good
 
 

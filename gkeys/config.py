@@ -74,9 +74,8 @@ class GKeysConfig(GPGConfig):
         # or manual install.
         self.defaults['installable-seeddir'] = '%(configdir)s/installable.seeds'
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
-        self.defaults['dev-seedurl'] = 'http://dev.gentoo.org/~dolsen/gkey-seeds/developer.seeds'
-        self.defaults['release-seedurl'] = 'http://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds'
-        self.defaults['known-seedurl'] = 'http://dev.gentoo.org/~dolsen/gkey-seeds/known.seeds'
+        self.defaults['dev-seedurl'] = 'https://dev.gentoo.org/~dolsen/gkey-seeds/developer.seeds'
+        self.defaults['release-seedurl'] = 'https://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds'
 
 
     def read_config(self):

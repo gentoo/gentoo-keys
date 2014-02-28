@@ -34,7 +34,7 @@ class Actions(object):
 
     def load_seeds(self, filename):
         if not filename:
-            self.logger.debug("ACTIONS: load_seeds; no filename to load: "
+            self.logger.error("ACTIONS: load_seeds; no filename to load: "
             "%s" % filename)
             return None
         filepath = self.config.get_key(filename + "-seedfile")

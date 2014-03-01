@@ -35,7 +35,8 @@ class Actions(object):
     def load_seeds(self, filename):
         if not filename:
             self.logger.error("ACTIONS: load_seeds; no filename to load: "
-            "%s" % filename)
+            "setting = %s.  Please use the -s option to indicate: which seed "
+            "file to use." % filename)
             return None
         filepath = self.config.get_key(filename + "-seedfile")
         self.logger.debug("ACTIONS: load_seeds; seeds filepath to load: "

@@ -39,10 +39,10 @@ class Actions(object):
         if not seeds and not seedfile:
             self.logger.error("ACTIONS: load_seeds; no filename to load: "
             "setting = %s.  Please use the -s option to indicate: which seed "
-            "file to use." % filename)
+            "file to use." % seedfile)
             return None
         if seeds:
-            filepath = self.config.get_key(filename + "-seedfile")
+            filepath = self.config.get_key(seeds + "-seedfile")
         elif seedfile:
             filepath = os.path.join(self.config.get_key('seedsdir'),
                                     '%s.seeds' % seedfile)

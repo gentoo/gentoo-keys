@@ -65,9 +65,11 @@ class GKeysConfig(GPGConfig):
         self.defaults['dev-keydir'] = '%(keysdir)s/devs'
         self.defaults['release-keydir'] = '%(keysdir)s/release'
         self.defaults['overlays-keydir'] = '%(keysdir)s/overlays'
+        self.defaults['logdir'] = '%(keysdir)s/logs'
         # known-keysfile is a repositories.xml like file of gpg seeds
         # distributed through api.g.o for convenience
         self.defaults['known-keysfile'] = '%(keysdir)s/knownkeys'
+        self.defaults['seedsdir'] = '%(keysdir)s/seeds'
         self.defaults['release-seedfile'] = '%(configdir)s/release.seeds'
         self.defaults['dev-seedfile'] = '%(configdir)s/developer.seeds'
         # local directory to scan for seed files installed via ebuild, layman

@@ -12,14 +12,17 @@
 
 from __future__ import print_function
 
+import os
+
 
 from gkeys.seedhandler import SeedHandler
 from gkeys.lib import GkeysGPG
 from gkeys.seed import Seeds
 
 
-Avialable_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'listkey',
-            'addkey', 'removekey', 'movekey', 'installed']
+Avialable_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed',
+            'listseedfiles', 'listkey', 'addkey', 'removekey', 'movekey',
+            'installed']
 
 
 class Actions(object):
@@ -32,13 +35,17 @@ class Actions(object):
         self.seeds = None
 
 
-    def load_seeds(self, filename):
-        if not filename:
+    def load_seeds(self, seeds=None ,seedfile=None):
+        if not seeds and not seedfile:
             self.logger.error("ACTIONS: load_seeds; no filename to load: "
             "setting = %s.  Please use the -s option to indicate: which seed "
             "file to use." % filename)
             return None
-        filepath = self.config.get_key(filename + "-seedfile")
+        if seeds:
+            filepath = self.config.get_key(filename + "-seedfile")
+        elif seedfile:
+            filepath = os.path.join(self.config.get_key('seedsdir'),
+                                    '%s.seeds' % seedfile)
         self.logger.debug("ACTIONS: load_seeds; seeds filepath to load: "
             "%s" % filepath)
         seeds = Seeds()
@@ -52,7 +59,7 @@ class Actions(object):
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
-            self.seeds = self.load_seeds(args.seeds)
+            self.seeds = self.load_seeds(args.seeds, args.seedfile)
         if self.seeds:
             results = self.seeds.list(**kwargs)
             return results
@@ -275,3 +282,9 @@ class Actions(object):
         '''
         pass
 
+
+    def listseedfiles(self, args):
+        seedsdir = self.config.get_key('seedsdir')
+        files = os.listdir(seedsdir)
+        return {"Seed files found at path: %s\n   %s"
+            % (seedsdir, "\n   ".join(files)): True}

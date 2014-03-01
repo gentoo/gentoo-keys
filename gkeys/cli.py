@@ -24,7 +24,7 @@ from gkeys import seed
 from gkeys import lib
 
 from gkeys.config import GKeysConfig
-from gkeys.actions import Actions, Avialable_Actions
+from gkeys.actions import Actions, Available_Actions
 
 
 
@@ -59,7 +59,7 @@ class Main(object):
         @returns argparse.Namespace object
         '''
         #logger.debug('MAIN: parse_args; args: %s' % args)
-        actions = Avialable_Actions
+        actions = Available_Actions
         parser = argparse.ArgumentParser(
             prog='gkeys',
             description='Gentoo-keys manager program',

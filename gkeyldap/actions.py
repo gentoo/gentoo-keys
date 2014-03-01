@@ -18,7 +18,7 @@ from gkeys.seed import Seeds
 from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
 
 
-Avialable_Actions = ['ldapsearch', 'updateseeds']
+Available_Actions = ['ldapsearch', 'updateseeds']
 
 
 def get_key_ids(key, info):

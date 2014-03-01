@@ -20,7 +20,7 @@ from gkeys.lib import GkeysGPG
 from gkeys.seed import Seeds
 
 
-Avialable_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed',
+Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed',
             'listseedfiles', 'listkey', 'addkey', 'removekey', 'movekey',
             'installed']
 

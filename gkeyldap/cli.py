@@ -15,7 +15,7 @@ from gkeys import seed
 
 from gkeys.config import GKeysConfig
 from gkeyldap import search
-from gkeyldap.actions import Actions, Avialable_Actions
+from gkeyldap.actions import Actions, Available_Actions
 logger = log.logger
 
 
@@ -49,7 +49,7 @@ class Main(object):
         @returns argparse.Namespace object
         '''
         #logger.debug('MAIN: parse_args; args: %s' % args)
-        actions = Avialable_Actions
+        actions = Available_Actions
         parser = argparse.ArgumentParser(
             prog='gkeys',
             description='Gentoo-keys manager program',

@@ -11,7 +11,10 @@
 # $ source ./testpath
 # $ esearch some-package
 
-
-export PATH="$(dirname $BASH_SOURCE[0])/../pyGPG/bin:$(dirname $BASH_SOURCE[0])/bin:${PATH}"
-
-export PYTHONPATH="$(dirname $BASH_SOURCE[0])/../pyGPG/:$(dirname $BASH_SOURCE[0])/../ssl-fetch/:$(dirname $BASH_SOURCE[0])/:${PYTHONPATH}"
+if [[ "$SHELL" =~ "zsh" ]]; then
+    export PATH="$(dirname $0)/../pyGPG/bin:$(dirname $0)/bin:${PATH}"
+    export PYTHONPATH="$(dirname $0)/../pyGPG/:$(dirname $0)/../ssl-fetch/:$(dirname $0)/:${PYTHONPATH}"
+else
+    export PATH="$(dirname $BASH_SOURCE[0])/../pyGPG/bin:$(dirname $BASH_SOURCE[0])/bin:${PATH}"
+    export PYTHONPATH="$(dirname $BASH_SOURCE[0])/../pyGPG/:$(dirname $BASH_SOURCE[0])/../ssl-fetch/:$(dirname $BASH_SOURCE[0])/:${PYTHONPATH}"
+fi

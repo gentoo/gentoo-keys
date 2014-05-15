@@ -27,6 +27,8 @@ class Main(object):
         """ Main class init function.
 
         @param root: string, root path to use
+        @param config: optional GKeysConfig instance, For API use
+        @param print_results: optional boolean, for API use
         """
         self.root = root or "/"
         self.config = config or GKeysConfig(root=root)
@@ -36,6 +38,11 @@ class Main(object):
 
 
     def __call__(self, args=None):
+        """Main class call function
+
+        @param args: Optional list of argumanets to parse and action to run
+                     Defaults to sys.argv[1:]
+        """
         if args:
             self.run(self.parse_args(args))
         else:

@@ -146,7 +146,7 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
     @property
     def packed_string(self):
         '''Returns a separator joined string of the field values'''
-        return self.field_separator.join([x for x in self._packed_values()])
+        return self.field_separator.join([str(x) for x in self._packed_values()])
 
     def _unpack_string(self, packed_data):
         '''Returns a list of the separator joined string of the field values'''

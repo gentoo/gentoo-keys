@@ -73,8 +73,8 @@ class GKeysConfig(GPGConfig):
         self.defaults['dev-seedfile'] = '%(seedsdir)s/developer.seeds'
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
         self.defaults['seedurls'] = {
-            'release.seeds': https://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds,
-            'developers.seeds': https://dev.gentoo.org/~dolsen/gkey-seeds/developer.seeds,
+            'release.seeds': 'https://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds',
+            'developers.seeds': 'https://dev.gentoo.org/~dolsen/gkey-seeds/developer.seeds',
         }
 
 

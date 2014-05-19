@@ -120,7 +120,7 @@ KEYDIR = 4
 FINGERPRINT = 5
 
 # set some defaults
-KEY_LEN = {
+KEYLEN_MAP = {
     'keyid': 8,
     'longkeyid': 16,
 }

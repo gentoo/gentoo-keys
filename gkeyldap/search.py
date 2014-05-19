@@ -60,7 +60,7 @@ gkey2SEARCH = {
 
 
 class LdapSearch(object):
-    '''Class to perform searches on the configured ldap server
+    '''Class to perform searches on the configured LDAP server
     '''
 
     def __init__(self, server=None, fields=None, criteria=None):
@@ -74,9 +74,9 @@ class LdapSearch(object):
 
 
     def connect(self, server=None,):
-        '''Creates our ldap server connection
-
+        '''Creates our LDAP server connection
         '''
+
         if server:
             self.server = server
             logger.debug('LdapSearch: connect; new server: %s' % self.server)
@@ -93,9 +93,8 @@ class LdapSearch(object):
         return True
 
 
-
     def search(self, target, search_field=UID, fields=None, criteria=None):
-        '''Perform the ldap search
+        '''Perform the LDAP search
         '''
         if not target:
             logger.debug('LdapSearch: search; invalid target: "%s"' % target)

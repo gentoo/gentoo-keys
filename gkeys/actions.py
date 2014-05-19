@@ -76,7 +76,7 @@ class Actions(object):
             success = self.seeds.add(gkey)
             if success:
                 success = self.seeds.save()
-                return ["Successfully Added new seed: %s" % str(success), gkey]
+                return ["Successfully added new seed: %s" % str(success), gkey]
         else:
             messages = ["Matching seeds found in seeds file",
                 "Aborting... \nMatching seeds:"]
@@ -91,20 +91,20 @@ class Actions(object):
         self.logger.debug("ACTIONS: removeseed; gkey: %s" % str(searchkey))
         gkeys = self.listseed(args)
         if not gkeys:
-            return ["Failed to Removed seed: No gkeys returned from listseed()",
+            return ["Failed to remove seed: No gkeys returned from listseed()",
                 None]
         if len(gkeys) == 1:
             self.logger.debug("ACTIONS: removeseed; now deleting gkey: %s" % str(gkeys[0]))
             success = self.seeds.delete(gkeys[0])
             if success:
                 success = self.seeds.save()
-            return ["Successfully Removed seed: %s" % str(success),
+            return ["Successfully removed seed: %s" % str(success),
                 gkeys[0]]
         elif len(gkeys):
             messages = ["Too many seeds found to remove"]
             messages.extend(gkeys)
             return messages
-        return ["Failed to Remove seed:", searchkey,
+        return ["Failed to remove seed:", searchkey,
             "No matching seed found"]
 
 
@@ -138,7 +138,7 @@ class Actions(object):
             messages = ["Too many seeds found to move"]
             messages.extend(sourcekeys)
             return messages
-        messages.append("Failed to Move seed:")
+        messages.append("Failed to move seed:")
         messages.append(searchkey)
         messages.append('\n')
         messages.append("Source seeds found...")

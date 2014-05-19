@@ -149,33 +149,6 @@ class Actions(object):
         return (x, target, search_field)
 
 
-
-    def build_gkeydict(self, info):
-        keyinfo = {}
-        for x in GKEY._fields:
-            field = gkey2ldap_map[x]
-            if not field:
-                continue
-            try:
-                # strip errant line feeds
-                values = [y.strip('\n') for y in info[field]]
-                if values and values in ['uid', 'cn' ]:
-                    value = values[0]
-                # separate out short/long key id's
-                elif values and x in ['keyid', 'longkeyid']:
-                    value = get_key_ids(x, values)
-                else:
-                    value = values
-                if 'undefined' in values:
-                    self.logger.error('%s = "undefined" for %s, %s'
-                        %(field, info['uid'][0], info['cn'][0]))
-                if value:
-                    keyinfo[x] = value
-            except KeyError:
-                pass
-        return keyinfo
-
-
     def build_gkeylist(self, info):
         keyinfo = []
         keyid_found = False

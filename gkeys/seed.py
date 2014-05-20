@@ -92,7 +92,6 @@ class Seeds(object):
         return False
 
 
-
     def delete(self, gkey=None, index=None):
         '''Delete the key from the seeds in memory
 

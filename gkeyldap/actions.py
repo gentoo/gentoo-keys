@@ -13,7 +13,7 @@
 import os
 import re
 
-from gkeys.config import GKEY, KEYID, LONGKEYID, FINGERPRINT, KEY_LEN
+from gkeys.config import GKEY, KEYID, LONGKEYID, FINGERPRINT, KEYLEN_MAP
 from gkeys.seed import Seeds
 from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
 
@@ -21,22 +21,21 @@ from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
 Available_Actions = ['ldapsearch', 'updateseeds']
 
 
-def get_key_ids(key, info):
+def get_key_ids(key_len, keyids):
     '''Small utility function to return only keyid (short)
     or longkeyid's
 
-    @param key: string, the key length desired
-    @param info: list of keysid's to process
+    @param key_len: string, the key length desired
+    @param keyids: list of keysid's to process
     @return list of the desired key length id's
     '''
     result = []
-    for x in info:
-        if x.startswith('0x'):
-            mylen = KEY_LEN[key] + 2
-        else:
-            mylen = KEY_LEN[key]
-        if len(x) == mylen:
-            result.append(x)
+    for keyid in keyids:
+        target_len = KEYLEN_MAP[key_len]
+        if keyid.startswith('0x'):
+            target_len = KEYLEN_MAP[key_len] + 2
+        if len(keyid) == target_len:
+            result.append(keyid)
     return result
 
 
@@ -53,11 +52,11 @@ class Actions(object):
 
     def ldapsearch(self, args):
         l = LdapSearch()
-        self.logger.info("Search...establishing connection")
-        self.output("Search...establishing connection")
+        self.logger.info("Search... Establishing connection")
+        self.output("Search... Establishing connection")
         if not l.connect():
-            self.logger.info("Aborting Search...Connection failed")
-            self.output("Aborting Search...Connection failed")
+            self.logger.info("Aborting search... Connection failed")
+            self.output("Aborting search... Connection failed")
             return False
         self.logger.debug("MAIN: _action_ldapsearch; args = %s" % str(args))
         x, target, search_field = self.get_args(args)
@@ -66,26 +65,26 @@ class Actions(object):
         for dev in sorted(devs):
             self.output(dev, devs[dev])
         self.output("============================================")
-        self.output("Total number of devs in results:", len(devs))
+        self.output("Total number of developers in results:", len(devs))
         self.logger.info("============================================")
-        self.logger.info("Total number of devs in results: %d" % len(devs))
+        self.logger.info("Total number of developers in results: %d" % len(devs))
         return True
 
 
     def updateseeds(self, args):
-        self.logger.info("Beginning ldap search...")
-        self.output("Beginning ldap search...")
+        self.logger.info("Beginning LDAP search...")
+        self.output("Beginning LDAP search...")
         l = LdapSearch()
         if not l.connect():
-            self.output("Aborting Update...Connection failed")
-            self.logger.info("Aborting Update...Connection failed")
+            self.output("Aborting update... Connection failed")
+            self.logger.info("Aborting update... Connection failed")
             return False
         results = l.search('*', UID)
         info = l.result2dict(results, 'uid')
         self.logger.debug(
             "MAIN: _action_updateseeds; got results :) converted to info")
         if not self.create_seedfile(info):
-            self.logger.error("Dev seed file update failure: "
+            self.logger.error("Developer seed file update failure: "
                 "Original seed file is intact & untouched.")
         filename = self.config['dev-seedfile']
         old = filename + '.old'
@@ -108,12 +107,12 @@ class Actions(object):
             os.rename(filename + '.new', filename)
         except IOError:
             raise
-        self.output("Developer Seed file updated")
+        self.output("Developer seed file updated!")
         return True
 
 
     def create_seedfile(self, devs):
-        self.output("Creating seeds from ldap data...")
+        self.output("Creating seeds from LDAP data...")
         filename = self.config['dev-seedfile'] + '.new'
         self.seeds = Seeds(filename)
         count = 0
@@ -131,49 +130,22 @@ class Actions(object):
             else:
                 error_count += 1
         self.output("Total number of seeds created:", count)
-        self.output("Seeds created...saving file: %s" % filename)
-        self.output("Total number of Dev's with gpg errors:", error_count)
+        self.output("Seeds created... Saving file: %s" % filename)
+        self.output("Total number of Dev's with GPG errors:", error_count)
         self.logger.info("Total number of seeds created: %d" % count)
-        self.logger.info("Seeds created...saving file: %s" % filename)
-        self.logger.info("Total number of Dev's with gpg errors: %d" % error_count)
+        self.logger.info("Seeds created... Saving file: %s" % filename)
+        self.logger.info("Total number of Dev's with GPG errors: %d" % error_count)
         return self.seeds.save()
 
 
     @staticmethod
     def get_args(args):
-        for x in ['nick', 'name', 'gpgkey', 'fingerprint', 'status']:
-            if x:
-                target = getattr(args, x)
-                search_field = gkey2SEARCH[x]
+        for attr in ['nick', 'name', 'gpgkey', 'fingerprint', 'status']:
+            if attr:
+                target = getattr(args, attr)
+                search_field = gkey2SEARCH[attr]
                 break
-        return (x, target, search_field)
-
-
-
-    def build_gkeydict(self, info):
-        keyinfo = {}
-        for x in GKEY._fields:
-            field = gkey2ldap_map[x]
-            if not field:
-                continue
-            try:
-                # strip errant line feeds
-                values = [y.strip('\n') for y in info[field]]
-                if values and values in ['uid', 'cn' ]:
-                    value = values[0]
-                # separate out short/long key id's
-                elif values and x in ['keyid', 'longkeyid']:
-                    value = get_key_ids(x, values)
-                else:
-                    value = values
-                if 'undefined' in values:
-                    self.logger.error('%s = "undefined" for %s, %s'
-                        %(field, info['uid'][0], info['cn'][0]))
-                if value:
-                    keyinfo[x] = value
-            except KeyError:
-                pass
-        return keyinfo
+        return (attr, target, search_field)
 
 
     def build_gkeylist(self, info):
@@ -183,8 +155,8 @@ class Actions(object):
         # assume it's good until an error is found
         is_good = True
         #self.logger.debug("Actions: build_gkeylist; info = %s" % str(info))
-        for x in GKEY._fields:
-            field = gkey2ldap_map[x]
+        for attr in GKEY._fields:
+            field = gkey2ldap_map[attr]
             if not field:
                 keyinfo.append(None)
                 continue
@@ -194,24 +166,24 @@ class Actions(object):
                 if values and field in ['uid', 'cn' ]:
                     value = values[0]
                 # separate out short/long key id's
-                elif values and x in ['keyid', 'longkeyid']:
-                    value = get_key_ids(x, values)
+                elif values and attr in ['keyid', 'longkeyid']:
+                    value = get_key_ids(attr, values)
                     if len(value):
                         keyid_found = True
-                elif values and x in ['fingerprint']:
+                elif values and attr in ['fingerprint']:
                     value = [v.replace(' ', '') for v in values]
                 else:
                     value = values
                 if 'undefined' in values:
-                    self.logger.error('ERROR in ldap info for: %s, %s'
+                    self.logger.error('ERROR in LDAP info for: %s, %s'
                         %(info['uid'][0],info['cn'][0]))
                     self.logger.error('  %s = "undefined"' %(field))
                     is_good = False
                 keyinfo.append(value)
             except KeyError:
-                self.logger.debug('Ldap info for: %s, %s'
+                self.logger.debug('LDAP info for: %s, %s'
                     %(info['uid'][0],info['cn'][0]))
-                self.logger.debug('  MISSING or EMPTY ldap field ' +
+                self.logger.debug('  MISSING or EMPTY LDAP field ' +
                     '[%s] GPGKey field [%s]' %(field, x))
                 if x in ['keyid', 'longkeyid']:
                     keyid_missing = True
@@ -222,21 +194,21 @@ class Actions(object):
             fingerprint = None
             try:
                 fingerprint = info[gkey2ldap_map['fingerprint']]
-                self.logger.debug('  Generate gpgkey, Found ldap fingerprint field')
+                self.logger.debug('  Generate gpgkey, Found LDAP fingerprint field')
             except KeyError:
-                gpgkey = 'Missing fingerprint from ldap info'
-                self.logger.debug('  Generate gpgkey, ldap fingerprint KeyError')
+                gpgkey = 'Missing fingerprint from LDAP info'
+                self.logger.debug('  Generate gpgkey, LDAP fingerprint KeyError')
             if fingerprint:
                 values = [y.strip('\n') for y in fingerprint]
                 value = [v.replace(' ', '') for v in values]
                 # assign it to gpgkey to prevent a possible
                 # "gpgkey" undefined error
-                gpgkey = ['0x' + x[-KEY_LEN['longkeyid']:] for x in value]
+                gpgkey = ['0x' + x[-KEYLEN_MAP['longkeyid']:] for x in value]
                 keyinfo[LONGKEYID] = gpgkey
                 self.logger.debug('  Generate gpgkey, NEW keyinfo[LONGKEYID] = %s'
                     % str(keyinfo[LONGKEYID]))
             else:
-                gpgkey = 'Missing or Bad fingerprint from ldap info'
+                gpgkey = 'Missing or Bad fingerprint from LDAP info'
                 is_good = False
             if not keyinfo[LONGKEYID]:
                 self.logger.error('ERROR in ldap info for: %s, %s'
@@ -266,7 +238,7 @@ class Actions(object):
                 index = len(y.lstrip('0x'))
                 if y.lstrip('0x').upper() not in \
                         [x[-index:].upper() for x in keyinfo[FINGERPRINT]]:
-                    self.logger.error('ERROR in ldap info for: %s, %s'
+                    self.logger.error('ERROR in LDAP info for: %s, %s'
                         %(info['uid'][0],info['cn'][0]))
                     self.logger.error('  ' + str(keyinfo))
                     self.logger.error('  GPGKey id %s not found in the '
@@ -278,19 +250,19 @@ class Actions(object):
     def _check_fingerprint_integrity(self, info, keyinfo):
         # assume it's good until found an error is found
         is_good = True
-        for x in keyinfo[FINGERPRINT]:
+        for fingerprint in keyinfo[FINGERPRINT]:
             # check fingerprint integrity
-            if len(x) != 40:
-                self.logger.error('ERROR in ldap info for: %s, %s'
+            if len(fingerprint) != 40:
+                self.logger.error('ERROR in LDAP info for: %s, %s'
                     %(info['uid'][0],info['cn'][0]))
                 self.logger.error('  GPGKey incorrect fingerprint ' +
-                    'length (%s) for fingerprint: %s' %(len(x), x))
+                    'length (%s) for fingerprint: %s' %(len(fingerprint), fingerprint))
                 is_good = False
                 continue
-            if not self.fingerprint_re.match(x):
+            if not self.fingerprint_re.match(fingerprint):
                 self.logger.error('ERROR in ldap info for: %s, %s'
                     %(info['uid'][0],info['cn'][0]))
                 self.logger.error('  GPGKey: Non hexadecimal digits in ' +
-                    'fingerprint for fingerprint: ' + x)
+                    'fingerprint for fingerprint: ' + fingerprint)
                 is_good = False
         return is_good

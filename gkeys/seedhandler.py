@@ -13,7 +13,7 @@
 import re
 
 from gkeys.config import (GKEY, NICK, NAME, KEYID, LONGKEYID, FINGERPRINT,
-    KEY_LEN)
+    KEYLEN_MAP)
 
 
 class SeedHandler(object):
@@ -40,11 +40,11 @@ class SeedHandler(object):
     @staticmethod
     def build_gkeydict(args):
         keyinfo = {}
-        for x in GKEY._fields:
+        for attr in GKEY._fields:
             try:
-                value = getattr(args, x)
+                value = getattr(args, attr)
                 if value:
-                    keyinfo[x] = value
+                    keyinfo[attr] = value
             except AttributeError:
                 pass
         return keyinfo
@@ -56,20 +56,20 @@ class SeedHandler(object):
         # assume it's good until an error is found
         is_good = True
         #self.logger.debug("SeedHandler: build_gkeylist; args = %s" % str(args))
-        for x in GKEY._fields:
-            if GKEY.field_types[x] is str:
+        for attr in GKEY._fields:
+            if GKEY.field_types[attr] is str:
                 try:
-                    value = getattr(args, x)
+                    value = getattr(args, attr)
                 except AttributeError:
                     value = None
-            elif GKEY.field_types[x] is list:
+            elif GKEY.field_types[attr] is list:
                 try:
-                    values = [y for y in getattr(args, x).split(':')]
+                    values = [y for y in getattr(args, attr).split(':')]
                     value = [v.replace(' ', '') for v in values]
                 except AttributeError:
                     value = None
             keyinfo.append(value)
-            if x in ["keyid", "longkeyid"] and value:
+            if attr in ["keyid", "longkeyid"] and value:
                 keyid_found = True
         if not keyid_found and needkeyid:
             fingerprint = keyinfo[FINGERPRINT]
@@ -78,7 +78,7 @@ class SeedHandler(object):
                     'fingerprint in args')
                 # assign it to gpgkey to prevent a possible
                 # "gpgkey" undefined error
-                gpgkey = ['0x' + x[-KEY_LEN['longkeyid']:] for x in fingerprint]
+                gpgkey = ['0x' + x[-KEYLEN_MAP['longkeyid']:] for x in fingerprint]
                 keyinfo[LONGKEYID] = gpgkey
                 self.logger.debug('  Generate gpgkey longkeyid, NEW '
                     'keyinfo[LONGKEYID] = %s' % str(keyinfo[LONGKEYID]))
@@ -139,19 +139,19 @@ class SeedHandler(object):
     def _check_fingerprint_integrity(self, keyinfo):
         # assume it's good until an error is found
         is_good = True
-        for x in keyinfo[FINGERPRINT]:
+        for fingerprint in keyinfo[FINGERPRINT]:
             # check fingerprint integrity
-            if len(x) != 40:
+            if len(fingerprint) != 40:
                 self.logger.error('ERROR in keyinfo for: %s, %s'
                     %(keyinfo[NICK], keyinfo[NAME]))
                 self.logger.error('  GPGKey incorrect fingerprint ' +
                     'length (%s) for fingerprint: %s' %(len(x), x))
                 is_good = False
                 continue
-            if not self.fingerprint_re.match(x):
+            if not self.fingerprint_re.match(fingerprint):
                 self.logger.error('ERROR in keyinfo info for: %s, %s'
                     %(keyinfo[NICK], keyinfo[NAME]))
                 self.logger.error('  GPGKey: Non hexadecimal digits in ' +
-                    'fingerprint for fingerprint: ' + x)
+                    'fingerprint for fingerprint: ' + fingerprint)
                 is_good = False
         return is_good

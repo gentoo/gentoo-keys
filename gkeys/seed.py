@@ -15,7 +15,9 @@ with gentoo-keys specific convienience functions.
              Brian Dolbec <dolsen@gentoo.org>
 
 '''
+import json
 
+from collections import defaultdict
 from gkeys.log import logger
 from gkeys.config import GKEY
 
@@ -45,18 +47,16 @@ class Seeds(object):
         self.seeds = []
         try:
             with open(self.filename) as seedfile:
-                seedlines = seedfile.readlines()
+                seedlines = json.load(seedfile)
         except IOError as err:
             logger.debug("Seed: load; IOError occurred while loading file")
             self._error(err)
             return False
-
         # initialize a dummy instance, so it can make new ones
         gkey = GKEY._make([None,None,None,None,None,None])
-        for seed in seedlines:
+        for seed in seedlines.items():
             #try:
-            seed = seed.strip('\n')
-            self.seeds.append(gkey.make_packed(seed))
+            self.seeds.append(gkey.make_packed_dict(seed[1]))
             #except Exception as err:
                 #logger.debug("Seed: load; Error splitting seed: %s" % seed)
                 #logger.debug("Seed: load; ...............parts: %s" % str(parts))
@@ -75,8 +75,7 @@ class Seeds(object):
         logger.debug("Seed: save; Begin saving seed file %s" % self.filename)
         try:
             with open(self.filename, 'w') as seedfile:
-                seedlines = [x.packed_string for x in self.seeds]
-                seedfile.write('\n'.join(seedlines))
+                seedfile.write(self._seeds2json(self.seeds))
                 seedfile.write("\n")
         except IOError as err:
             self._error(err)
@@ -86,9 +85,11 @@ class Seeds(object):
 
     def add(self, gkey):
         '''Add a new seed key to memory'''
-        if isinstance(gkey, GKEY):
+        if isinstance(gkey, defaultdict):
             self.seeds.append(gkey)
             return True
+        elif isinstance(gkey, GKEY):
+            pass
         return False
 
 
@@ -150,3 +151,6 @@ class Seeds(object):
         logger.error("Seed: Error processing seed file %s" % self.filename)
         logger.error("Seed: Error was: %s" % str(err))
 
+
+    def _seeds2json(self, seeds):
+        return json.dumps(self.seeds[0], sort_keys=True, indent=4)

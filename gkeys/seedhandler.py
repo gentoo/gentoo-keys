@@ -145,7 +145,7 @@ class SeedHandler(object):
                 self.logger.error('ERROR in keyinfo for: %s, %s'
                     %(keyinfo[NICK], keyinfo[NAME]))
                 self.logger.error('  GPGKey incorrect fingerprint ' +
-                    'length (%s) for fingerprint: %s' %(len(x), x))
+                    'length (%s) for fingerprint: %s' %(len(fingerprint), fingerprint))
                 is_good = False
                 continue
             if not self.fingerprint_re.match(fingerprint):

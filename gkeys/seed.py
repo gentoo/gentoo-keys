@@ -52,11 +52,9 @@ class Seeds(object):
             logger.debug("Seed: load; IOError occurred while loading file")
             self._error(err)
             return False
-        # initialize a dummy instance, so it can make new ones
-        gkey = GKEY._make([None,None,None,None,None,None])
         for seed in seedlines.items():
             #try:
-            self.seeds.append(gkey.make_packed_dict(seed[1]))
+            self.seeds.append(GKEY(**seed[1]))
             #except Exception as err:
                 #logger.debug("Seed: load; Error splitting seed: %s" % seed)
                 #logger.debug("Seed: load; ...............parts: %s" % str(parts))

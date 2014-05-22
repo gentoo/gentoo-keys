@@ -184,20 +184,6 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
                 result = data.split(self.list_separator)
         return result
 
-    def _unpack_dict(self, data):
-        values = []
-        for attr in self._fields:
-            values.append(data[attr])
-        return values
-
-    def make_packed_dict(self, packed_dict):
-        '''Creates a new instance of Gkey from a dictionary
-
-        @param packed_dict: data inside a dictionary
-        @return new GKEY instance containing the data
-        '''
-        return GKEY._make(self._unpack_dict(packed_dict))
-
     def make_packed(self, packed_string):
         '''Creates a new instance of Gkey from the packed
         value string

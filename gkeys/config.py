@@ -130,6 +130,13 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
     'keydir', 'fingerprint'])):
     '''Class to hold the relavent info about a key'''
 
+    # subclass __new__ to make both gkeys and gkeyldap work properly
+    # delete it when keyid and longkeyid are removed from LDAP
+    def __new__(cls, nick=None, name=None, keydir=None, fingerprint=None,
+                keyid=None, longkeyid=None):
+        return super(GKEY, cls).__new__(cls, nick, name, keydir, fingerprint,
+                                        keyid, longkeyid)
+
     field_types = {'nick': str, 'name': str, 'keyid': list,
         'longkeyid': list, 'keydir': str, 'fingerprint': list}
     field_separator = "|"

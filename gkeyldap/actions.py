@@ -118,7 +118,6 @@ class Actions(object):
         self.seeds = Seeds(filename)
         count = 0
         error_count = 0
-        gkeyattr_dev = defaultdict()
         for dev in sorted(devs):
             if devs[dev]['gentooStatus'][0] not in ['active']:
                 continue
@@ -126,8 +125,7 @@ class Actions(object):
             #   "%s, %s" % (str(dev), str(devs[dev])))
             developer_attrs = self.build_gkeydict(devs[dev])
             if developer_attrs:
-                gkeyattr_dev[dev] = developer_attrs
-                self.seeds.add(gkeyattr_dev)
+                self.seeds.add(dev, developer_attrs)
                 count += 1
             else:
                 error_count += 1

@@ -17,7 +17,6 @@ with gentoo-keys specific convienience functions.
 '''
 import json
 
-from collections import defaultdict
 from gkeys.log import logger
 from gkeys.config import GKEY
 
@@ -32,7 +31,7 @@ class Seeds(object):
         @param filepath: string of the file to load
         '''
         self.filename = filepath
-        self.seeds = []
+        self.seeds = {}
 
 
     def load(self, filename=None):
@@ -44,7 +43,7 @@ class Seeds(object):
             return False
         logger.debug("Seeds: load; Begin loading seed file %s" % self.filename)
         seedlines = None
-        self.seeds = []
+        self.seeds = {}
         try:
             with open(self.filename) as seedfile:
                 seedlines = json.load(seedfile)
@@ -52,11 +51,9 @@ class Seeds(object):
             logger.debug("Seed: load; IOError occurred while loading file")
             self._error(err)
             return False
-        # initialize a dummy instance, so it can make new ones
-        gkey = GKEY._make([None,None,None,None,None,None])
         for seed in seedlines.items():
             #try:
-            self.seeds.append(gkey.make_packed_dict(seed[1]))
+            self.seeds[seed[0]] = GKEY(**seed[1])
             #except Exception as err:
                 #logger.debug("Seed: load; Error splitting seed: %s" % seed)
                 #logger.debug("Seed: load; ...............parts: %s" % str(parts))
@@ -83,13 +80,11 @@ class Seeds(object):
         return True
 
 
-    def add(self, gkey):
+    def add(self, dev, gkey):
         '''Add a new seed key to memory'''
-        if isinstance(gkey, defaultdict):
-            self.seeds.append(gkey)
+        if isinstance(gkey, dict) or isinstance(gkey, GKEY):
+            self.seeds[dev] = gkey
             return True
-        elif isinstance(gkey, GKEY):
-            pass
         return False
 
 
@@ -100,7 +95,7 @@ class Seeds(object):
         @param index: int, '''
         if gkey:
             try:
-                self.seeds.remove(gkey)
+                self.seeds.pop(getattr(gkey[0], 'nick')[0], None)
             except ValueError:
                 return False
             return True
@@ -115,17 +110,15 @@ class Seeds(object):
         @param kwargs: dict of GKEY._fields and values
         @returns list
         '''
-        if not kwargs:
-            return self.seeds
-        if kwargs['nick'] == '*':
-            return self.seeds[:]
+        if not kwargs or kwargs['nick'] == '*':
+            return self.seeds.values()[0]
         # proceed with the search
         # discard any invalid keys
-        keys = set(list(kwargs)).intersection(GKEY._fields)
-        result = self.seeds[:]
+        keys = kwargs
+        result = self.seeds
         for key in keys:
-            result = [x for x in result if getattr(x , key) == kwargs[key]]
-        return result
+            result = {dev: gkey for dev, gkey in result.items() if kwargs[key] in getattr(gkey, key)}
+        return result.values()
 
 
     def search(self, pattern):
@@ -153,4 +146,10 @@ class Seeds(object):
 
 
     def _seeds2json(self, seeds):
-        return json.dumps(self.seeds[0], sort_keys=True, indent=4)
+        is_gkey=False
+        if isinstance(seeds.values()[0], GKEY):
+            is_gkey = True
+        for dev, value in seeds.items():
+            if is_gkey:
+                seeds[dev] = dict(value._asdict())
+        return json.dumps(seeds, sort_keys=True, indent=4)

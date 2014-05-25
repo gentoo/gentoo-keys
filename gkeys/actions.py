@@ -69,11 +69,11 @@ class Actions(object):
     def addseed(self, args):
         '''Action addseed method'''
         handler = SeedHandler(self.logger)
-        gkey = handler.new(args)
+        gkey = handler.new(args, checkgkey=True)
         gkeys = self.listseed(args)
         if len(gkeys) == 0:
             self.logger.debug("ACTIONS: addkey; now adding gkey: %s" % str(gkey))
-            success = self.seeds.add(gkey)
+            success = self.seeds.add(getattr(gkey, 'nick')[0], gkey)
             if success:
                 success = self.seeds.save()
                 return ["Successfully added new seed: %s" % str(success), gkey]
@@ -87,19 +87,19 @@ class Actions(object):
     def removeseed(self, args):
         '''Action removeseed method'''
         handler = SeedHandler(self.logger)
-        searchkey = handler.new(args, needkeyid=False, checkintegrity=False)
+        searchkey = handler.new(args)
         self.logger.debug("ACTIONS: removeseed; gkey: %s" % str(searchkey))
         gkeys = self.listseed(args)
         if not gkeys:
             return ["Failed to remove seed: No gkeys returned from listseed()",
                 None]
         if len(gkeys) == 1:
-            self.logger.debug("ACTIONS: removeseed; now deleting gkey: %s" % str(gkeys[0]))
-            success = self.seeds.delete(gkeys[0])
+            self.logger.debug("ACTIONS: removeseed; now deleting gkey: %s" % str(gkeys))
+            success = self.seeds.delete(gkeys)
             if success:
                 success = self.seeds.save()
             return ["Successfully removed seed: %s" % str(success),
-                gkeys[0]]
+                gkeys]
         elif len(gkeys):
             messages = ["Too many seeds found to remove"]
             messages.extend(gkeys)

@@ -110,25 +110,10 @@ class GKeysConfig(GPGConfig):
             return super(GKeysConfig, self)._get_(key, subkey)
 
 
-# some constants used in gkeyldap/actions.py
-# they map the index values of the GKEY input data fields
-NICK = 0
-NAME = 1
-KEYID = 2
-LONGKEYID = 3
-KEYDIR = 4
-FINGERPRINT = 5
 
-# set some defaults
-KEYLEN_MAP = {
-    'keyid': 8,
-    'longkeyid': 16,
-}
-
-
-class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
-    'keydir', 'fingerprint'])):
+class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
     '''Class to hold the relavent info about a key'''
+
 
     field_types = {'nick': str, 'name': str, 'keyid': list,
         'longkeyid': list, 'keydir': str, 'fingerprint': list}
@@ -183,20 +168,6 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keyid', 'longkeyid',
             else:
                 result = data.split(self.list_separator)
         return result
-
-    def _unpack_dict(self, data):
-        values = []
-        for attr in self._fields:
-            values.append(data[attr])
-        return values
-
-    def make_packed_dict(self, packed_dict):
-        '''Creates a new instance of Gkey from a dictionary
-
-        @param packed_dict: data inside a dictionary
-        @return new GKEY instance containing the data
-        '''
-        return GKEY._make(self._unpack_dict(packed_dict))
 
     def make_packed(self, packed_string):
         '''Creates a new instance of Gkey from the packed

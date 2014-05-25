@@ -36,9 +36,6 @@ gkey2ldap_map = {
     'keydir': 'uid',
     'fingerprint': 'gpgfingerprint'
 }
-# Sanity check they are in sync
-if not sorted(gkey2ldap_map) == sorted(GKEY._fields):
-    raise "Search.py out of sync with GKEY class"
 
 
 # Now for some search field defaults

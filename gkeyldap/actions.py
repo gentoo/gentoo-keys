@@ -14,7 +14,7 @@ import os
 import re
 
 from collections import defaultdict
-from gkeys.config import GKEY, KEYLEN_MAP
+from gkeys.config import GKEY
 from gkeys.seed import Seeds
 from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
 
@@ -32,9 +32,9 @@ def get_key_ids(key_len, keyids):
     '''
     result = []
     for keyid in keyids:
-        target_len = KEYLEN_MAP[key_len]
+        target_len = 16
         if keyid.startswith('0x'):
-            target_len = KEYLEN_MAP[key_len] + 2
+            target_len = target_len + 2
         if len(keyid) == target_len:
             result.append(keyid)
     return result
@@ -118,7 +118,6 @@ class Actions(object):
         self.seeds = Seeds(filename)
         count = 0
         error_count = 0
-        gkeyattr_dev = defaultdict()
         for dev in sorted(devs):
             if devs[dev]['gentooStatus'][0] not in ['active']:
                 continue
@@ -126,8 +125,7 @@ class Actions(object):
             #   "%s, %s" % (str(dev), str(devs[dev])))
             developer_attrs = self.build_gkeydict(devs[dev])
             if developer_attrs:
-                gkeyattr_dev[dev] = developer_attrs
-                self.seeds.add(gkeyattr_dev)
+                self.seeds.add(dev, developer_attrs)
                 count += 1
             else:
                 error_count += 1
@@ -157,7 +155,7 @@ class Actions(object):
         # assume it's good until an error is found
         is_good = True
         #self.logger.debug("Actions: build_gkeylist; info = %s" % str(info))
-        for attr in GKEY._fields:
+        for attr in gkey2ldap_map:
             field = gkey2ldap_map[attr]
             if not field:
                 keyinfo[attr] = None
@@ -201,7 +199,7 @@ class Actions(object):
                 values = [v.replace(' ', '') for v in values]
                 # assign it to gpgkey to prevent a possible
                 # "gpgkey" undefined error
-                gpgkey = ['0x' + x[-KEYLEN_MAP['longkeyid']:] for x in values]
+                gpgkey = ['0x' + x[-16:] for x in values]
                 keyinfo['longkeyid'] = gpgkey
                 self.logger.debug('  Generate gpgkey, NEW keyinfo[\'fingerprint\'] = %s'
                     % str(keyinfo['longkeyid']))

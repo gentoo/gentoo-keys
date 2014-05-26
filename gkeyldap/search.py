@@ -15,7 +15,6 @@ except ImportError:
 
 
 from gkeys import log
-from gkeys.config import GKEY
 
 logger = log.logger
 

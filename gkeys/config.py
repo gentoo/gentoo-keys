@@ -114,66 +114,6 @@ class GKeysConfig(GPGConfig):
 class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
     '''Class to hold the relavent info about a key'''
 
-
     field_types = {'nick': str, 'name': str, 'keyid': list,
-        'longkeyid': list, 'keydir': str, 'fingerprint': list}
-    field_separator = "|"
-    list_separator = ":"
+                   'longkeyid': list, 'keydir': str, 'fingerprint': list}
     __slots__ = ()
-
-    def _packed_values(self):
-        '''Returns a list of the field values'''
-        v = []
-        for f in self._fields:
-            v.append(self._pack(f))
-        return v
-
-    @property
-    def packed_string(self):
-        '''Returns a separator joined string of the field values'''
-        return self.field_separator.join([str(x) for x in self._packed_values()])
-
-    def _unpack_string(self, packed_data):
-        '''Returns a list of the separator joined string of the field values'''
-        values = []
-        data = packed_data.split(self.field_separator)
-        for x in self._fields:
-            values.append(self._unpack(x, data.pop(0)))
-        return values
-
-    def _pack(self, field):
-        '''pack field data into a string'''
-        if self.field_types[field] == str:
-            return getattr(self, field)
-        elif self.field_types[field] == list:
-            info = getattr(self, field)
-            if info:
-                return self.list_separator.join(info)
-            else:
-                # force an empty list to None
-                return 'None'
-        else:
-            raise "ERROR packing %s" %str(getattr(self, field))
-
-    def _unpack(self, field, data):
-        '''unpack field data to the desired type'''
-        if self.field_types[field] == str:
-            result = data
-            if result == 'None':
-                result = None
-        else:
-            if data == 'None':
-                # make it an empty list
-                result = []
-            else:
-                result = data.split(self.list_separator)
-        return result
-
-    def make_packed(self, packed_string):
-        '''Creates a new instance of Gkey from the packed
-        value string
-
-        @param packed_string: string of data separated by field_separator
-        @return new GKEY instance containing the data
-        '''
-        return GKEY._make(self._unpack_string(packed_string))

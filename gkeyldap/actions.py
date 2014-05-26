@@ -14,7 +14,6 @@ import os
 import re
 
 from collections import defaultdict
-from gkeys.config import GKEY
 from gkeys.seed import Seeds
 from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
 

@@ -115,6 +115,11 @@ class GKeysConfig(GPGConfig):
 class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
     '''Class to hold the relavent info about a key'''
 
-    field_types = {'nick': str, 'name': str, 'keyid': list,
-                   'longkeyid': list, 'keydir': str, 'fingerprint': list}
+    field_types = {'nick': str, 'name': str, 'keydir': str, 'fingerprint': list}
     __slots__ = ()
+
+
+    @property
+    def keyid(self):
+        '''Keyid is a substring value of the fingerprint'''
+        return ['0x' + x[-16:] for x in self.fingerprint]

@@ -56,6 +56,7 @@ class GKeysConfig(GPGConfig):
             self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gentoo-keys'])
             self.defaults['config'] = '%(configdir)s/gkeys.conf'
         self.configparser = None
+        self._add_gkey_defaults()
         if read_configfile:
             self.read_config()
 

@@ -59,7 +59,10 @@ class Actions(object):
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
-            self.seeds = self.load_seeds(args.seeds, args.seedfile)
+            try:
+                self.seeds = self.load_seeds(args.seeds, args.seedfile)
+            except ValueError:
+                return ["Failed to load seed file. Consider fetching seedfiles."]
         if self.seeds:
             results = self.seeds.list(**kwargs)
             return results

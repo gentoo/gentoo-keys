@@ -13,14 +13,15 @@
 from __future__ import print_function
 
 import os
+import re
 
-
-from gkeys.seedhandler import SeedHandler
+from gkeys.config import SEED_TYPES
 from gkeys.lib import GkeysGPG
 from gkeys.seed import Seeds
+from gkeys.seedhandler import SeedHandler
+from sslfetch.connections import Connector
 
-
-Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed',
+Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'addkey', 'removekey', 'movekey',
             'installed']
 
@@ -53,6 +54,62 @@ class Actions(object):
         return seeds
 
 
+    def fetch_seeds(self, seeds):
+        # setup the ssl-fetch ouptut map
+        connector_output = {
+            'info': self.logger.info,
+            'error': self.logger.error,
+            'kwargs-info': {},
+            'kwargs-error': {},
+        }
+        urls = []
+        messages = []
+        urls.append(self.config.get_key('developers.seeds'))
+        urls.append(self.config.get_key('release.seeds'))
+        if not re.search('^(http|https)://', urls[0]) and not re.search('^(http|https)://', urls[1]):
+            urls = []
+            urls.append(self.config['seedurls']['developers.seeds'])
+            urls.append(self.config['seedurls']['release.seeds'])
+        fetcher = Connector(connector_output, None, "Gentoo Keys")
+        for url in zip(urls, SEED_TYPES):
+            timestamp_path = self.config['%s-timestamp' % url[1]]
+            success, seeds, timestamp = fetcher.fetch_content(url[0], timestamp_path)
+            if not timestamp:
+                messages += ["%s seed file is already up to date." % url[1]]
+            else:
+                with open(timestamp_path, 'w+') as timestampfile:
+                    timestampfile.write(str(timestamp))
+                    timestampfile.write("\n")
+                if success and timestamp:
+                    self.logger.debug("MAIN: _action_fetchseed; got results.")
+                    filename = self.config['%s-seedfile' % url[1]] + '.new'
+                    with open(filename, 'w') as seedfile:
+                        seedfile.write(seeds)
+                    filename = self.config['%s-seedfile' % url[1]]
+                    old = filename + '.old'
+                    try:
+                        self.logger.info("Backing up existing file...")
+                        if os.path.exists(old):
+                            self.logger.debug(
+                                "MAIN: _action_fetch_seeds; Removing 'old' seed file: %s"
+                                % old)
+                            os.unlink(old)
+                        if os.path.exists(filename):
+                            self.logger.debug(
+                                "MAIN: _action_fetch_seeds; Renaming current seed file to: "
+                                "%s" % old)
+                            os.rename(filename, old)
+                        self.logger.debug("MAIN: _action_fetch_seeds; Renaming '.new' seed file to %s"
+                                          % filename)
+                        os.rename(filename + '.new', filename)
+                        messages += ["Successfully fetched %s seed files." % url[1]]
+                    except IOError:
+                        raise
+                else:
+                    messages += ["Failed to fetch %s seed file." % url[1]]
+        return messages
+
+
     def listseed(self, args):
         '''Action listseed method'''
         handler = SeedHandler(self.logger)
@@ -67,6 +124,14 @@ class Actions(object):
             results = self.seeds.list(**kwargs)
             return results
         return None
+
+
+    def fetchseed(self, args):
+        '''Action fetchseed method'''
+        handler = SeedHandler(self.logger)
+        messages = self.fetch_seeds(args.seeds)
+        self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
+        return messages
 
 
     def addseed(self, args):

@@ -38,6 +38,7 @@ EPREFIX = "@GENTOO_PORTAGE_EPREFIX@"
 if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
     EPREFIX = ''
 
+SEED_TYPES = ['dev', 'release']
 
 
 class GKeysConfig(GPGConfig):
@@ -72,6 +73,8 @@ class GKeysConfig(GPGConfig):
         self.defaults['seedsdir'] = '%(keysdir)s/seeds'
         self.defaults['release-seedfile'] = '%(seedsdir)s/release.seeds'
         self.defaults['dev-seedfile'] = '%(seedsdir)s/developer.seeds'
+        self.defaults['dev-timestamp'] = '%(keysdir)s/.developer_seeds_timestamp'
+        self.defaults['release-timestamp'] = '%(keysdir)s/.release_seeds_timestamp'
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
         self.defaults['seedurls'] = {
             'release.seeds': 'https://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds',

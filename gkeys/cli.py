@@ -147,7 +147,11 @@ class Main(object):
     def output_results(results, header):
         # super simple output for the time being
         print(header)
-        print("\n".join([x.pretty_print for x in results]))
+        for msg in results:
+            if isinstance(msg, str):
+                print(msg)
+            else:
+                print("\n".join([x.pretty_print for x in msg]))
         print()
 
 

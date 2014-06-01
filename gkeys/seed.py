@@ -111,7 +111,7 @@ class Seeds(object):
         @returns list
         '''
         if not kwargs or kwargs['nick'] == '*':
-            return self.seeds.values()[0]
+            return self.seeds.values()
         # proceed with the search
         # discard any invalid keys
         keys = kwargs

@@ -147,7 +147,7 @@ class Main(object):
     def output_results(results, header):
         # super simple output for the time being
         print(header)
-        print("\n".join([str(x) for x in results]))
+        print("\n".join([x.pretty_print for x in results]))
         print()
 
 

@@ -40,6 +40,15 @@ if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
 
 SEED_TYPES = ['dev', 'release']
 
+GKEY_STRING = '''    ----------
+    Name.........: %(name)s
+    Nick.........: %(nick)s
+    Keydir.......: %(keydir)s
+'''
+GKEY_FINGERPRINTS = \
+'''    Keyid........: %(keyid)s
+      Fingerprint: %(fingerprint)s
+'''
 
 class GKeysConfig(GPGConfig):
     """ Configuration superclass which holds our gentoo-keys
@@ -126,3 +135,15 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
     def keyid(self):
         '''Keyid is a substring value of the fingerprint'''
         return ['0x' + x[-16:] for x in self.fingerprint]
+
+
+    @property
+    def pretty_print(self):
+        '''Pretty printing a GKEY'''
+        gkey = {'name': ', '.join(self.name), 'nick': ', '.join(self.nick)
+            , 'keydir': ', '.join(self.keydir)}
+        output = GKEY_STRING % gkey
+        for f in self.fingerprint:
+            fingerprint = {'fingerprint': f, 'keyid': '0x' + f[-16:]}
+            output += GKEY_FINGERPRINTS % fingerprint
+        return output

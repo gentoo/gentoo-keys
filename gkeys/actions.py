@@ -122,7 +122,7 @@ class Actions(object):
                 return ["Failed to load seed file. Consider fetching seedfiles."]
         if self.seeds:
             results = self.seeds.list(**kwargs)
-            return results
+            return ['', results]
         return None
 
 
@@ -138,7 +138,7 @@ class Actions(object):
         '''Action addseed method'''
         handler = SeedHandler(self.logger)
         gkey = handler.new(args, checkgkey=True)
-        gkeys = self.listseed(args)
+        gkeys = self.listseed(args)[1]
         if len(gkeys) == 0:
             self.logger.debug("ACTIONS: addkey; now adding gkey: %s" % str(gkey))
             success = self.seeds.add(getattr(gkey, 'nick')[0], gkey)
@@ -155,9 +155,9 @@ class Actions(object):
     def removeseed(self, args):
         '''Action removeseed method'''
         handler = SeedHandler(self.logger)
-        searchkey = handler.new(args)
+        searchkey = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: removeseed; gkey: %s" % str(searchkey))
-        gkeys = self.listseed(args)
+        gkeys = self.listseed(args)[1]
         if not gkeys:
             return ["Failed to remove seed: No gkeys returned from listseed()",
                 None]

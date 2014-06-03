@@ -218,6 +218,9 @@ class Actions(object):
                 if not is_ok or not is_match:
                     is_good = False
         if is_good:
+            # drop keyid and longkeyid
+            keyinfo.pop('keyid', None)
+            keyinfo.pop('longkeyid', None)
             return keyinfo
         return None
 

@@ -144,11 +144,13 @@ class Actions(object):
             success = self.seeds.add(getattr(gkey, 'nick')[0], gkey)
             if success:
                 success = self.seeds.save()
-                return ["Successfully added new seed: %s" % str(success), gkey]
+                messages = ["Successfully added new seed: %s" % str(success)]
+                messages.append(gkeys)
+                return messages
         else:
             messages = ["Matching seeds found in seeds file",
                 "Aborting... \nMatching seeds:"]
-            messages.extend(gkeys)
+            messages.append(gkeys)
             return messages
 
 
@@ -170,7 +172,7 @@ class Actions(object):
                 gkeys]
         elif len(gkeys):
             messages = ["Too many seeds found to remove"]
-            messages.extend(gkeys)
+            messages.append(gkeys)
             return messages
         return ["Failed to remove seed:", searchkey,
             "No matching seed found"]

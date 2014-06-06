@@ -272,12 +272,14 @@ class Actions(object):
         handler = SeedHandler(self.logger)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
-        self.seeds = self.load_seeds(args.seeds)
-        if self.seeds:
+        if not args.nick:
+            return {'Please provide a nickname or -n *': False}
+        gkey = self.listseed(args)
+        if gkey:
             # get the desired seed
             keyresults = self.seeds.list(**kwargs)
             if keyresults and not args.nick == '*' and self.output:
-                self.output(keyresults, "\n Found GKEY seeds:")
+                self.output(['', keyresults], "\n Found GKEY seeds:")
             elif keyresults and self.output:
                 self.output(['all'], "\n Installing seeds:")
             else:
@@ -306,12 +308,12 @@ class Actions(object):
                     continue
                 self.logger.debug("ACTIONS: addkey; adding key:")
                 self.logger.debug("ACTIONS: " + str(key))
-                results[key.name] = self.gpg.add_key(key)
-                for result in results[key.name]:
+                results[key.name[0]] = self.gpg.add_key(key)
+                for result in results[key.name[0]]:
                     self.logger.debug("ACTIONS: addkey; result.failed = " +
                         str(result.failed))
                 if self.config.options['print_results']:
-                    for result in results[key.name]:
+                    for result in results[key.name[0]]:
                         print("key desired:", key.name, ", key added:",
                             result.username, ", succeeded:",
                             not result.failed, ", keyid:", result.keyid,

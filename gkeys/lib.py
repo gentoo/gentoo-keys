@@ -77,7 +77,7 @@ class GkeysGPG(GPG):
 
     def set_keydir(self, keydir, task, reset=True):
         logger.debug("basedir: %s, keydir: %s" % (self.basedir, keydir))
-        self.keydir = pjoin(self.basedir, keydir)
+        self.keydir = pjoin(self.basedir, keydir[0])
         self.task = task
         if reset:
             self.config.options['tasks'][task] = self.config.defaults['tasks'][task][:]
@@ -98,16 +98,7 @@ class GkeysGPG(GPG):
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
         if not os.path.exists(self.keydir):
             os.makedirs(self.keydir, mode=0x0700)
-
-        # prefer the longkeyid if available
-        #logger.debug("LIB: add_key; keyids %s, %s"
-        #    % (str(gkey.longkeyid), str(gkey.keyid)))
-        if gkey.longkeyid != []:
-            keyids = gkey.longkeyid
-        #    logger.debug("LIB: add_key; found gkey.longkeyid", keyids, type(gkey.longkeyid)
-        elif gkey.keyid != []:
-            keyids = gkey.keyid
-        #    logger.debug("LIB: add_key; found gkey.keyid" + str(keyids))
+        keyids = gkey.keyid
         results = []
         for keyid in keyids:
             logger.debug("LIB: add_key; final keyids" + keyid)

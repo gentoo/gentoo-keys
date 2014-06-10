@@ -103,7 +103,7 @@ class Actions(object):
                 continue
             #self.logger.debug("create_seedfile, dev = "
             #   "%s, %s" % (str(dev), str(devs[dev])))
-            developer_attrs = self.build_gkeydict(devs[dev])
+            developer_attrs = self.build_gkey(devs[dev])
             if developer_attrs:
                 self.seeds.add(dev, developer_attrs)
                 count += 1
@@ -128,34 +128,17 @@ class Actions(object):
         return (attr, target, search_field)
 
 
-    def build_gkeydict(self, info):
+    def build_gkey(self, info):
         keyinfo = defaultdict()
-        keyid_found = False
         keyid_missing = False
-        # assume it's good until an error is found
-        is_good = True
-        #self.logger.debug("Actions: build_gkeylist; info = %s" % str(info))
+        # self.logger.debug("Actions: build_gkeylist; info = %s" % str(info))
         for attr in gkey2ldap:
             field = gkey2ldap[attr]
             if not field:
                 keyinfo[attr] = None
                 continue
             try:
-                values = info[field]
-                # strip errant line feeds
-                values = [y.strip('\n') for y in values]
-                # separate out short/long key id's
-                if values and attr in ['keyid', 'longkeyid']:
-                    if len(get_key_ids(attr, values)):
-                        keyid_found = True
-                elif values and attr in ['fingerprint']:
-                    values = [v.replace(' ', '') for v in values]
-                if 'undefined' in values:
-                    self.logger.error('ERROR in LDAP info for: %s, %s'
-                        % (info['uid'][0], info['cn'][0]))
-                    self.logger.error('  %s = "undefined"' % (field))
-                    is_good = False
-                keyinfo[attr] = values
+                keyinfo[attr], keyid_found, is_good = self._fix_bad_ldap(info, attr, field)
             except KeyError:
                 self.logger.debug('LDAP info for: %s, %s'
                     % (info['uid'][0], info['cn'][0]))
@@ -167,43 +150,80 @@ class Actions(object):
                     is_good = False
                 keyinfo[attr] = None
         if not keyid_found and keyid_missing:
-            fingerprint = None
-            try:
-                fingerprint = info[gkey2ldap['fingerprint']]
-                self.logger.debug('  Generate gpgkey, Found LDAP fingerprint field')
-            except KeyError:
-                gpgkey = 'Missing fingerprint from LDAP info'
-                self.logger.debug('  Generate gpgkey, LDAP fingerprint KeyError')
-            if fingerprint:
-                values = [y.strip('\n') for y in fingerprint]
-                values = [v.replace(' ', '') for v in values]
-                # assign it to gpgkey to prevent a possible
-                # "gpgkey" undefined error
-                gpgkey = ['0x' + x[-16:] for x in values]
-                keyinfo['longkeyid'] = gpgkey
-                self.logger.debug('  Generate gpgkey, NEW keyinfo[\'fingerprint\'] = %s'
-                    % str(keyinfo['longkeyid']))
-            else:
-                gpgkey = 'Missing or Bad fingerprint from LDAP info'
-                is_good = False
-            if not keyinfo['longkeyid']:
-                self.logger.error('ERROR in ldap info for: %s, %s'
-                    %(info['uid'][0], info['cn'][0]))
-                self.logger.error('  A valid keyid, longkeyid or fingerprint '
-                    'was not found for %s : gpgkey = %s' %(info['cn'][0], gpgkey))
-                is_good = False
+            keyinfo, is_good = self._check_bad_fingerprint(info, keyinfo)
         if is_good:
-            if keyinfo['fingerprint']: # fingerprints exist check
+            if keyinfo['fingerprint']:  # fingerprints exist check
                 is_ok = self._check_fingerprint_integrity(info, keyinfo)
                 is_match = self._check_id_fingerprint_match(info, keyinfo)
                 if not is_ok or not is_match:
                     is_good = False
-        if is_good:
-            # drop keyid and longkeyid
-            keyinfo.pop('keyid', None)
-            keyinfo.pop('longkeyid', None)
-            return keyinfo
+            if is_good:
+                # drop keyid and longkeyid
+                keyinfo.pop('keyid', None)
+                keyinfo.pop('longkeyid', None)
+                return keyinfo
         return None
+
+
+    def _fix_bad_ldap(self, info, attr, field):
+        '''Fix bad LDAP values
+
+        @param info: dictionary with raw LDAP attributes and values
+        @param attr: string key for new Gentoo Keys attributes
+        @param field: string key for LDAP attributes'''
+
+        is_good = True
+        keyid_found = False
+        values = info[field]
+        # strip errant line feeds
+        values = [y.strip('\n') for y in values]
+        # separate out short/long key id's
+        if values and attr in ['keyid', 'longkeyid']:
+            if len(get_key_ids(attr, values)):
+                keyid_found = True
+        elif values and attr in ['fingerprint']:
+            values = [v.replace(' ', '') for v in values]
+        if 'undefined' in values:
+            self.logger.error('ERROR in LDAP info for: %s, %s'
+                              % (info['uid'][0], info['cn'][0]))
+            self.logger.error('  %s = "undefined"' % (field))
+            is_good = False
+        return (values, keyid_found, is_good)
+
+
+    def _check_bad_fingerprint(self, info, keyinfo):
+        '''Check and fix bad fingerprints and keyids
+
+        @param info: dictionary with raw LDAP attributes
+        @param keyinfo: dictionary with new Gentoo Keys attributes
+        '''
+        is_good = True
+        fingerprint = None
+        try:
+            fingerprint = info[gkey2ldap['fingerprint']]
+            self.logger.debug('  Generate gpgkey, Found LDAP fingerprint field')
+        except KeyError:
+            gpgkey = 'Missing fingerprint from LDAP info'
+            self.logger.debug('  Generate gpgkey, LDAP fingerprint KeyError')
+        if fingerprint:
+            values = [y.strip('\n') for y in fingerprint]
+            values = [v.replace(' ', '') for v in values]
+            # assign it to gpgkey to prevent a possible
+            # "gpgkey" undefined error
+            gpgkey = ['0x' + x[-16:] for x in values]
+            keyinfo['longkeyid'] = gpgkey
+            self.logger.debug('  Generate gpgkey, NEW keyinfo[\'fingerprint\'] = %s'
+                % str(keyinfo['longkeyid']))
+        else:
+            gpgkey = 'Missing or Bad fingerprint from LDAP info'
+            is_good = False
+        if not keyinfo['longkeyid']:
+            self.logger.error('ERROR in ldap info for: %s, %s'
+                % (info['uid'][0], info['cn'][0]))
+            self.logger.error('  A valid keyid, longkeyid or fingerprint '
+                'was not found for %s : gpgkey = %s' % (info['cn'][0], gpgkey))
+            is_good = False
+        return (keyinfo, is_good)
 
 
     def _check_id_fingerprint_match(self, info, keyinfo):

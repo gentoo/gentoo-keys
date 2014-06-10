@@ -15,7 +15,8 @@ import re
 
 from collections import defaultdict
 from gkeys.seed import Seeds
-from gkeyldap.search import (LdapSearch, UID, gkey2ldap_map, gkey2SEARCH)
+from gkeyldap.config import UID, gkey2ldap, gkey2SEARCH
+from gkeyldap.search import LdapSearch
 
 
 Available_Actions = ['ldapsearch', 'updateseeds']
@@ -52,16 +53,14 @@ class Actions(object):
 
     def ldapsearch(self, args):
         l = LdapSearch()
-        self.logger.info("Search... Establishing connection")
-        self.output("Search... Establishing connection")
-        if not l.connect():
-            self.logger.info("Aborting search... Connection failed")
-            self.output("Aborting search... Connection failed")
-            return False
         self.logger.debug("MAIN: _action_ldapsearch; args = %s" % str(args))
-        x, target, search_field = self.get_args(args)
+        self.output("Search... Establishing connection\n")
+        if not l.status:
+            self.output("Aborting Search... Connection failed")
+            return False
+        attr, target, search_field = self.get_args(args)
         results = l.search(target, search_field)
-        devs = l.result2dict(results, gkey2ldap_map[x])
+        devs = l.result2dict(results, gkey2ldap[attr])
         for dev in sorted(devs):
             self.output(dev, devs[dev])
         self.output("============================================")
@@ -72,12 +71,11 @@ class Actions(object):
 
 
     def updateseeds(self, args):
-        self.logger.info("Beginning LDAP search...")
-        self.output("Beginning LDAP search...")
         l = LdapSearch()
-        if not l.connect():
+        self.logger.debug("MAIN: _action_updateseeds; args = %s" % str(args))
+        self.output("Search... Establishing connection")
+        if not l.status:
             self.output("Aborting update... Connection failed")
-            self.logger.info("Aborting update... Connection failed")
             return False
         results = l.search('*', UID)
         info = l.result2dict(results, 'uid')
@@ -154,8 +152,8 @@ class Actions(object):
         # assume it's good until an error is found
         is_good = True
         #self.logger.debug("Actions: build_gkeylist; info = %s" % str(info))
-        for attr in gkey2ldap_map:
-            field = gkey2ldap_map[attr]
+        for attr in gkey2ldap:
+            field = gkey2ldap[attr]
             if not field:
                 keyinfo[attr] = None
                 continue
@@ -188,7 +186,7 @@ class Actions(object):
         if not keyid_found and keyid_missing:
             fingerprint = None
             try:
-                fingerprint = info[gkey2ldap_map['fingerprint']]
+                fingerprint = info[gkey2ldap['fingerprint']]
                 self.logger.debug('  Generate gpgkey, Found LDAP fingerprint field')
             except KeyError:
                 gpgkey = 'Missing fingerprint from LDAP info'

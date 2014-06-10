@@ -14,9 +14,8 @@ from gkeys import config
 from gkeys import seed
 
 from gkeys.config import GKeysConfig
-from gkeyldap import search
+from gkeyldap import connect, search
 from gkeyldap.actions import Actions, Available_Actions
-logger = log.logger
 
 
 class Main(object):
@@ -106,6 +105,7 @@ class Main(object):
         logger = set_logger('gkeys-ldap', self.config['logdir'], args.debug)
         config.logger = logger
         seed.logger = logger
+        connect.logger = logger
         search.logger = logger
 
         if message:

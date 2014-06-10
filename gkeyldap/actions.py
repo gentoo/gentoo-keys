@@ -10,14 +10,13 @@
     @license: GNU GPL2, see COPYING for details.
 """
 
-import os
 import re
 
 from collections import defaultdict
 from gkeys.seed import Seeds
 from gkeyldap.config import UID, gkey2ldap, gkey2SEARCH
 from gkeyldap.search import LdapSearch
-
+from gkeys.fileops import updatefiles
 
 Available_Actions = ['ldapsearch', 'updateseeds']
 
@@ -81,37 +80,21 @@ class Actions(object):
         info = l.result2dict(results, 'uid')
         self.logger.debug(
             "MAIN: _action_updateseeds; got results :) converted to info")
-        if not self.create_seedfile(info):
+        filename = self.config['dev-seedfile'] + '.new'
+        if not self.create_seedfile(info, filename):
             self.logger.error("Developer seed file update failure: "
                 "Original seed file is intact & untouched.")
-        filename = self.config['dev-seedfile']
-        old = filename + '.old'
-        try:
-            self.output("Backing up existing file...")
-            self.logger.info("Backing up existing file...")
-            if os.path.exists(old):
-                self.logger.debug(
-                    "MAIN: _action_updateseeds; Removing 'old' seed file: %s"
-                    % old)
-                os.unlink(old)
-            if os.path.exists(filename):
-                self.logger.debug(
-                    "MAIN: _action_updateseeds; Renaming current seed file to: "
-                    "%s" % old)
-                os.rename(filename, old)
-            self.logger.debug(
-                "MAIN: _action_updateseeds; Renaming '.new' seed file to: %s"
-                % filename)
-            os.rename(filename + '.new', filename)
-        except IOError:
-            raise
+        self.output("Backing up existing file...")
+        status = updatefiles(self.config, self.logger)
+        if not status:
+            self.output("Develope seed failed to update!")
+            return False
         self.output("Developer seed file updated!")
         return True
 
 
-    def create_seedfile(self, devs):
+    def create_seedfile(self, devs, filename):
         self.output("Creating seeds from LDAP data...")
-        filename = self.config['dev-seedfile'] + '.new'
         self.seeds = Seeds(filename)
         count = 0
         error_count = 0
@@ -169,13 +152,13 @@ class Actions(object):
                     values = [v.replace(' ', '') for v in values]
                 if 'undefined' in values:
                     self.logger.error('ERROR in LDAP info for: %s, %s'
-                        % (info['uid'][0],info['cn'][0]))
+                        % (info['uid'][0], info['cn'][0]))
                     self.logger.error('  %s = "undefined"' % (field))
                     is_good = False
                 keyinfo[attr] = values
             except KeyError:
                 self.logger.debug('LDAP info for: %s, %s'
-                    % (info['uid'][0],info['cn'][0]))
+                    % (info['uid'][0], info['cn'][0]))
                 self.logger.debug('  MISSING or EMPTY LDAP field ' +
                     '[%s] GPGKey field [%s]' % (field, attr))
                 if attr in ['keyid', 'longkeyid']:
@@ -205,7 +188,7 @@ class Actions(object):
                 is_good = False
             if not keyinfo['longkeyid']:
                 self.logger.error('ERROR in ldap info for: %s, %s'
-                    %(info['uid'][0],info['cn'][0]))
+                    %(info['uid'][0], info['cn'][0]))
                 self.logger.error('  A valid keyid, longkeyid or fingerprint '
                     'was not found for %s : gpgkey = %s' %(info['cn'][0], gpgkey))
                 is_good = False
@@ -235,7 +218,7 @@ class Actions(object):
                 if y.lstrip('0x').upper() not in \
                         [x[-index:].upper() for x in keyinfo['fingerprint']]:
                     self.logger.error('ERROR in LDAP info for: %s, %s'
-                        %(info['uid'][0],info['cn'][0]))
+                        %(info['uid'][0], info['cn'][0]))
                     self.logger.error('  ' + str(keyinfo))
                     self.logger.error('  GPGKey id %s not found in the '
                         % y.lstrip('0x') + 'listed fingerprint(s)')
@@ -250,14 +233,14 @@ class Actions(object):
             # check fingerprint integrity
             if len(fingerprint) != 40:
                 self.logger.error('ERROR in LDAP info for: %s, %s'
-                    %(info['uid'][0],info['cn'][0]))
+                    %(info['uid'][0], info['cn'][0]))
                 self.logger.error('  GPGKey incorrect fingerprint ' +
                     'length (%s) for fingerprint: %s' %(len(fingerprint), fingerprint))
                 is_good = False
                 continue
             if not self.fingerprint_re.match(fingerprint):
                 self.logger.error('ERROR in LDAP info for: %s, %s'
-                    % (info['uid'][0],info['cn'][0]))
+                    % (info['uid'][0], info['cn'][0]))
                 self.logger.error('  GPGKey: Non hexadecimal digits in ' +
                     'fingerprint for fingerprint: ' + fingerprint)
                 is_good = False

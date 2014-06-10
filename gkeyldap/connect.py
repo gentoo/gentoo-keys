@@ -14,7 +14,7 @@ except ImportError:
         raise
 
 
-from gkeys import log
+from gkeys.log import logger
 from gkeyldap.config import default_server
 
 class LdapConnect(object):

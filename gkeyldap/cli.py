@@ -7,7 +7,6 @@ from __future__ import print_function
 import sys
 import argparse
 
-from gkeys import log
 from gkeys.log import log_levels, set_logger
 
 from gkeys import config

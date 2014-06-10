@@ -1,5 +1,4 @@
 import os
-from gkeys.log import logger
 
 def updatefiles(config, logger):
         filename = config['dev-seedfile']

@@ -7,16 +7,14 @@ from __future__ import print_function
 import sys
 import argparse
 
-from gkeys import log
 from gkeys.log import log_levels, set_logger
 
 from gkeys import config
 from gkeys import seed
 
 from gkeys.config import GKeysConfig
-from gkeyldap import search
+from gkeyldap import connect, search
 from gkeyldap.actions import Actions, Available_Actions
-logger = log.logger
 
 
 class Main(object):
@@ -58,34 +56,31 @@ class Main(object):
         #logger.debug('MAIN: parse_args; args: %s' % args)
         actions = Available_Actions
         parser = argparse.ArgumentParser(
-            prog='gkeys',
-            description='Gentoo-keys manager program',
+            prog='gkeys-ldap',
+            description='Gentoo Keys LDAP manager program',
             epilog='''Caution: adding untrusted keys to these keyrings can
                 be hazardous to your system!''')
         # actions
         parser.add_argument('action', choices=actions, nargs='?',
-            default='ldapsearch', help='Search ldap or update the seed file')
+            default='ldapsearch', help='Search in LDAP or update the seed file')
         # options
         parser.add_argument('-c', '--config', dest='config', default=None,
             help='The path to an alternate config file')
         parser.add_argument('-d', '--dest', dest='destination', default=None,
             help='The destination db file path')
-        parser.add_argument('-N', '--name', dest='name', default=None,
-            help='The name to search for')
-        parser.add_argument('-n', '--nick', dest='nick', default=None,
-            help='The nick or user id (uid) to search for')
-        parser.add_argument('-m', '--mail', dest='mail', default=None,
-            help='The email address to search for')
-        parser.add_argument('-k', '--keyid', dest='keyid', default=None,
-            help='The gpg keyid to search for')
-        parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
-            help='The gpg fingerprint to search for')
-        parser.add_argument('-S', '--status', default=False,
-            help='The seedfile path to use')
         parser.add_argument('-D', '--debug', default='DEBUG',
             choices=list(log_levels),
             help='The logging level to set for the logfile')
-
+        parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
+            help='The gpg fingerprint to search for')
+        parser.add_argument('-m', '--mail', dest='mail', default=None,
+            help='The email address to search for')
+        parser.add_argument('-n', '--nick', dest='nick', default=None,
+            help='The nick or user id (uid) to search for')
+        parser.add_argument('-N', '--name', dest='name', default=None,
+            help='The name to search for')
+        parser.add_argument('-S', '--status', default=False,
+            help='The seedfile path to use')
         return parser.parse_args(args)
 
 
@@ -106,9 +101,10 @@ class Main(object):
         self.config.read_config()
 
         # establish our logger and update it in the imported files
-        logger = set_logger('gkeyldap', self.config['logdir'], args.debug)
+        logger = set_logger('gkeys-ldap', self.config['logdir'], args.debug)
         config.logger = logger
         seed.logger = logger
+        connect.logger = logger
         search.logger = logger
 
         if message:
@@ -130,5 +126,4 @@ class Main(object):
         logger.debug('Main: run; Found action: %s' % args.action)
         results = func(args)
         return results
-
 

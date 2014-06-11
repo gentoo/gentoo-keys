@@ -16,14 +16,10 @@ from __future__ import print_function
 import argparse
 import sys
 
-from gkeys.log import log_levels, set_logger
-
-from gkeys import config
-from gkeys import seed
-from gkeys import lib
-
-from gkeys.config import GKeysConfig
+from gkeys import config, fileops, seed, lib
 from gkeys.actions import Actions, Available_Actions
+from gkeys.config import GKeysConfig
+from gkeys.log import log_levels, set_logger
 
 
 
@@ -116,6 +112,7 @@ class Main(object):
         # establish our logger and update it in the imported files
         logger = set_logger('gkeys', self.config['logdir'], args.debug)
         config.logger = logger
+        fileops.logger = logger
         seed.logger = logger
         lib.logger = logger
 

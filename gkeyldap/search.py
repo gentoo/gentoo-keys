@@ -9,85 +9,28 @@ except ImportError:
     # py3.2
     if sys.hexversion >= 0x30200f0:
         print('To run "ldap-seeds" in python 3, it requires a python3 '
-            'compatible version of dev-python/python-ldap be installed')
-        print('Currently only dev-python/python-ldap-9999 has that capability')
+            'compatible version of dev-python/python-ldap be installed\n'
+            'Currently only dev-python/python-ldap-9999 has that capability.')
         raise
 
 
-from gkeys import log
-
-logger = log.logger
-
-default_server = 'ldap://ldap1.gentoo.org'
-# add uid to the results so you don't have to
-# separate it out of the results tuple[0] value
-default_fields = ['uid', 'cn', 'mail', 'gentooStatus', 'gpgkey', 'gpgfingerprint']
-default_criteria = 'ou=devs,dc=gentoo,dc=org'
-
-# establish a ldap fields to GKEY._fields map
-gkey2ldap_map = {
-    'nick': 'uid',
-    'name': 'cn',
-    'keyid': 'gpgkey',
-    'longkeyid': 'gpgkey',
-    # map the uid to keydir, since we want
-    # dev keydir to be separate from each other
-    'keydir': 'uid',
-    'fingerprint': 'gpgfingerprint'
-}
-
-
-# Now for some search field defaults
-UID = '(uid=%s)'
-CN = '(cn=%s)'
-STATUS = '(gentooStatus=%s)'
-GPGKEY = '(gpgkey=%s)'
-MAIL = '(mail=%s)'
-GPGFINGERPRINT = '(gpgfingerprint=%s)'
-
-gkey2SEARCH = {
-    'nick': UID,
-    'name': CN,
-    'status': STATUS,
-    'keyid': GPGKEY,
-    'mail': MAIL,
-    'fingerprint': GPGFINGERPRINT,
-}
-
+from gkeyldap.config import default_criteria, default_fields, UID
+from gkeyldap.connect import LdapConnect
+from gkeys.log import logger
 
 class LdapSearch(object):
     '''Class to perform searches on the configured LDAP server
     '''
 
-    def __init__(self, server=None, fields=None, criteria=None):
-        self.server = server or default_server
+    def __init__(self, fields=None, criteria=None):
         self.fields = fields or default_fields
         self.criteria = criteria or default_criteria
-        logger.debug('LdapSearch: __init__; server...: %s' % self.server)
         logger.debug('LdapSearch: __init__; fields...: %s' % self.fields)
         logger.debug('LdapSearch: __init__; criteria.: %s' % self.criteria)
-        self.ldap_connection = None
-
-
-    def connect(self, server=None,):
-        '''Creates our LDAP server connection
-        '''
-
-        if server:
-            self.server = server
-            logger.debug('LdapSearch: connect; new server: %s' % self.server)
-        try:
-            self.ldap_connection = ldap.initialize(self.server)
-            self.ldap_connection.set_option(ldap.OPT_X_TLS_DEMAND, True)
-            self.ldap_connection.start_tls_s()
-            self.ldap_connection.simple_bind_s()
-        except Exception as e:
-            logger.error('LdapSearch: connect; failed to connect to server: %s' % self.server)
-            logger.error("Exception was: %s" % str(e))
-            return False
-        logger.debug('LdapSearch: connect; connection: %s' % self.ldap_connection)
-        return True
-
+        self.ldap_connection = LdapConnect().connect(action='Search')
+        self.status = True
+        if not self.ldap_connection:
+            self.status = False
 
     def search(self, target, search_field=UID, fields=None, criteria=None):
         '''Perform the LDAP search
@@ -110,6 +53,13 @@ class LdapSearch(object):
 
 
     def result2dict(self, results, key='uid'):
+        ''' Convert results from LDAP attributes
+         to Gentoo Keys compatible attributes
+
+         @param results: dictionary with results
+         @param key: string to use as a key in the dictionary
+        '''
+
         _dict = {}
         for entry in results:
             info = entry[1]

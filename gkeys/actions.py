@@ -122,10 +122,10 @@ class Actions(object):
                 self.seeds = self.load_seeds(args.seeds, args.seedfile)
             except ValueError:
                 return ["Failed to load seed file. Consider fetching seedfiles."]
+        results = []
         if self.seeds:
-            results = self.seeds.list(**kwargs)
-            return ['', results]
-        return None
+            results.append(self.seeds.list(**kwargs))
+        return ['', results]
 
 
     def fetchseed(self, args):
@@ -148,12 +148,11 @@ class Actions(object):
                 success = self.seeds.save()
                 messages = ["Successfully added new seed: %s" % str(success)]
                 messages.append(gkeys)
-                return messages
         else:
             messages = ["Matching seeds found in seeds file",
                 "Aborting... \nMatching seeds:"]
             messages.append(gkeys)
-            return messages
+        return messages
 
 
     def removeseed(self, args):
@@ -173,9 +172,7 @@ class Actions(object):
             return ["Successfully removed seed: %s" % str(success),
                 gkeys]
         elif len(gkeys):
-            messages = ["Too many seeds found to remove"]
-            messages.append(gkeys)
-            return messages
+            return ["Too many seeds found to remove", gkeys]
         return ["Failed to remove seed:", searchkey,
             "No matching seed found"]
 
@@ -260,13 +257,9 @@ class Actions(object):
                     print(results[key.name].output)
                     self.logger.debug("data output:\n" +
                         str(results[key.name].output))
-                    #for result in results[key.name].status.data:
-                        #print("key desired:", key.name, ", keydir listed:",
-                            #result)
-                        #self.logger.debug("data record: " + str(result))
                 else:
                     return results
-            return {'done': True}
+            return {'Done': True}
         else:
             return {"No keydirs to list": False}
 

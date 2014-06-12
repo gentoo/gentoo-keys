@@ -15,7 +15,6 @@ from __future__ import print_function
 import os
 import re
 
-from gkeys.config import SEED_TYPES
 from gkeys.lib import GkeysGPG
 from gkeys.seed import Seeds
 from gkeys.seedhandler import SeedHandler
@@ -41,7 +40,7 @@ class Actions(object):
             self.logger.error("ACTIONS: load_seeds; no filename to load: "
             "setting = %s.  Please use the -s option to indicate: which seed "
             "file to use." % seedfile)
-            return None
+            return False
         if seeds:
             filepath = self.config.get_key(seeds + "-seedfile")
         elif seedfile:
@@ -55,6 +54,7 @@ class Actions(object):
 
 
     def fetch_seeds(self, seeds):
+        '''Fetch new seed files'''
         # setup the ssl-fetch ouptut map
         connector_output = {
             'info': self.logger.info,
@@ -62,30 +62,32 @@ class Actions(object):
             'kwargs-info': {},
             'kwargs-error': {},
         }
+        http_check = re.compile(r'^(http|https)://')
         urls = []
         messages = []
-        urls.append(self.config.get_key('developers.seeds'))
-        urls.append(self.config.get_key('release.seeds'))
-        if not re.search('^(http|https)://', urls[0]) and not re.search('^(http|https)://', urls[1]):
-            urls = []
-            urls.append(self.config['seedurls']['developers.seeds'])
-            urls.append(self.config['seedurls']['release.seeds'])
+        devseeds = self.config.get_key('developers.seeds')
+        relseeds = self.config.get_key('release.seeds')
+        if not http_check.match(devseeds) and not http_check.match(relseeds):
+            urls.extend([self.config['seedurls']['developers.seeds'], self.config['seedurls']['release.seeds']])
+        else:
+            urls.extend([devseeds, relseeds])
         fetcher = Connector(connector_output, None, "Gentoo Keys")
-        for url in zip(urls, SEED_TYPES):
-            timestamp_path = self.config['%s-timestamp' % url[1]]
-            success, seeds, timestamp = fetcher.fetch_content(url[0], timestamp_path)
+        for url in urls:
+            seed = url.rsplit('/', 1)[1]
+            timestamp_prefix = seed[:3]
+            timestamp_path = self.config['%s-timestamp' % timestamp_prefix]
+            success, seeds, timestamp = fetcher.fetch_content(url, timestamp_path)
             if not timestamp:
-                messages += ["%s seed file is already up to date." % url[1]]
+                messages.append("%s is already up to date." % seed)
             else:
                 with open(timestamp_path, 'w+') as timestampfile:
-                    timestampfile.write(str(timestamp))
-                    timestampfile.write("\n")
-                if success and timestamp:
+                    timestampfile.write(str(timestamp) + '\n')
+                if success:
                     self.logger.debug("MAIN: _action_fetchseed; got results.")
-                    filename = self.config['%s-seedfile' % url[1]] + '.new'
+                    filename = self.config['%s-seedfile' % timestamp_prefix] + '.new'
                     with open(filename, 'w') as seedfile:
                         seedfile.write(seeds)
-                    filename = self.config['%s-seedfile' % url[1]]
+                    filename = self.config['%s-seedfile' % timestamp_prefix]
                     old = filename + '.old'
                     try:
                         self.logger.info("Backing up existing file...")
@@ -102,11 +104,11 @@ class Actions(object):
                         self.logger.debug("MAIN: _action_fetch_seeds; Renaming '.new' seed file to %s"
                                           % filename)
                         os.rename(filename + '.new', filename)
-                        messages += ["Successfully fetched %s seed files." % url[1]]
+                        messages.append("Successfully fetched %s." % seed)
                     except IOError:
                         raise
                 else:
-                    messages += ["Failed to fetch %s seed file." % url[1]]
+                    messages.append("Failed to fetch %s." % seed)
         return messages
 
 

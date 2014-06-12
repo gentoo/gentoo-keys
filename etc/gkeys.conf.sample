@@ -18,7 +18,7 @@ dev-keydir: %(keysdir)s/devs
 
 # releaskeydir: the directory where the official release media keys
 # will be stored.
-release-keydir: %(keysdir)s/release
+rel-keydir: %(keysdir)s/release
 
 
 # overlayskeydir: the directory where the overlay keys
@@ -38,7 +38,7 @@ seedsdir: %(keysdir)s/seeds
 
 # releaseseedfile: txt file of one tuple of (name, keyid, fingerprint)
 # entry per line
-release-seedfile: %(seedsdir)s/release.seeds
+rel-seedfile: %(seedsdir)s/release.seeds
 
 
 # devseedfile: txt file of one tuple of (name, keyid, fingerprint)

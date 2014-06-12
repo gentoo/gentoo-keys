@@ -68,16 +68,15 @@ class Main(object):
             help='The path to an alternate config file')
         parser.add_argument('-d', '--dest', dest='destination', default=None,
             help='The destination seed file or keydir for move, copy operations')
+        parser.add_argument('-D', '--debug', default='DEBUG',
+            choices=list(log_levels),
+            help='The logging level to set for the logfile')
         parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
             help='The fingerprint of the the key')
-        parser.add_argument('-N', '--name', dest='name', default=None,
-            help='The name of the the key')
         parser.add_argument('-n', '--nick', dest='nick', default=None,
             help='The nick associated with the the key')
-        parser.add_argument('-k', '--keyid', dest='keyid', default=None,
-            help='The keyid of the the key')
-        parser.add_argument('-l', '--longkeyid', dest='longkeyid', default=None,
-            help='The longkeyid of the the key')
+        parser.add_argument('-N', '--name', dest='name', default=None,
+            help='The name of the the key')
         parser.add_argument('-r', '--keydir',
             choices=['release', 'dev', 'overlays'], dest='keydir', default=None,
             help='The keydir to use or update')
@@ -86,9 +85,6 @@ class Main(object):
             help='The seeds file to use or update')
         parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
             help='The seedfile path to use')
-        parser.add_argument('-D', '--debug', default='DEBUG',
-            choices=list(log_levels),
-            help='The logging level to set for the logfile')
 
         return parser.parse_args(args)
 

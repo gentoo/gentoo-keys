@@ -36,7 +36,7 @@ class Actions(object):
         self.seeds = None
 
 
-    def load_seeds(self, seeds=None ,seedfile=None):
+    def load_seeds(self, seeds=None, seedfile=None):
         if not seeds and not seedfile:
             self.logger.error("ACTIONS: load_seeds; no filename to load: "
             "setting = %s.  Please use the -s option to indicate: which seed "
@@ -250,7 +250,7 @@ class Actions(object):
             for key in keyresults:
                 if not key.keydir and not args.nick == '*':
                     self.logger.debug("ACTIONS: listkey; NO keydir... Ignoring")
-                    return {"Failed: No keyid's found for %s" % key.name : ''}
+                    return {"Failed: No keyid's found for %s" % key.name: ''}
                 self.logger.debug("ACTIONS: listkey; listing keydir:"
                     + str(key.keydir))
                 results[key.name] = self.gpg.list_keys(key.keydir)
@@ -303,7 +303,7 @@ class Actions(object):
             for key in keyresults:
                 if not key.keyid and not key.longkeyid and not args.nick == '*':
                     self.logger.debug("ACTIONS: addkey; NO key id's to add... Ignoring")
-                    return {"Failed: No keyid's found for %s" % key.name : ''}
+                    return {"Failed: No keyid's found for %s" % key.name: ''}
                 elif not key.keyid and not key.longkeyid:
                     print("No keyid's found for:", key.nick, key.name, "Skipping...")
                     failed.append(key)

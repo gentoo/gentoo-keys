@@ -17,7 +17,7 @@ from gkeys.config import GKEY
 
 class SeedHandler(object):
 
-    def __init__(self,logger):
+    def __init__(self, logger):
         self.logger = logger
         self.fingerprint_re = re.compile('[0-9A-Fa-f]{40}')
         self.finerprint_re2 = re.compile('[0-9A-Fa-f]{4}( [0-9A-Fa-f]{4}){9}')
@@ -64,7 +64,7 @@ class SeedHandler(object):
           self.logger.error('GPG fingerprint not found.')
           is_good = False
       # need to add values to a list
-      for key,value in args.items():
+      for key, value in args.items():
           args[key] = value.split()
       if is_good:
           return args

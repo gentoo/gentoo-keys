@@ -54,7 +54,7 @@ class GKeysConfig(GPGConfig):
     """ Configuration superclass which holds our gentoo-keys
     config settings for pygpg """
 
-    def __init__ (self, config=None, root=None, read_configfile=False):
+    def __init__(self, config=None, root=None, read_configfile=False):
         """ Class initialiser """
         GPGConfig.__init__(self)
 
@@ -140,8 +140,8 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
     @property
     def pretty_print(self):
         '''Pretty printing a GKEY'''
-        gkey = {'name': ', '.join(self.name), 'nick': ', '.join(self.nick)
-            , 'keydir': ', '.join(self.keydir)}
+        gkey = {'name': ', '.join(self.name), 'nick': ', '.join(self.nick),
+                'keydir': ', '.join(self.keydir)}
         output = GKEY_STRING % gkey
         for f in self.fingerprint:
             fingerprint = {'fingerprint': f, 'keyid': '0x' + f[-16:]}

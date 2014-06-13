@@ -270,10 +270,7 @@ class Actions(object):
 
 
     def listseedfiles(self, args):
-        seedfile = []
         seedsdir = self.config.get_key('seedsdir')
-        for files in os.listdir(seedsdir):
-            if files.endswith('.seeds'):
-                seedfile.append(files)
-        return {"Seed files found at path: %s\n   %s"
-            % (seedsdir, "\n   ".join(seedfile)): True}
+        seedfile = [f for f in os.listdir(seedsdir) if f[-5:] == 'seeds']
+        return {"Seed files found at path: %s\n  %s"
+            % (seedsdir, "\n  ".join(seedfile)): True}

@@ -78,10 +78,10 @@ class Main(object):
         parser.add_argument('-N', '--name', dest='name', default=None,
             help='The name of the the key')
         parser.add_argument('-r', '--keydir',
-            choices=['release', 'dev', 'overlays'], dest='keydir', default=None,
+            choices=['rel', 'dev', 'overlays'], dest='keydir', default=None,
             help='The keydir to use or update')
         parser.add_argument('-s', '--seeds',
-            choices=['release', 'dev'], dest='seeds', default=None,
+            choices=['rel', 'dev'], dest='seeds', default=None,
             help='The seeds file to use or update')
         parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
             help='The seedfile path to use')

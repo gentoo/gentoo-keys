@@ -75,8 +75,8 @@ class Main(object):
             help='The fingerprint of the the key')
         parser.add_argument('-n', '--nick', dest='nick', default=None,
             help='The nick associated with the the key')
-        parser.add_argument('-N', '--name', dest='name', default=None,
-            help='The name of the the key')
+        parser.add_argument('-N', '--name', dest='name', nargs='*',
+            default=None, help='The name of the the key')
         parser.add_argument('-r', '--keydir',
             choices=['rel', 'dev', 'overlays'], dest='keydir', default=None,
             help='The keydir to use or update')

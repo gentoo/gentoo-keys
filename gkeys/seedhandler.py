@@ -31,14 +31,27 @@ class SeedHandler(object):
         newgkey = self.build_gkeydict(args)
         if checkgkey:
             newgkey = self.check_gkey(newgkey)
-        if newgkey:
             newgkey = GKEY(**newgkey)
             self.logger.debug("SeedHandler: new; new gkey: %s" % str(newgkey))
         else:
-            self.logger.debug("SeedHandler: new; FAILED to et parts from: %s"
+            self.logger.debug("SeedHandler: new; FAILED to get parts from: %s"
                 % str(args))
             return None
         return newgkey
+
+    @staticmethod
+    def build_gkeydict(args):
+        keyinfo = {}
+        for attr in GKEY._fields:
+            try:
+                value = getattr(args, attr)
+                if attr == 'name' and value:
+                    value = " ".join(value)
+                if value:
+                    keyinfo[attr] = value
+            except AttributeError:
+                pass
+        return keyinfo
 
     def load_seeds(self, seeds=None, seedfile=None):
         if not seeds and not seedfile:
@@ -118,41 +131,28 @@ class SeedHandler(object):
                     messages.append("Failed to fetch %s." % seed)
         return messages
 
-    @staticmethod
-    def build_gkeydict(args):
-        keyinfo = {}
-        for attr in GKEY._fields:
-            try:
-                value = getattr(args, attr)
-                if value:
-                    keyinfo[attr] = value
-            except AttributeError:
-                pass
-        return keyinfo
-
     def check_gkey(self, args):
-      # assume it's good until an error is found
-      is_good = True
-      try:
-          if args['fingerprint']:
-              # create a longkeyid based on fingerprint
-              is_ok = self._check_fingerprint_integrity(args)
-              args['keydir'] = args.get('keydir', args['nick'])
-              if not is_ok:
-                is_good = False
-                self.logger.error('Bad fingerprint from command line args.')
-      except KeyError:
-          self.logger.error('GPG fingerprint not found.')
-          is_good = False
-      # need to add values to a list
-      for key, value in args.items():
-          args[key] = value.split()
-      if is_good:
-          return args
-      else:
-          self.logger.error('A valid fingerprint '
+        # assume it's good until an error is found
+        is_good = True
+        try:
+            args['keydir'] = args.get('keydir', args['nick'])
+            if args['fingerprint']:
+                if not self._check_fingerprint_integrity(args):
+                    is_good = False
+                    self.logger.error('Bad fingerprint from command line args.')
+        except KeyError:
+            self.logger.error('GPG fingerprint not found.')
+            is_good = False
+        # need to add values to a list
+        for key, value in args.items():
+            if key == 'name':
+                args[key] = value.split(',')
+            else:
+                args[key] = value.split()
+        if not is_good:
+            self.logger.error('A valid fingerprint '
                   'was not found for %s' % args['name'])
-      return args
+        return args
 
     def _check_fingerprint_integrity(self, gkey):
         # assume it's good unti an error is found
@@ -161,7 +161,7 @@ class SeedHandler(object):
         # check fingerprint integrity
         if len(fingerprint) != 40:
             self.logger.error('  GPGKey incorrect fingerprint ' +
-                    'length (%s) for fingerprint: %s' %(len(fingerprint), fingerprint))
+                    'length (%s) for fingerprint: %s' % (len(fingerprint), fingerprint))
             is_good = False
         if not self.fingerprint_re.match(fingerprint):
             self.logger.error('  GPGKey: Non hexadecimal digits in ' + 'fingerprint for fingerprint: ' + fingerprint)

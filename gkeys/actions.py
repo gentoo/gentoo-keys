@@ -13,12 +13,9 @@
 from __future__ import print_function
 
 import os
-import re
 
 from gkeys.lib import GkeysGPG
-from gkeys.seed import Seeds
 from gkeys.seedhandler import SeedHandler
-from sslfetch.connections import Connector
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'addkey', 'removekey', 'movekey',
@@ -26,7 +23,7 @@ Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed
 
 
 class Actions(object):
-    '''Primary api actions'''
+    '''Primary API actions'''
 
     def __init__(self, config, output=None, logger=None):
         self.config = config
@@ -35,103 +32,27 @@ class Actions(object):
         self.seeds = None
 
 
-    def load_seeds(self, seeds=None, seedfile=None):
-        if not seeds and not seedfile:
-            self.logger.error("ACTIONS: load_seeds; no filename to load: "
-            "setting = %s.  Please use the -s option to indicate: which seed "
-            "file to use." % seedfile)
-            return False
-        if seeds:
-            filepath = self.config.get_key(seeds + "-seedfile")
-        elif seedfile:
-            filepath = os.path.join(self.config.get_key('seedsdir'),
-                                    '%s.seeds' % seedfile)
-        self.logger.debug("ACTIONS: load_seeds; seeds filepath to load: "
-            "%s" % filepath)
-        seeds = Seeds()
-        seeds.load(filepath)
-        return seeds
-
-
-    def fetch_seeds(self, seeds):
-        '''Fetch new seed files'''
-        # setup the ssl-fetch ouptut map
-        connector_output = {
-            'info': self.logger.info,
-            'error': self.logger.error,
-            'kwargs-info': {},
-            'kwargs-error': {},
-        }
-        http_check = re.compile(r'^(http|https)://')
-        urls = []
-        messages = []
-        devseeds = self.config.get_key('developers.seeds')
-        relseeds = self.config.get_key('release.seeds')
-        if not http_check.match(devseeds) and not http_check.match(relseeds):
-            urls.extend([self.config['seedurls']['developers.seeds'], self.config['seedurls']['release.seeds']])
-        else:
-            urls.extend([devseeds, relseeds])
-        fetcher = Connector(connector_output, None, "Gentoo Keys")
-        for url in urls:
-            seed = url.rsplit('/', 1)[1]
-            timestamp_prefix = seed[:3]
-            timestamp_path = self.config['%s-timestamp' % timestamp_prefix]
-            success, seeds, timestamp = fetcher.fetch_content(url, timestamp_path)
-            if not timestamp:
-                messages.append("%s is already up to date." % seed)
-            else:
-                with open(timestamp_path, 'w+') as timestampfile:
-                    timestampfile.write(str(timestamp) + '\n')
-                if success:
-                    self.logger.debug("MAIN: _action_fetchseed; got results.")
-                    filename = self.config['%s-seedfile' % timestamp_prefix] + '.new'
-                    with open(filename, 'w') as seedfile:
-                        seedfile.write(seeds)
-                    filename = self.config['%s-seedfile' % timestamp_prefix]
-                    old = filename + '.old'
-                    try:
-                        self.logger.info("Backing up existing file...")
-                        if os.path.exists(old):
-                            self.logger.debug(
-                                "MAIN: _action_fetch_seeds; Removing 'old' seed file: %s"
-                                % old)
-                            os.unlink(old)
-                        if os.path.exists(filename):
-                            self.logger.debug(
-                                "MAIN: _action_fetch_seeds; Renaming current seed file to: "
-                                "%s" % old)
-                            os.rename(filename, old)
-                        self.logger.debug("MAIN: _action_fetch_seeds; Renaming '.new' seed file to %s"
-                                          % filename)
-                        os.rename(filename + '.new', filename)
-                        messages.append("Successfully fetched %s." % seed)
-                    except IOError:
-                        raise
-                else:
-                    messages.append("Failed to fetch %s." % seed)
-        return messages
-
-
     def listseed(self, args):
         '''Action listseed method'''
-        handler = SeedHandler(self.logger)
+        handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
             try:
-                self.seeds = self.load_seeds(args.seeds, args.seedfile)
+                self.seeds = handler.load_seeds(args.seeds, args.seedfile)
             except ValueError:
                 return ["Failed to load seed file. Consider fetching seedfiles."]
-        results = []
         if self.seeds:
-            results.append(self.seeds.list(**kwargs))
+            results = self.seeds.list(**kwargs)
+        else:
+            results = ''
         return ['', results]
 
 
     def fetchseed(self, args):
         '''Action fetchseed method'''
-        handler = SeedHandler(self.logger)
-        messages = self.fetch_seeds(args.seeds)
+        handler = SeedHandler(self.logger, self.config)
+        messages = handler.fetch_seeds(args.seeds)
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
         return messages
 
@@ -146,12 +67,10 @@ class Actions(object):
             success = self.seeds.add(getattr(gkey, 'nick')[0], gkey)
             if success:
                 success = self.seeds.save()
-                messages = ["Successfully added new seed: %s" % str(success)]
-                messages.append(gkeys)
+                messages = ["Successfully added new seed: %s" % str(success), gkeys]
         else:
             messages = ["Matching seeds found in seeds file",
-                "Aborting... \nMatching seeds:"]
-            messages.append(gkeys)
+                "Aborting... \nMatching seeds:", gkeys]
         return messages
 
 

@@ -170,7 +170,8 @@ class Actions(object):
 
         @param info: dictionary with raw LDAP attributes and values
         @param attr: string key for new Gentoo Keys attributes
-        @param field: string key for LDAP attributes'''
+        @param field: string key for LDAP attributes
+        '''
 
         is_good = True
         keyid_found = False

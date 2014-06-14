@@ -28,9 +28,8 @@ log_levels = {
     'INFO': logging.INFO,
     'NOTSET': logging.NOTSET,
     'WARN': logging.WARN,
-    'WARNING':logging.WARNING,
+    'WARNING': logging.WARNING,
 }
-
 
 
 def set_logger(namespace=None, logpath='', level=None):
@@ -47,7 +46,7 @@ def set_logger(namespace=None, logpath='', level=None):
     # add the handlers to logger
     if logpath:
         logname = os.path.join(logpath,
-            '%s-%s.log' % (namespace,time.strftime('%Y%m%d-%H:%M')))
+            '%s-%s.log' % (namespace, time.strftime('%Y%m%d-%H:%M')))
         File_handler = logging.FileHandler(logname)
         if level:
             #print "Setting cli log level", level, log_levels[level]
@@ -67,7 +66,3 @@ def set_logger(namespace=None, logpath='', level=None):
     logger.debug("Loggers initialized")
 
     return logger
-
-
-
-

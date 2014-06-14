@@ -38,8 +38,6 @@ EPREFIX = "@GENTOO_PORTAGE_EPREFIX@"
 if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
     EPREFIX = ''
 
-SEED_TYPES = ['dev', 'release']
-
 GKEY_STRING = '''    ----------
     Name.........: %(name)s
     Nick.........: %(nick)s
@@ -54,7 +52,7 @@ class GKeysConfig(GPGConfig):
     """ Configuration superclass which holds our gentoo-keys
     config settings for pygpg """
 
-    def __init__ (self, config=None, root=None, read_configfile=False):
+    def __init__(self, config=None, root=None, read_configfile=False):
         """ Class initialiser """
         GPGConfig.__init__(self)
 
@@ -74,16 +72,16 @@ class GKeysConfig(GPGConfig):
     def _add_gkey_defaults(self):
         self.defaults['keysdir'] = path([self.root, EPREFIX, '/var/gentoo/gkeys'])
         self.defaults['dev-keydir'] = '%(keysdir)s/devs'
-        self.defaults['release-keydir'] = '%(keysdir)s/release'
+        self.defaults['rel-keydir'] = '%(keysdir)s/release'
         self.defaults['overlays-keydir'] = '%(keysdir)s/overlays'
         self.defaults['logdir'] = '%(keysdir)s/logs'
         # local directory to scan for seed files installed via ebuild, layman
         # or manual install.
         self.defaults['seedsdir'] = '%(keysdir)s/seeds'
-        self.defaults['release-seedfile'] = '%(seedsdir)s/release.seeds'
         self.defaults['dev-seedfile'] = '%(seedsdir)s/developer.seeds'
+        self.defaults['rel-seedfile'] = '%(seedsdir)s/release.seeds'
         self.defaults['dev-timestamp'] = '%(keysdir)s/.developer_seeds_timestamp'
-        self.defaults['release-timestamp'] = '%(keysdir)s/.release_seeds_timestamp'
+        self.defaults['rel-timestamp'] = '%(keysdir)s/.release_seeds_timestamp'
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
         self.defaults['seedurls'] = {
             'release.seeds': 'https://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds',
@@ -140,8 +138,8 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
     @property
     def pretty_print(self):
         '''Pretty printing a GKEY'''
-        gkey = {'name': ', '.join(self.name), 'nick': ', '.join(self.nick)
-            , 'keydir': ', '.join(self.keydir)}
+        gkey = {'name': ', '.join(self.name), 'nick': ', '.join(self.nick),
+                'keydir': ', '.join(self.keydir)}
         output = GKEY_STRING % gkey
         for f in self.fingerprint:
             fingerprint = {'fingerprint': f, 'keyid': '0x' + f[-16:]}

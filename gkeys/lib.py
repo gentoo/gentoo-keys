@@ -196,4 +196,3 @@ class GkeysGPG(GPG):
         '''Verify the file specified at filepath
         '''
         pass
-

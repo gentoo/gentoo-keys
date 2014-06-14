@@ -185,7 +185,7 @@ class Actions(object):
         '''Action addkey method'''
         handler = SeedHandler(self.logger)
         kwargs = handler.build_gkeydict(args)
-        self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
+        self.logger.debug("ACTIONS: addkey; kwargs: %s" % str(kwargs))
         if not args.nick:
             return {'Please provide a nickname or -n *': False}
         gkey = self.listseed(args)

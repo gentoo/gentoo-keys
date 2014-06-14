@@ -99,36 +99,35 @@ class SeedHandler(object):
             success, seeds, timestamp = fetcher.fetch_content(url, timestamp_path)
             if not timestamp and file_exists:
                 messages.append("%s is already up to date." % seed)
+            elif success:
+                self.logger.debug("SeedHandler: fetch_seed; got results.")
+                filename = filename + '.new'
+                with open(filename, 'w') as seedfile:
+                    seedfile.write(seeds)
+                filename = self.config['%s-seedfile' % timestamp_prefix]
+                old = filename + '.old'
+                try:
+                    self.logger.info("Backing up existing file...")
+                    if os.path.exists(old):
+                        self.logger.debug(
+                            "SeedHandler: fetch_seeds; Removing 'old' seed file: %s"
+                            % old)
+                        os.unlink(old)
+                    if os.path.exists(filename):
+                        self.logger.debug(
+                            "SeedHandler: fetch_seeds; Renaming current seed file to: "
+                            "%s" % old)
+                        os.rename(filename, old)
+                    self.logger.debug("SeedHandler: fetch_seeds; Renaming '.new' seed file to %s"
+                                      % filename)
+                    os.rename(filename + '.new', filename)
+                    with open(timestamp_path, 'w+') as timestampfile:
+                        timestampfile.write(str(timestamp) + '\n')
+                    messages.append("Successfully fetched %s." % seed)
+                except IOError:
+                    raise
             else:
-                with open(timestamp_path, 'w+') as timestampfile:
-                    timestampfile.write(str(timestamp) + '\n')
-                if success:
-                    self.logger.debug("SeedHandler: fetch_seed; got results.")
-                    filename = filename + '.new'
-                    with open(filename, 'w') as seedfile:
-                        seedfile.write(seeds)
-                    filename = self.config['%s-seedfile' % timestamp_prefix]
-                    old = filename + '.old'
-                    try:
-                        self.logger.info("Backing up existing file...")
-                        if os.path.exists(old):
-                            self.logger.debug(
-                                "SeedHandler: fetch_seeds; Removing 'old' seed file: %s"
-                                % old)
-                            os.unlink(old)
-                        if os.path.exists(filename):
-                            self.logger.debug(
-                                "SeedHandler: fetch_seeds; Renaming current seed file to: "
-                                "%s" % old)
-                            os.rename(filename, old)
-                        self.logger.debug("SeedHandler: fetch_seeds; Renaming '.new' seed file to %s"
-                                          % filename)
-                        os.rename(filename + '.new', filename)
-                        messages.append("Successfully fetched %s." % seed)
-                    except IOError:
-                        raise
-                else:
-                    messages.append("Failed to fetch %s." % seed)
+                messages.append("Failed to fetch %s." % seed)
         return messages
 
     def check_gkey(self, args):

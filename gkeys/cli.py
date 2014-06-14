@@ -54,15 +54,12 @@ class Main(object):
         @returns argparse.Namespace object
         '''
         #logger.debug('MAIN: parse_args; args: %s' % args)
-        actions = Available_Actions
         parser = argparse.ArgumentParser(
             prog='gkeys',
             description='Gentoo-keys manager program',
             epilog='''Caution: adding untrusted keys to these keyrings can
                 be hazardous to your system!''')
-        # actions
-        parser.add_argument('action', choices=actions, nargs='?',
-            default='listseeds', help='List the seeds in the file')
+
         # options
         parser.add_argument('-c', '--config', dest='config', default=None,
             help='The path to an alternate config file')
@@ -85,6 +82,16 @@ class Main(object):
             help='The seeds file to use or update')
         parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
             help='The seedfile path to use')
+
+        subparsers = parser.add_subparsers(help='actions')
+        for name in Available_Actions:
+            action_method = getattr(Actions, name)
+            action_parser = subparsers.add_parser(
+                name,
+                help=action_method.__doc__.splitlines()[0],
+                description=action_method.__doc__,
+                formatter_class=argparse.RawDescriptionHelpFormatter)
+            action_parser.set_defaults(action=name)
 
         return parser.parse_args(args)
 

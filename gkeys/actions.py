@@ -33,7 +33,7 @@ class Actions(object):
 
 
     def listseed(self, args):
-        '''Action listseed method'''
+        '''Pretty-print the selected seed file(s)'''
         handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
@@ -50,7 +50,7 @@ class Actions(object):
 
 
     def fetchseed(self, args):
-        '''Action fetchseed method'''
+        '''Download the selected seed file(s)'''
         handler = SeedHandler(self.logger, self.config)
         messages = handler.fetch_seeds(args.seeds)
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
@@ -58,7 +58,7 @@ class Actions(object):
 
 
     def addseed(self, args):
-        '''Action addseed method'''
+        '''Add a key to the selected seed file(s)'''
         handler = SeedHandler(self.logger, self.config)
         gkeys = self.listseed(args)[1]
         if not args.nick or not args.name or not args.fingerprint:
@@ -77,7 +77,7 @@ class Actions(object):
 
 
     def removeseed(self, args):
-        '''Action removeseed method'''
+        '''Remove a key from the selected seed file(s)'''
         handler = SeedHandler(self.logger, self.config)
         searchkey = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: removeseed; gkey: %s" % str(searchkey))
@@ -99,7 +99,7 @@ class Actions(object):
 
 
     def moveseed(self, args):
-        '''Action moveseed method'''
+        '''Move keys between seed files'''
         handler = SeedHandler(self.logger)
         searchkey = handler.new(args, needkeyid=False, checkintegrity=False)
         self.logger.debug("ACTIONS: moveseed; gkey: %s" % str(searchkey))
@@ -139,7 +139,7 @@ class Actions(object):
 
 
     def listkey(self, args):
-        '''Action listskey method'''
+        '''Pretty-print the selected seed file or nick'''
         if not args.nick:
             return ["Too many seeds found. Consider using -n <nick> option."]
         # get the desired seed
@@ -182,7 +182,7 @@ class Actions(object):
         return messages
 
     def addkey(self, args):
-        '''Action addkey method'''
+        '''Install a key from the seed(s)'''
         handler = SeedHandler(self.logger)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: addkey; kwargs: %s" % str(kwargs))
@@ -242,24 +242,22 @@ class Actions(object):
 
 
     def removekey(self, args):
-        '''Action removekey method'''
+        '''Remove an installed key'''
         pass
 
 
     def movekey(self, args):
-        '''Action movekey method'''
+        '''Rename an installed key'''
         pass
 
 
     def installed(self, args):
-        '''Action installed method.
-        lists the installed key directories'''
+        '''Lists the installed key directories'''
         pass
 
 
     def user_confirm(self, message):
-        '''Get input from the user to confirm to proceed
-        with the desired action
+        '''Prompt a user to confirm an action
 
         @param message: string, user promt message to display
         @return boolean: confirmation to proceed or abort
@@ -268,6 +266,7 @@ class Actions(object):
 
 
     def listseedfiles(self, args):
+        '''List seed files found in the configured seed directory'''
         seedsdir = self.config.get_key('seedsdir')
         seedfile = [f for f in os.listdir(seedsdir) if f[-5:] == 'seeds']
         return {"Seed files found at path: %s\n  %s"

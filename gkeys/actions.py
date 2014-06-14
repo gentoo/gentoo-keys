@@ -140,50 +140,46 @@ class Actions(object):
 
     def listkey(self, args):
         '''Action listskey method'''
-        self.seeds = self.load_seeds(args.seeds)
-        if self.seeds:
-            handler = SeedHandler(self.logger)
-            kwargs = handler.build_gkeydict(args)
-            # get the desired seed
-            keyresults = self.seeds.list(**kwargs)
-            if keyresults and not args.nick == '*' and self.output:
-                self.output(keyresults, "\n Found GKEY seeds:")
-            elif keyresults and self.output:
-                self.output(['all'], "\n Installed seeds:")
+        if not args.nick:
+            return ["Too many seeds found. Consider using -n <nick> option."]
+        # get the desired seed
+        keyresults = self.listseed(args)[1]
+        if not keyresults:
+            return ["No keydirs to list"]
+        elif keyresults and not args.nick == '*' and self.output:
+            self.output(['', keyresults], "\n Found GKEY seeds:")
+        elif keyresults and self.output:
+            self.output(['all'], "\n Installed seeds:")
+        else:
+            self.logger.info("ACTIONS: listkey; "
+                "Matching seed entry not found")
+            if args.nick:
+                messages = ["Search failed for: %s" % args.nick]
+            elif args.name:
+                messages = ["Search failed for: %s" % args.name]
             else:
-                self.logger.info("ACTIONS: listkey; "
-                    "Matching seed entry not found")
-                if args.nick:
-                    return {"Search failed for: %s" % args.nick: False}
-                elif args.name:
-                    return {"Search failed for: %s" % args.name: False}
-                else:
-                    return {"Search failed for search term": False}
-            # get confirmation
-            # fill in code here
-            keydir = self.config.get_key(args.seeds + "-keydir")
-            self.logger.debug("ACTIONS: listkey; keysdir = %s" % keydir)
-            self.gpg = GkeysGPG(self.config, keydir)
-            results = {}
-            #failed = []
-            print(" GPG output:")
-            for key in keyresults:
-                if not key.keydir and not args.nick == '*':
-                    self.logger.debug("ACTIONS: listkey; NO keydir... Ignoring")
-                    return {"Failed: No keyid's found for %s" % key.name: ''}
-                self.logger.debug("ACTIONS: listkey; listing keydir:"
-                    + str(key.keydir))
-                results[key.name] = self.gpg.list_keys(key.keydir)
+                messages = ["Search failed for search term"]
+        # get confirmation
+        # fill in code here
+        keydir = self.config.get_key(args.seeds + "-keydir")
+        self.logger.debug("ACTIONS: listkey; keysdir = %s" % keydir)
+        self.gpg = GkeysGPG(self.config, keydir)
+        results = {}
+        print(" GPG output:")
+        for key in keyresults:
+            if not key.keydir and not args.nick == '*':
+                self.logger.debug("ACTIONS: listkey; NO keydir... Ignoring")
+                messages = ["Failed: No keyid's found for %s" % key.name[0]]
+            else:
+                self.logger.debug("ACTIONS: listkey; listing keydir:" + str(key.keydir))
+                results[key.name[0]] = self.gpg.list_keys(key.keydir[0])
                 if self.config.options['print_results']:
-                    print(results[key.name].output)
-                    self.logger.debug("data output:\n" +
-                        str(results[key.name].output))
+                    print(results[key.name[0]].output)
+                    self.logger.debug("data output:\n" + str(results[key.name[0]].output))
+                    messages = ["Done."]
                 else:
                     return results
-            return {'Done': True}
-        else:
-            return {"No keydirs to list": False}
-
+        return messages
 
     def addkey(self, args):
         '''Action addkey method'''

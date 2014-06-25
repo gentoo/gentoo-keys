@@ -66,7 +66,7 @@ class Actions(object):
         gkey = handler.new(args, checkgkey=True)
         if len(gkeys) == 0:
             self.logger.debug("ACTIONS: addkey; now adding gkey: %s" % str(gkey))
-            success = self.seeds.add(getattr(gkey, 'nick')[0], gkey)
+            success = self.seeds.add(getattr(gkey, 'nick'), gkey)
             if success:
                 success = self.seeds.save()
                 messages = ["Successfully added new seed."]

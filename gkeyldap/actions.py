@@ -132,11 +132,7 @@ class Actions(object):
         keyinfo = defaultdict()
         keyid_missing = False
         # self.logger.debug("Actions: build_gkeylist; info = %s" % str(info))
-        for attr in gkey2ldap:
-            field = gkey2ldap[attr]
-            if not field:
-                keyinfo[attr] = None
-                continue
+        for attr, field in gkey2ldap.items():
             try:
                 keyinfo[attr], keyid_found, is_good = self._fix_bad_ldap(info, attr, field)
             except KeyError:
@@ -144,7 +140,7 @@ class Actions(object):
                     % (info['uid'][0], info['cn'][0]))
                 self.logger.debug('  MISSING or EMPTY LDAP field ' +
                     '[%s] GPGKey field [%s]' % (field, attr))
-                if attr in ['keyid', 'longkeyid']:
+                if attr in ['fingerprint', 'keyid', 'longkeyid']:
                     keyid_missing = True
                 else:
                     is_good = False
@@ -189,6 +185,8 @@ class Actions(object):
                               % (info['uid'][0], info['cn'][0]))
             self.logger.error('  %s = "undefined"' % (field))
             is_good = False
+        if values and attr in ['nick','name', 'keydir']:
+            values = "".join(values)
         return (values, keyid_found, is_good)
 
 

@@ -95,7 +95,7 @@ class Seeds(object):
         @param index: int, '''
         if gkey:
             try:
-                self.seeds.pop(getattr(gkey[0], 'nick')[0], None)
+                self.seeds.pop(getattr(gkey[0], 'nick'), None)
             except ValueError:
                 return False
             return True
@@ -146,7 +146,7 @@ class Seeds(object):
 
 
     def _seeds2json(self, seeds):
-        is_gkey=False
+        is_gkey = False
         if isinstance(seeds.values()[0], GKEY):
             is_gkey = True
         for dev, value in seeds.items():

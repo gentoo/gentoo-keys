@@ -142,12 +142,11 @@ class SeedHandler(object):
         except KeyError:
             self.logger.error('GPG fingerprint not found.')
             is_good = False
-        # need to add values to a list
         for key, value in args.items():
-            if key == 'name':
-                args[key] = value.split(',')
-            else:
+            if key == 'fingerprint':
                 args[key] = value.split()
+            else:
+                args[key] = value
         if not is_good:
             self.logger.error('A valid fingerprint '
                   'was not found for %s' % args['name'])

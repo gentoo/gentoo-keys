@@ -169,42 +169,41 @@ class Actions(object):
         for key in keyresults:
             if not key.keydir and not args.nick == '*':
                 self.logger.debug("ACTIONS: listkey; NO keydir... Ignoring")
-                messages = ["Failed: No keyid's found for %s" % key.name[0]]
+                messages = ["Failed: No keyid's found for %s" % key.name]
             else:
                 self.logger.debug("ACTIONS: listkey; listing keydir:" + str(key.keydir))
-                results[key.name[0]] = self.gpg.list_keys(key.keydir[0])
+                results[key.name] = self.gpg.list_keys(key.keydir)
                 if self.config.options['print_results']:
-                    print(results[key.name[0]].output)
-                    self.logger.debug("data output:\n" + str(results[key.name[0]].output))
+                    print(results[key.name].output)
+                    self.logger.debug("data output:\n" + str(results[key.name].output))
                     messages = ["Done."]
                 else:
                     return results
         return messages
 
+
     def addkey(self, args):
         '''Install a key from the seed(s)'''
-        handler = SeedHandler(self.logger)
+        if not args.nick:
+            return ["Please provide a nickname or -n *"]
+        handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: addkey; kwargs: %s" % str(kwargs))
-        if not args.nick:
-            return {'Please provide a nickname or -n *': False}
-        gkey = self.listseed(args)
+        gkey = self.listseed(args)[1]
         if gkey:
-            # get the desired seed
-            keyresults = self.seeds.list(**kwargs)
-            if keyresults and not args.nick == '*' and self.output:
-                self.output(['', keyresults], "\n Found GKEY seeds:")
-            elif keyresults and self.output:
+            if gkey and not args.nick == '*' and self.output:
+                self.output(['', gkey], "\n Found GKEY seeds:")
+            elif gkey and self.output:
                 self.output(['all'], "\n Installing seeds:")
             else:
                 self.logger.info("ACTIONS: addkey; "
                     "Matching seed entry not found")
                 if args.nick:
-                    return {"Search failed for: %s" % args.nick: False}
+                    return ["Search failed for: %s" % args.nick]
                 elif args.name:
-                    return {"Search failed for: %s" % args.name: False}
+                    return ["Search failed for: %s" % args.name]
                 else:
-                    return {"Search failed for search term": False}
+                    return ["Search failed for search term"]
             # get confirmation
             # fill in code here
             keydir = self.config.get_key(args.seeds + "-keydir")
@@ -212,33 +211,25 @@ class Actions(object):
             self.gpg = GkeysGPG(self.config, keydir)
             results = {}
             failed = []
-            for key in keyresults:
-                if not key.keyid and not key.longkeyid and not args.nick == '*':
-                    self.logger.debug("ACTIONS: addkey; NO key id's to add... Ignoring")
-                    return {"Failed: No keyid's found for %s" % key.name: ''}
-                elif not key.keyid and not key.longkeyid:
-                    print("No keyid's found for:", key.nick, key.name, "Skipping...")
-                    failed.append(key)
-                    continue
+            for key in gkey:
                 self.logger.debug("ACTIONS: addkey; adding key:")
                 self.logger.debug("ACTIONS: " + str(key))
-                results[key.name[0]] = self.gpg.add_key(key)
-                for result in results[key.name[0]]:
+                results[key.name] = self.gpg.add_key(key)
+                for result in results[key.name]:
                     self.logger.debug("ACTIONS: addkey; result.failed = " +
-                        str(result.failed))
+                                      str(result.failed))
                 if self.config.options['print_results']:
-                    for result in results[key.name[0]]:
+                    for result in results[key.name]:
                         print("key desired:", key.name, ", key added:",
                             result.username, ", succeeded:",
-                            not result.failed, ", keyid:", result.keyid,
-                            ", fingerprint:", result.fingerprint)
+                            not result.failed,", fingerprint:", result.fingerprint)
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
                         if result.failed:
                             failed.append(key)
             if failed and self.output:
                 self.output(failed, "\n Failed to install:")
-            return {'Completed': True}
-        return {"No seeds to search or install": False}
+            return ["Completed"]
+        return ["No seeds to search or install"]
 
 
     def removekey(self, args):

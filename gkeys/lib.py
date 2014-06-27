@@ -20,12 +20,11 @@ with gentoo-keys specific convienience functions.
 from __future__ import print_function
 
 
-import os
 from os.path import join as pjoin
 
 from pyGPG.gpg import GPG
+from gkeys.fileops import ensure_dirs
 from gkeys.log import logger
-
 
 class GkeysGPG(GPG):
     '''Gentoo-keys primary gpg class'''
@@ -77,7 +76,7 @@ class GkeysGPG(GPG):
 
     def set_keydir(self, keydir, task, reset=True):
         logger.debug("basedir: %s, keydir: %s" % (self.basedir, keydir))
-        self.keydir = pjoin(self.basedir, keydir[0])
+        self.keydir = pjoin(self.basedir, keydir)
         self.task = task
         if reset:
             self.config.options['tasks'][task] = self.config.defaults['tasks'][task][:]
@@ -96,8 +95,8 @@ class GkeysGPG(GPG):
         self.set_keyserver()
         self.set_keydir(gkey.keydir, 'recv-keys', reset=True)
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
-        if not os.path.exists(self.keydir):
-            os.makedirs(self.keydir, mode=0x0700)
+        logger.debug("LIB: add_key; ensure dirs: " + self.keydir)
+        ensure_dirs(str(self.keydir))
         keyids = gkey.keyid
         results = []
         for keyid in keyids:

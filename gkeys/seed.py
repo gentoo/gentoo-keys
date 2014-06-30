@@ -88,19 +88,16 @@ class Seeds(object):
         return False
 
 
-    def delete(self, gkey=None, index=None):
+    def delete(self, gkey=None):
         '''Delete the key from the seeds in memory
 
         @param gkey: GKEY, the matching GKEY to delete
-        @param index: int, '''
+        '''
         if gkey:
             try:
-                self.seeds.pop(getattr(gkey[0], 'nick'), None)
+                self.seeds.pop(gkey.nick, None)
             except ValueError:
                 return False
-            return True
-        elif index:
-            self.seeds.pop(index)
             return True
 
 
@@ -125,19 +122,16 @@ class Seeds(object):
         '''Search for the keys matching the regular expression pattern'''
         pass
 
+    def nick_search(self, nick):
+        '''Searches the seeds for a matching nick
 
-    def index(self, gkey):
-        '''The index of the gkey in the seeds list
-
-        @param gkey: GKEY, the matching GKEY to delete
-        @return int
+        @param nick: string
+        @returns GKEY instance or None
         '''
         try:
-            index = self.seeds.index(gkey)
-        except ValueError:
+            return self.seeds[nick]
+        except KeyError:
             return None
-        return index
-
 
     def _error(self, err):
         '''Class error logging function'''
@@ -153,3 +147,13 @@ class Seeds(object):
             if is_gkey:
                 seeds[dev] = dict(value._asdict())
         return json.dumps(seeds, sort_keys=True, indent=4)
+
+    def update(self, gkey):
+        '''Looks for existance of a matching nick already in the seedfile
+        if it exists. Then either adds or replaces the gkey
+        @param gkey: GKEY instance
+        '''
+        oldkey = self.nick_search(gkey.nick[0])
+        if oldkey:
+            self.delete(oldkey)
+        self.add(gkey.nick, gkey)

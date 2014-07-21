@@ -96,17 +96,10 @@ class GkeysGPG(GPG):
         self.set_keyserver()
         self.set_keydir(gkey.keydir, 'recv-keys', reset=True)
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
-        # Save the gkey seed to the installed db
-        self.set_keyseedfile()
-        self.seedfile.update(gkey)
-        if not self.seedfile.save():
-            logger.error("GkeysGPG.add_key(); failed to save seed" + gkey.nick)
-            return []
         logger.debug("LIB: add_key; ensure dirs: " + self.keydir)
         ensure_dirs(str(self.keydir))
-        fingerprints = gkey.fingerprint
         results = []
-        for fingerprint in fingerprints:
+        for fingerprint in gkey.fingerprint:
             logger.debug("LIB: add_key; adding fingerprint" + fingerprint)
             logger.debug("** Calling runGPG with Running 'gpg %s --recv-keys %s' for: %s"
                 % (' '.join(self.config.get_key('tasks', 'recv-keys')),
@@ -127,6 +120,12 @@ class GkeysGPG(GPG):
                 message += "\n result: %s" % (result.fingerprint)
                 message += "\n gkey..: %s" % (str(gkey.fingerprint))
                 logger.error(message)
+            # Save the gkey seed to the installed db
+            self.set_keyseedfile()
+            self.seedfile.update(gkey)
+            if not self.seedfile.save():
+                logger.error("GkeysGPG.add_key(); failed to save seed: " + gkey.nick)
+                return []
             results.append(result)
             print("lib.add_key(), result =")
             print(result.stderr_out)
@@ -203,6 +202,6 @@ class GkeysGPG(GPG):
         '''
         pass
 
+
     def set_keyseedfile(self):
         self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'))
-        self.seedfile.load()

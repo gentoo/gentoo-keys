@@ -45,7 +45,7 @@ class Seeds(object):
         seedlines = None
         self.seeds = {}
         try:
-            with open(self.filename) as seedfile:
+            with open(self.filename, "r+") as seedfile:
                 seedlines = json.load(seedfile)
         except IOError as err:
             logger.debug("Seed: load; IOError occurred while loading file")
@@ -122,6 +122,7 @@ class Seeds(object):
         '''Search for the keys matching the regular expression pattern'''
         pass
 
+
     def nick_search(self, nick):
         '''Searches the seeds for a matching nick
 
@@ -132,6 +133,7 @@ class Seeds(object):
             return self.seeds[nick]
         except KeyError:
             return None
+
 
     def _error(self, err):
         '''Class error logging function'''
@@ -148,12 +150,13 @@ class Seeds(object):
                 seeds[dev] = dict(value._asdict())
         return json.dumps(seeds, sort_keys=True, indent=4)
 
+
     def update(self, gkey):
         '''Looks for existance of a matching nick already in the seedfile
         if it exists. Then either adds or replaces the gkey
         @param gkey: GKEY instance
         '''
-        oldkey = self.nick_search(gkey.nick[0])
+        oldkey = self.nick_search(gkey.nick)
         if oldkey:
             self.delete(oldkey)
         self.add(gkey.nick, gkey)

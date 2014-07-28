@@ -14,8 +14,12 @@ from __future__ import print_function
 
 import os
 
+from json import load
+from shutil import rmtree
+
 from gkeys.lib import GkeysGPG
 from gkeys.seedhandler import SeedHandler
+from gkeys.config import GKEY
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'addkey', 'removekey', 'movekey',
@@ -222,7 +226,7 @@ class Actions(object):
                     for result in results[key.name]:
                         print("key desired:", key.name, ", key added:",
                             result.username, ", succeeded:",
-                            not result.failed,", fingerprint:", result.fingerprint)
+                            not result.failed, ", fingerprint:", result.fingerprint)
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
                         if result.failed:
                             failed.append(key)
@@ -234,7 +238,35 @@ class Actions(object):
 
     def removekey(self, args):
         '''Remove an installed key'''
-        pass
+        if not args.nick:
+            return ["Please provide a nickname or -n *"]
+        handler = SeedHandler(self.logger, self.config)
+        kwargs = handler.build_gkeydict(args)
+        self.logger.debug("ACTIONS: addkey; kwargs: %s" % str(kwargs))
+        installed_keys = self.installed(args)[1]
+        for gkey in installed_keys:
+            if kwargs['nick'] not in gkey.nick:
+                messages = ["%s does not seem to be a valid key." % kwargs['nick']]
+            else:
+                self.output(['', [gkey]], '\n Found GKEY seed:')
+                ans = raw_input("Do you really want to remove %s?[y/n]: "
+                                % kwargs['nick']).lower()
+                while ans not in ["yes", "y", "no", "n"]:
+                    ans = raw_input("Do you really want to remove %s?[y/n]: "
+                                    % kwargs['nick']).lower()
+                if ans in ["no", "n"]:
+                    messages = ["Key removal aborted... Nothing to be done."]
+                else:
+                    keydir = self.config.get_key(args.seeds + "-keydir")
+                    rm_candidate = os.path.join(keydir, gkey.nick)
+                    self.logger.debug("ACTIONS: removekey; keysdir = %s" % keydir)
+                    if args.seeds:
+                        try:
+                            rmtree(rm_candidate)
+                            messages = ["Done removing %s key." % kwargs['nick']]
+                        except OSError:
+                            messages = ["%s directory does not exist." % rm_candidate]
+        return messages
 
 
     def movekey(self, args):
@@ -244,7 +276,25 @@ class Actions(object):
 
     def installed(self, args):
         '''Lists the installed key directories'''
-        pass
+        if args.seeds:
+            keydir = self.config.get_key(args.seeds + "-keydir")
+        else:
+            return ["Please specify a seed file."]
+        self.logger.debug("ACTIONS: installed; keysdir = %s" % keydir)
+        installed_keys = []
+        try:
+            for key in os.listdir(keydir):
+                seed_path = os.path.join(keydir, key)
+                gkey_path = os.path.join(seed_path, 'gkey.seeds')
+                try:
+                    with open(gkey_path, 'r') as fileseed:
+                        seed = load(fileseed)
+                except IOError:
+                    return ["No seed file found in %s." % gkey_path, ""]
+                installed_keys.append(GKEY(**seed.values()[0]))
+        except OSError:
+            return ["%s keydir does not exist." % keydir, ""]
+        return ['Found Key/s:', installed_keys]
 
 
     def user_confirm(self, message):

@@ -25,6 +25,7 @@ from os.path import join as pjoin
 from pyGPG.gpg import GPG
 from gkeys.fileops import ensure_dirs
 from gkeys.log import logger
+from gkeys.seed import Seeds
 
 class GkeysGPG(GPG):
     '''Gentoo-keys primary gpg class'''
@@ -90,38 +91,43 @@ class GkeysGPG(GPG):
         '''Add the specified key to the specified keydir
 
         @param gkey: GKEY namedtuple with
-            (name, keyid/longkeyid, keydir, fingerprint,)
+            (name, nick, keydir, fingerprint)
         '''
         self.set_keyserver()
         self.set_keydir(gkey.keydir, 'recv-keys', reset=True)
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
         logger.debug("LIB: add_key; ensure dirs: " + self.keydir)
         ensure_dirs(str(self.keydir))
-        keyids = gkey.keyid
         results = []
-        for keyid in keyids:
-            logger.debug("LIB: add_key; final keyids" + keyid)
+        for fingerprint in gkey.fingerprint:
+            logger.debug("LIB: add_key; adding fingerprint" + fingerprint)
             logger.debug("** Calling runGPG with Running 'gpg %s --recv-keys %s' for: %s"
                 % (' '.join(self.config.get_key('tasks', 'recv-keys')),
-                    keyid, gkey.name)
-                )
-            result = self.runGPG(task='recv-keys', inputfile=keyid)
+                    fingerprint, gkey.name))
+            result = self.runGPG(task='recv-keys', inputfile=fingerprint)
             logger.info('GPG return code: ' + str(result.returncode))
             if result.fingerprint in gkey.fingerprint:
                 result.failed = False
                 message = "Fingerprints match... Import successful: "
-                message += "key: %s" %keyid
-                message += "\n    result len: %s, %s" %(len(result.fingerprint), result.fingerprint)
-                message += "\n    gkey len: %s, %s" %(len(gkey.fingerprint[0]), gkey.fingerprint[0])
+                message += "fingerprint: %s" % fingerprint
+                message += "\n result len: %s, %s" % (len(result.fingerprint), result.fingerprint)
+                message += "\n gkey len: %s, %s" % (len(gkey.fingerprint[0]), gkey.fingerprint[0])
                 logger.info(message)
             else:
                 result.failed = True
                 message = "Fingerprints do not match... Import failed for "
-                message += "key: %s" %keyid
-                message += "\n     result:   %s" %(result.fingerprint)
-                message += "\n     gkey..: %s" %(str(gkey.fingerprint))
+                message += "fingerprint: %s" % fingerprint
+                message += "\n result: %s" % (result.fingerprint)
+                message += "\n gkey..: %s" % (str(gkey.fingerprint))
                 logger.error(message)
+            # Save the gkey seed to the installed db
+            self.set_keyseedfile()
+            self.seedfile.update(gkey)
+            if not self.seedfile.save():
+                logger.error("GkeysGPG.add_key(); failed to save seed: " + gkey.nick)
+                return []
             results.append(result)
+            print("lib.add_key(), result =")
             print(result.stderr_out)
         return results
 
@@ -129,7 +135,7 @@ class GkeysGPG(GPG):
     def del_key(self, gkey, keydir):
         '''Delete the specified key in the specified keydir
 
-        @param gkey: GKEY namedtuple with (name, keyid/longkeyid, fingerprint)
+        @param gkey: GKEY namedtuple with (name, nick, keydir, fingerprint)
         '''
         return []
 
@@ -143,7 +149,7 @@ class GkeysGPG(GPG):
     def update_key(self, gkey, keydir):
         '''Update the specified key in the specified keydir
 
-        @param key: tuple of (name, keyid, fingerprint)
+        @param key: tuple of (name, nick, keydir, fingerprint)
         @param keydir: the keydir to add the key to
         '''
         return []
@@ -195,3 +201,7 @@ class GkeysGPG(GPG):
         '''Verify the file specified at filepath
         '''
         pass
+
+
+    def set_keyseedfile(self):
+        self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'))

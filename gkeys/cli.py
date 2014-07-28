@@ -155,6 +155,5 @@ class Main(object):
         print()
 
 
-
     def output_failed(self, failed):
         pass

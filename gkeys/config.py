@@ -73,6 +73,7 @@ class GKeysConfig(GPGConfig):
         self.defaults['keysdir'] = path([self.root, EPREFIX, '/var/gentoo/gkeys'])
         self.defaults['dev-keydir'] = '%(keysdir)s/devs'
         self.defaults['rel-keydir'] = '%(keysdir)s/release'
+        self.defaults['keyring'] = '%(keysdir)s/keyring'
         self.defaults['overlays-keydir'] = '%(keysdir)s/overlays'
         self.defaults['logdir'] = '%(keysdir)s/logs'
         # local directory to scan for seed files installed via ebuild, layman

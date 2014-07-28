@@ -70,6 +70,8 @@ class Main(object):
             help='The logging level to set for the logfile')
         parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
             help='The fingerprint of the the key')
+        parser.add_argument('-k', '--keyring', dest='keyring', default='trusted_keyring',
+            help='The name of the keyring to use')
         parser.add_argument('-n', '--nick', dest='nick', default=None,
             help='The nick associated with the the key')
         parser.add_argument('-N', '--name', dest='name', nargs='*',

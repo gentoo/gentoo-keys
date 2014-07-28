@@ -20,6 +20,9 @@ dev-keydir: %(keysdir)s/devs
 # will be stored.
 rel-keydir: %(keysdir)s/release
 
+# keyring: the directory where the official keyring  with the specified keys
+# will be exported.
+keyring: %(keysdir)s/keyring
 
 # overlayskeydir: the directory where the overlay keys
 # will be stored.

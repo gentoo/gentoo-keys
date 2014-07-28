@@ -22,8 +22,8 @@ from gkeys.seedhandler import SeedHandler
 from gkeys.config import GKEY
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
-            'listseedfiles', 'listkey', 'addkey', 'removekey', 'movekey',
-            'installed']
+            'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
+            'installed', 'importkey']
 
 
 class Actions(object):
@@ -69,7 +69,7 @@ class Actions(object):
             return ["Provide a nickname, a name and a fingerprint."]
         gkey = handler.new(args, checkgkey=True)
         if len(gkeys) == 0:
-            self.logger.debug("ACTIONS: addkey; now adding gkey: %s" % str(gkey))
+            self.logger.debug("ACTIONS: installkey; now adding gkey: %s" % str(gkey))
             success = self.seeds.add(getattr(gkey, 'nick'), gkey)
             if success:
                 success = self.seeds.save()
@@ -186,13 +186,13 @@ class Actions(object):
         return messages
 
 
-    def addkey(self, args):
+    def installkey(self, args):
         '''Install a key from the seed(s)'''
         if not args.nick:
             return ["Please provide a nickname or -n *"]
         handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
-        self.logger.debug("ACTIONS: addkey; kwargs: %s" % str(kwargs))
+        self.logger.debug("ACTIONS: installkey; kwargs: %s" % str(kwargs))
         gkey = self.listseed(args)[1]
         if gkey:
             if gkey and not args.nick == '*' and self.output:
@@ -200,7 +200,7 @@ class Actions(object):
             elif gkey and self.output:
                 self.output(['all'], "\n Installing seeds:")
             else:
-                self.logger.info("ACTIONS: addkey; "
+                self.logger.info("ACTIONS: installkey; "
                     "Matching seed entry not found")
                 if args.nick:
                     return ["Search failed for: %s" % args.nick]
@@ -211,16 +211,16 @@ class Actions(object):
             # get confirmation
             # fill in code here
             keydir = self.config.get_key(args.seeds + "-keydir")
-            self.logger.debug("ACTIONS: addkey; keysdir = %s" % keydir)
+            self.logger.debug("ACTIONS: installkey; keysdir = %s" % keydir)
             self.gpg = GkeysGPG(self.config, keydir)
             results = {}
             failed = []
             for key in gkey:
-                self.logger.debug("ACTIONS: addkey; adding key:")
+                self.logger.debug("ACTIONS: installkey; adding key:")
                 self.logger.debug("ACTIONS: " + str(key))
                 results[key.name] = self.gpg.add_key(key)
                 for result in results[key.name]:
-                    self.logger.debug("ACTIONS: addkey; result.failed = " +
+                    self.logger.debug("ACTIONS: installkey; result.failed = " +
                                       str(result.failed))
                 if self.config.options['print_results']:
                     for result in results[key.name]:
@@ -231,7 +231,7 @@ class Actions(object):
                         if result.failed:
                             failed.append(key)
             if failed and self.output:
-                self.output(failed, "\n Failed to install:")
+                self.output([failed], "\n Failed to install:")
             return ["Completed"]
         return ["No seeds to search or install"]
 
@@ -272,6 +272,41 @@ class Actions(object):
     def movekey(self, args):
         '''Rename an installed key'''
         pass
+
+
+    def importkey(self, args):
+        '''Add a specified key to a specified keyring'''
+        if args.seeds:
+            keydir = self.config.get_key(args.seeds + "-keydir")
+            keyring_dir = self.config.get_key("keyring")
+            self.logger.debug("ACTIONS: importkey; keydir = %s" % keydir)
+            self.gpg = GkeysGPG(self.config, keydir)
+            handler = SeedHandler(self.logger, self.config)
+            gkeys = self.listseed(args)[1]
+            results = {}
+            failed = []
+            print("Importing specified keys to keyring.")
+            for gkey in gkeys:
+                self.logger.debug("ACTIONS: importkey; adding key: %s", gkey.name)
+                results[gkey.name] = self.gpg.add_key(gkey)
+                if self.config.options['print_results']:
+                    for result in results[gkey.name]:
+                        print("key desired:", gkey.name, ", key added:",
+                            result.username, ", succeeded:",
+                            not result.failed, ", fingerprint:", result.fingerprint)
+                        self.logger.debug("stderr_out: " + str(result.stderr_out))
+                        if result.failed:
+                            self.logger.debug("ACTIONS: importkey; result.failed = " + str(result.failed))
+                            failed.append(gkey)
+                if not results[gkey.name][0].failed:
+                    print("Importing: ", gkey.name)
+                    self.logger.debug("ACTIONS: importkey; importing key: %s", gkey.name)
+                    keyring = os.path.join(keyring_dir,args.keyring + '.gpg')
+                    self.gpg.add_to_keyring(gkey, keydir, keyring)
+            if failed and self.output:
+                self.output([failed], "\n Failed to install:")
+            return ["Completed."]
+        return ["No seeds to search or install"]
 
 
     def installed(self, args):

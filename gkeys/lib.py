@@ -20,6 +20,7 @@ with gentoo-keys specific convienience functions.
 from __future__ import print_function
 
 
+from os.path import abspath, pardir
 from os.path import join as pjoin
 
 from pyGPG.gpg import GPG
@@ -60,7 +61,7 @@ class GkeysGPG(GPG):
         return
 
 
-    def set_keyring(self, keyring, task, reset=True):
+    def set_keyring(self, keyring, task, importkey=False, reset=True):
         '''Sets the keyring to use as well as related task options
         '''
         logger.debug("keydir: %s, keyring: %s" % (self.keydir, keyring))
@@ -69,6 +70,11 @@ class GkeysGPG(GPG):
         # --keyring file |  Note that this adds a keyring to the current list.
         # If the intent is to use the specified keyring alone,
         # use  --keyring  along with --no-default-keyring.
+        if importkey:
+            task_value = ['--import-options', 'import-clean']
+            self.config.options['tasks'][task].extend(task_value)
+            parent_dir = abspath(pjoin(keyring, pardir))
+            ensure_dirs(parent_dir)
         task_value = ['--no-default-keyring', '--keyring', keyring]
         self.config.options['tasks'][task].extend(task_value)
         logger.debug("set_keyring: New task options: %s" %str(self.config.options['tasks'][task]))
@@ -85,6 +91,29 @@ class GkeysGPG(GPG):
         self.config.options['tasks'][task].extend(task_value)
         logger.debug("set_keydir: New task options: %s" %str(self.config.options['tasks'][task]))
         return
+
+
+    def add_to_keyring(self, gkey, keydir, keyring):
+        '''Add the specified key to the specified keyring
+
+        @param gkey: GKEY namedtuple with
+            (name, keyid/longkeyid, keydir, fingerprint)
+        @param keydir: path with the specified keydir
+        @param keyring: string with the specified keyring
+        '''
+        self.set_keydir(keydir, 'import', reset=True)
+        self.set_keyring(keyring, 'import', importkey=True, reset=False)
+        results = []
+        logger.debug("LIB: import_to_keyring; name: " + gkey.name)
+        logger.debug("** Calling runGPG with Running: gpg %s --import' for: %s"
+                     % (' '.join(self.config.get_key('tasks', 'import')),
+                        gkey.name))
+        pubring_path = pjoin(self.keydir, gkey.keydir, 'pubring.gpg')
+        result = self.runGPG(task='import', inputfile=pubring_path)
+        logger.info('GPG return code: ' + str(result.returncode))
+        results.append(result)
+        print(result.stderr_out)
+        return results
 
 
     def add_key(self, gkey):

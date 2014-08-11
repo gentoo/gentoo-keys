@@ -16,6 +16,7 @@ import os
 
 from json import load
 from shutil import rmtree
+from sslfetch.connections import Connector
 
 from gkeys.lib import GkeysGPG
 from gkeys.seedhandler import SeedHandler
@@ -23,7 +24,7 @@ from gkeys.config import GKEY
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
-            'installed', 'importkey']
+            'installed', 'importkey', 'verify']
 
 
 class Actions(object):
@@ -339,6 +340,69 @@ class Actions(object):
         @return boolean: confirmation to proceed or abort
         '''
         pass
+
+    def verify(self, args):
+        '''File verification action'''
+        connector_output = {
+             'info': self.logger.debug,
+             'error': self.logger.error,
+             'kwargs-info': {},
+             'kwargs-error': {},
+        }
+        if not args.filename:
+            return ['Please provide a signed file.']
+        if not args.seeds:
+            return ['Please specifiy type of seed file.']
+        keys = self.installed(args)[1]
+        if not keys:
+            return ['No installed keys, try installkey action.']
+        keydir = self.config.get_key(args.seeds + "-keydir")
+        self.logger.debug("ACTIONS: verify; keysdir = %s" % keydir)
+        self.gpg = GkeysGPG(self.config, keydir)
+        filepath, signature  = args.filename, args.signature
+        isurl = success = False
+        if filepath.startswith('http'):
+            isurl = True
+            fetcher = Connector(connector_output, None, "Gentoo Keys")
+            self.logger.debug("ACTIONS: verify; fetching %s signed file " % filepath)
+            success, signedfile, timestamp = fetcher.fetch_file(filepath)
+        else:
+            filepath = os.path.abspath(filepath)
+            self.logger.debug("ACTIONS: verify; local file %s" % filepath)
+            success = os.path.isfile(filepath)
+        if not success:
+            messages = ["File %s cannot be retrieved." % filepath]
+        else:
+            if not signature:
+                EXTENSIONS = ['.asc','.sig','.gpgsig']
+                success_fetch = False
+                for ext in EXTENSIONS:
+                    signature = filepath + ext
+                    if isurl:
+                        self.logger.debug("ACTIONS: verify; fetching %s signature " % signature)
+                        success_fetch, sig, timestamp = fetcher.fetch_file(signature)
+                    else:
+                        signature = os.path.abspath(signature)
+                        self.logger.debug("ACTIONS: verify; checking %s signature " % signature)
+                        success_fetch = os.path.isfile(signature)
+                    if success_fetch:
+                        break
+            messages = []
+            #TODO: use file:// uri in the future
+            if isurl:
+                splitfile = filepath.split('/')[-1]
+                splitsig = signature.split('/')[-1]
+                filepath = os.path.abspath(splitfile)
+                signature = os.path.abspath(splitsig)
+            self.logger.info("Verifying file...")
+            for key in keys:
+                results = self.gpg.verify_file(key, signature, filepath)
+                keyid = key.keyid[0]
+                if results.verified[0]:
+                    messages = ["File %s has been successfully verified | %s (%s)." % (filepath, str(key.name), str(keyid))]
+                else:
+                    messages = ["File verification of %s failed | %s (%s)." % (filepath, str(key.name), str(keyid))]
+        return messages
 
 
     def listseedfiles(self, args):

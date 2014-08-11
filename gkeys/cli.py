@@ -84,6 +84,11 @@ class Main(object):
             help='The seeds file to use or update')
         parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
             help='The seedfile path to use')
+        parser.add_argument('-F', '--file', dest='filename', default=None,
+               help='The path/URL to use for the signed file')
+        parser.add_argument('-z','--signature', dest='signature', default=None,
+           help='The path/URL to use for the signature')
+
 
         subparsers = parser.add_subparsers(help='actions')
         for name in Available_Actions:

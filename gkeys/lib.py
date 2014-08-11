@@ -194,10 +194,9 @@ class GkeysGPG(GPG):
             logger.debug("LIB: list_keys(), invalid keydir parameter: %s"
                 % str(keydir))
             return []
+        self.set_keydir(keydir, 'list-keys')
         if '--with-colons' in self.config['tasks']['list-keys']:
             self.config['tasks']['list-keys'].remove('--with-colons')
-
-        self.set_keydir(keydir, 'list-keys')
         logger.debug("** Calling runGPG with Running 'gpg %s --list-keys %s'"
             % (' '.join(self.config['tasks']['list-keys']), keydir)
             )
@@ -213,7 +212,7 @@ class GkeysGPG(GPG):
 
 
     def verify_key(self, gkey):
-        '''verify the specified key from the specified keydir
+        '''Verify the specified key from the specified keydir
 
         @param gkey: GKEY namedtuple with (name, keyid/longkeyid, fingerprint)
         '''
@@ -226,10 +225,31 @@ class GkeysGPG(GPG):
         pass
 
 
-    def verify_file(self, filepath):
-        '''Verify the file specified at filepath
+    def verify_file(self, gkey, signature, filepath):
+        '''Verify the file specified at filepath or url
+
+        @param signature: string with the signature file
+        @param filepath: string with the path or url of the signed file
         '''
-        pass
+        if signature:
+            self.set_keydir(gkey.keydir, 'verify', reset=True)
+            logger.debug("** Calling runGPG with Running 'gpg %s --verify %s and %s'"
+                    % (' '.join(self.config['tasks']['verify']), signature, filepath))
+            results = self.runGPG(task='verify', inputfile=[signature,filepath])
+        else:
+            self.set_keydir(gkey.keydir, 'decrypt', reset=True)
+            logger.debug("** Calling runGPG with Running 'gpg %s --decrypt %s and %s'"
+                    % (' '.join(self.config['tasks']['decrypt']), filepath))
+            results = self.runGPG(task='decrypt', inputfile=filepath)
+        keyid = gkey.keyid[0]
+        if results.verified[0]:
+            logger.info("GPG verification succeeded. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            logger.info("\tSignature result:" + str(results.verified))
+        else:
+            logger.debug("GPG verification failed. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            logger.debug("\t Signature result:"+ str(results.verified))
+            logger.debug("LIB: verify; stderr_out:" + str(results.stderr_out))
+        return results
 
 
     def set_keyseedfile(self):

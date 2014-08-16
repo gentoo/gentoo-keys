@@ -189,8 +189,6 @@ class Actions(object):
 
     def installkey(self, args):
         '''Install a key from the seed(s)'''
-        if not args.nick:
-            return ["Please provide a nickname or -n *"]
         handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: installkey; kwargs: %s" % str(kwargs))

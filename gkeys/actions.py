@@ -317,7 +317,11 @@ class Actions(object):
         self.logger.debug("ACTIONS: installed; keysdir = %s" % keydir)
         installed_keys = []
         try:
-            for key in os.listdir(keydir):
+            if args.nick:
+                keys = [args.nick]
+            else:
+                keys = os.listdir(keydir)
+            for key in keys:
                 seed_path = os.path.join(keydir, key)
                 gkey_path = os.path.join(seed_path, 'gkey.seeds')
                 try:

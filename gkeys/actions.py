@@ -145,8 +145,6 @@ class Actions(object):
 
     def listkey(self, args):
         '''Pretty-print the selected seed file or nick'''
-        if not args.nick:
-            return ["Too many seeds found. Consider using -n <nick> option."]
         # get the desired seed
         keyresults = self.listseed(args)[1]
         if not keyresults:

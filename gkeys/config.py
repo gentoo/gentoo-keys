@@ -145,3 +145,7 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
             fingerprint = {'fingerprint': f, 'keyid': '0x' + f[-16:]}
             output += GKEY_FINGERPRINTS % fingerprint
         return output
+
+class GKEY_CHECK(namedtuple('GKEY_CHECK', ['keyid', 'revoked', 'expired', 'invalid', 'sign'])):
+
+    __slots__ = ()

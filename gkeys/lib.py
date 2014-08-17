@@ -24,6 +24,7 @@ from os.path import abspath, pardir
 from os.path import join as pjoin
 
 from pyGPG.gpg import GPG
+from gkeys.config import GKEY_CHECK
 from gkeys.fileops import ensure_dirs
 from gkeys.log import logger
 from gkeys.seed import Seeds
@@ -184,25 +185,72 @@ class GkeysGPG(GPG):
         return []
 
 
-    def list_keys(self, keydir):
+    def list_keys(self, keydir, colons=False):
         '''List all keys in the specified keydir or
         all keys in all keydir if keydir=None
 
         @param keydir: the keydir to list the keys for
+        @param colons: bool to enable colon listing
         '''
         if not keydir:
             logger.debug("LIB: list_keys(), invalid keydir parameter: %s"
                 % str(keydir))
             return []
         self.set_keydir(keydir, 'list-keys')
-        if '--with-colons' in self.config['tasks']['list-keys']:
-            self.config['tasks']['list-keys'].remove('--with-colons')
         logger.debug("** Calling runGPG with Running 'gpg %s --list-keys %s'"
             % (' '.join(self.config['tasks']['list-keys']), keydir)
             )
+        if colons:
+            task_value = ['--with-colons']
+            self.config.options['tasks']['list-keys'].extend(task_value)
         result = self.runGPG(task='list-keys', inputfile=keydir)
         logger.info('GPG return code: ' + str(result.returncode))
         return result
+
+
+    def check_keys(self, keydir, keyid):
+        '''Check specified or all keys based on the seed type
+
+        @param keydir: the keydir to list the keys for
+        @param keyid: the keyid to check
+        '''
+        result = self.list_keys(keydir, colons=True)
+        revoked = expired = invalid = False
+        sign = True
+        for data in result.status.data:
+            if data.name ==  "PUB":
+                if data.long_keyid == keyid[2:]:
+                    # check if revoked
+                    if 'r' in data.validity:
+                        revoked = True
+                        logger.debug("ERROR in key %s : revoked" % data.long_keyid)
+                        break
+                    # if primary key expired, all subkeys expire
+                    if 'e' in data.validity:
+                        expired = True
+                        logger.debug("ERROR in key %s : expired" % data.long_keyid)
+                        break
+                    # check if invalid
+                    if 'i' in data.validity:
+                        invalid = True
+                        logger.debug("ERROR in key %s : invalid" % data.long_keyid)
+                        break
+            if data.name == "SUB":
+                if data.long_keyid == keyid[2:]:
+                    # check if subkey has signing capabilities
+                    if 's' not in data.key_capabilities:
+                        sign = False
+                        logger.debug("ERROR in subkey %s : No signing capabilities" % data.long_keyid)
+                    # check if expired
+                    if 'e' in data.validity:
+                        logger.debug("WARNING in subkey %s : expired" % data.long_keyid)
+                     # check if revoked
+                    if 'r' in data.validity:
+                        logger.debug("WARNING in subkey %s : revoked" % data.long_keyid)
+                    # check if invalid
+                    if 'i' in data.validity:
+                        logger.debug("WARNING in subkey %s : invalid" % data.long_keyid)
+        return GKEY_CHECK(keyid, revoked, expired, invalid, sign)
 
 
     def list_keydirs(self):

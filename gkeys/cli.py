@@ -158,7 +158,11 @@ class Main(object):
             if isinstance(msg, str):
                 print(msg)
             else:
-                print("\n".join([x.pretty_print for x in msg]))
+                try:
+                    print("\n".join([x.pretty_print for x in msg]))
+                except AttributeError:
+                    for x in msg:
+                        print(x)
         print()
 
 

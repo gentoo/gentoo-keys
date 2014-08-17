@@ -14,6 +14,7 @@ from __future__ import print_function
 
 import os
 
+from collections import defaultdict
 from json import load
 from shutil import rmtree
 from sslfetch.connections import Connector
@@ -24,7 +25,7 @@ from gkeys.config import GKEY
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
-            'installed', 'importkey', 'verify']
+            'installed', 'importkey', 'verify', 'checkkey']
 
 
 class Actions(object):
@@ -145,8 +146,6 @@ class Actions(object):
 
     def listkey(self, args):
         '''Pretty-print the selected seed file or nick'''
-        if not args.nick:
-            return ["Too many seeds found. Consider using -n <nick> option."]
         # get the desired seed
         keyresults = self.listseed(args)[1]
         if not keyresults:
@@ -189,8 +188,6 @@ class Actions(object):
 
     def installkey(self, args):
         '''Install a key from the seed(s)'''
-        if not args.nick:
-            return ["Please provide a nickname or -n *"]
         handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: installkey; kwargs: %s" % str(kwargs))
@@ -236,6 +233,41 @@ class Actions(object):
             return ["Completed"]
         return ["No seeds to search or install"]
 
+    def checkkey(self, args):
+        '''Check keys actions'''
+        if not args.seeds:
+            return ["Please specify seeds type (-s)."]
+        self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
+        installed_keys = self.installed(args)[1]
+        keydir = self.config.get_key(args.seeds + "-keydir")
+        self.logger.debug("ACTIONS: checkkey; keysdir = %s" % keydir)
+        self.gpg = GkeysGPG(self.config, keydir)
+        results = {}
+        failed = defaultdict(list)
+        self.output('', '\n Checking keys...')
+        for gkey in installed_keys:
+            self.logger.debug("ACTIONS: checkkey; gkey = %s" % gkey)
+            for key in gkey.keyid:
+                results[gkey.name] = self.gpg.check_keys(gkey.keydir, key)
+                if results[gkey.name].expired:
+                    failed['expired'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                if results[gkey.name].revoked:
+                    failed['revoked'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                if results[gkey.name].invalid:
+                    failed['invalid'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                if not results[gkey.name].sign:
+                    failed['sign'].append("%s(%s): %s " % (gkey.name, gkey.nick, key))
+        if failed['expired']:
+            self.output([failed['expired']], '\nExpired keys:\n')
+        if failed['revoked']:
+            self.output([failed['revoked']], '\nRevoked keys:\n')
+        if failed['invalid']:
+            self.output([failed['invalid']], '\nInvalid keys:\n')
+        if failed['sign']:
+            self.output([failed['sign']], '\nNo signing capabilities keys:\n')
+        return ['\nFound:\n-------', 'Expired: %d\nRevoked: %d\nInvalid: %d\nNo signing capabilities: %d'
+                % (len(failed['expired']), len(failed['revoked']),
+                    len(failed['invalid']), len(failed['sign']))]
 
     def removekey(self, args):
         '''Remove an installed key'''
@@ -319,7 +351,11 @@ class Actions(object):
         self.logger.debug("ACTIONS: installed; keysdir = %s" % keydir)
         installed_keys = []
         try:
-            for key in os.listdir(keydir):
+            if args.nick:
+                keys = [args.nick]
+            else:
+                keys = os.listdir(keydir)
+            for key in keys:
                 seed_path = os.path.join(keydir, key)
                 gkey_path = os.path.join(seed_path, 'gkey.seeds')
                 try:

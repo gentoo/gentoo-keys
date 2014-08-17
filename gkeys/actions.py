@@ -246,7 +246,7 @@ class Actions(object):
         failed = defaultdict(list)
         self.output('', '\n Checking keys...')
         for gkey in installed_keys:
-            self.logger.debug("ACTIONS: checkkey; gkey = %s" % gkey)
+            self.logger.debug("ACTIONS: checkkey; gkey = %s" % str(gkey))
             for key in gkey.keyid:
                 results[gkey.name] = self.gpg.check_keys(gkey.keydir, key)
                 if results[gkey.name].expired:

@@ -208,13 +208,14 @@ class GkeysGPG(GPG):
         return result
 
 
-    def check_keys(self, keydir, keyid):
+    def check_keys(self, keydir, keyid, result=None):
         '''Check specified or all keys based on the seed type
 
         @param keydir: the keydir to list the keys for
         @param keyid: the keyid to check
         '''
-        result = self.list_keys(keydir, colons=True)
+        if not result:
+            result = self.list_keys(keydir, colons=True)
         revoked = expired = invalid = sign = False
         for data in result.status.data:
             if data.name ==  "PUB":

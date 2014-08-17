@@ -14,6 +14,7 @@ from __future__ import print_function
 
 import os
 
+from collections import defaultdict
 from json import load
 from shutil import rmtree
 from sslfetch.connections import Connector
@@ -24,7 +25,7 @@ from gkeys.config import GKEY
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
-            'installed', 'importkey', 'verify']
+            'installed', 'importkey', 'verify', 'checkkey']
 
 
 class Actions(object):
@@ -232,6 +233,41 @@ class Actions(object):
             return ["Completed"]
         return ["No seeds to search or install"]
 
+    def checkkey(self, args):
+        '''Check keys actions'''
+        if not args.seeds:
+            return ["Please specify seeds type (-s)."]
+        self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
+        installed_keys = self.installed(args)[1]
+        keydir = self.config.get_key(args.seeds + "-keydir")
+        self.logger.debug("ACTIONS: checkkey; keysdir = %s" % keydir)
+        self.gpg = GkeysGPG(self.config, keydir)
+        results = {}
+        failed = defaultdict(list)
+        self.output('', '\n Checking keys...')
+        for gkey in installed_keys:
+            self.logger.debug("ACTIONS: checkkey; gkey = %s" % gkey)
+            for key in gkey.keyid:
+                results[gkey.name] = self.gpg.check_keys(gkey.keydir, key)
+                if results[gkey.name].expired:
+                    failed['expired'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                if results[gkey.name].revoked:
+                    failed['revoked'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                if results[gkey.name].invalid:
+                    failed['invalid'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                if not results[gkey.name].sign:
+                    failed['sign'].append("%s(%s): %s " % (gkey.name, gkey.nick, key))
+        if failed['expired']:
+            self.output([failed['expired']], '\nExpired keys:\n')
+        if failed['revoked']:
+            self.output([failed['revoked']], '\nRevoked keys:\n')
+        if failed['invalid']:
+            self.output([failed['invalid']], '\nInvalid keys:\n')
+        if failed['sign']:
+            self.output([failed['sign']], '\nNo signing capabilities keys:\n')
+        return ['\nFound:\n-------', 'Expired: %d\nRevoked: %d\nInvalid: %d\nNo signing capabilities: %d'
+                % (len(failed['expired']), len(failed['revoked']),
+                    len(failed['invalid']), len(failed['sign']))]
 
     def removekey(self, args):
         '''Remove an installed key'''

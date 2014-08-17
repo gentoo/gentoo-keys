@@ -208,15 +208,15 @@ class GkeysGPG(GPG):
         return result
 
 
-    def check_keys(self, keydir, keyid):
+    def check_keys(self, keydir, keyid, result=None):
         '''Check specified or all keys based on the seed type
 
         @param keydir: the keydir to list the keys for
         @param keyid: the keyid to check
         '''
-        result = self.list_keys(keydir, colons=True)
-        revoked = expired = invalid = False
-        sign = True
+        if not result:
+            result = self.list_keys(keydir, colons=True)
+        revoked = expired = invalid = sign = False
         for data in result.status.data:
             if data.name ==  "PUB":
                 if data.long_keyid == keyid[2:]:
@@ -237,19 +237,22 @@ class GkeysGPG(GPG):
                         break
             if data.name == "SUB":
                 if data.long_keyid == keyid[2:]:
-                    # check if subkey has signing capabilities
-                    if 's' not in data.key_capabilities:
-                        sign = False
-                        logger.debug("ERROR in subkey %s : No signing capabilities" % data.long_keyid)
-                    # check if expired
-                    if 'e' in data.validity:
-                        logger.debug("WARNING in subkey %s : expired" % data.long_keyid)
-                     # check if revoked
-                    if 'r' in data.validity:
-                        logger.debug("WARNING in subkey %s : revoked" % data.long_keyid)
                     # check if invalid
                     if 'i' in data.validity:
                         logger.debug("WARNING in subkey %s : invalid" % data.long_keyid)
+                        continue
+                    # check if expired
+                    if 'e' in data.validity:
+                        logger.debug("WARNING in subkey %s : expired" % data.long_keyid)
+                        continue
+                    # check if revoked
+                    if 'r' in data.validity:
+                        logger.debug("WARNING in subkey %s : revoked" % data.long_keyid)
+                        continue
+                    # check if subkey has signing capabilities
+                    if 's' in data.key_capabilities:
+                        sign = True
+                        logger.debug("INFO subkey %s : signing capabilities" % data.long_keyid)
         return GKEY_CHECK(keyid, revoked, expired, invalid, sign)
 
 

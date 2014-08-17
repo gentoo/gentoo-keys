@@ -56,5 +56,5 @@ logdir: %(keysdir)s/logs
 # Use the filenames as the keys.
 # The will be paired to the seed file of the same name for fetching, updating
 
-release.seeds: https://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds
-developers.seeds: https://dev.gentoo.org/~dolsen/gkey-seeds/developer.seeds
+release.seeds: https://api.gentoo.org/gentoo-keys/seeds/release.seeds
+developers.seeds: https://api.gentoo.org/gentoo-keys/seeds/developer.seeds

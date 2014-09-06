@@ -65,7 +65,7 @@ class GKeysConfig(GPGConfig):
             self.defaults['config'] = config
             self.defaults['configdir'] = os.path.dirname(config)
         else:
-            self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gentoo-keys'])
+            self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gkeys'])
             self.defaults['config'] = '%(configdir)s/gkeys.conf'
         self.configparser = None
         self._add_gkey_defaults()
@@ -74,12 +74,12 @@ class GKeysConfig(GPGConfig):
 
 
     def _add_gkey_defaults(self):
-        self.defaults['keysdir'] = path([self.root, EPREFIX, '/var/gentoo/gkeys'])
+        self.defaults['keysdir'] = path([self.root, EPREFIX, '/var/lib/gentoo/gkeys'])
         self.defaults['dev-keydir'] = '%(keysdir)s/devs'
         self.defaults['rel-keydir'] = '%(keysdir)s/release'
         self.defaults['keyring'] = '%(keysdir)s/keyring'
         self.defaults['overlays-keydir'] = '%(keysdir)s/overlays'
-        self.defaults['logdir'] = '%(keysdir)s/logs'
+        self.defaults['logdir'] = '/var/log/gkeys'
         # local directory to scan for seed files installed via ebuild, layman
         # or manual install.
         self.defaults['seedsdir'] = '%(keysdir)s/seeds'
@@ -91,8 +91,8 @@ class GKeysConfig(GPGConfig):
         # NOTE: files is umask mode in octal, directories is chmod mode in octal
         self.defaults['permissions'] = {'files': '0o002', 'directories': '0o775',}
         self.defaults['seedurls'] = {
-            'release.seeds': 'https://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds',
-            'developers.seeds': 'https://dev.gentoo.org/~dolsen/gkey-seeds/developer.seeds',
+            'release.seeds': 'https://api.gentoo.org/gentoo-keys/release.seeds',
+            'developers.seeds': 'https://api.gentoo.org/gentoo-keys/developer.seeds',
         }
 
 

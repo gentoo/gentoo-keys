@@ -13,7 +13,14 @@ import gpgme
 import os
 import re
 import shutil
-import urllib2
+import sys
+
+if sys.hexversion >= 0x30200f0:
+    from urllib.request import urlopen
+    py_input = input
+else:
+    from urllib2 import urlopen
+    py_input = raw_input
 
 from gkeys.fileops import ensure_dirs
 
@@ -47,7 +54,7 @@ class Actions(object):
         key_params = self.get_input()
         ack = None
         while ack not in ["y", "yes", "n", "no"]:
-            ack = raw_input("Continue?[y/n]: ").lower()
+            ack = py_input("Continue?[y/n]: ").lower()
         if ack in ["n", "no"]:
             self.output("\nKey generation aborted.")
             return False
@@ -63,7 +70,7 @@ class Actions(object):
             newgpgconfpath = os.path.join(gpghome, 'gpg.conf')
             shutil.copy('/usr/share/gnupg/gpg-conf.skel', newgpgconfpath)
             with open(newgpgconfpath, 'a') as conf:
-                for line in urllib2.urlopen(GPG_CONF):
+                for line in urlopen(GPG_CONF):
                     conf.write(line)
             # Key generation
             ctx = gpgme.Context()
@@ -106,11 +113,11 @@ class Actions(object):
         '''Interactive user input'''
         self.output("\nGPG key creator based on GLEP 63\n"
                     "(https://wiki.gentoo.org/wiki/GLEP:63)\n")
-        name = raw_input("Give your Full Name: ")
-        email = raw_input("Give your Email: ")
+        name = py_input("Give your Full Name: ")
+        email = py_input("Give your Email: ")
         while not re.match(r'[\w.-]+@[\w.-]+', email):
             self.output("\nBad email input. Try again.")
-            email = raw_input("Give your Email: ")
+            email = py_input("Give your Email: ")
         print("\nReview:\n Full Name: %s\n Email: %s\n" % (name, email))
-        key_properties = urllib2.urlopen(SPEC).read()
+        key_properties = urlopen(SPEC).read()
         return key_properties.format(name, email)

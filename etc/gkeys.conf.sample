@@ -8,7 +8,7 @@ keyserver: pool.sks-keyservers.net
 
 
 # keysdir: base directory to store the binary keyrings and data
-keysdir: /var/lib/gentoo
+keysdir: /var/lib/gentoo/gkeys
 
 
 # devkeydir: the directory where the gentoo developer keys
@@ -52,7 +52,7 @@ dev-seedfile: %(seedsdir)s/developer.seeds
 
 
 # logfile directory
-logdir: %(keysdir)s/logs
+logdir: /var/log/gkeys
 
 
 [permissions]

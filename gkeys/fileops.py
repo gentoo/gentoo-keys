@@ -45,10 +45,11 @@ def updatefiles(config, logger):
                     "MAIN: _action_updatefile; Renaming current seed file to: "
                     "%s" % old)
                 os.rename(filename, old)
-            logger.debug(
-                "MAIN: _action_updatefile; Renaming '.new' seed file to: %s"
-                % filename)
-            os.rename(filename + '.new', filename)
+            if os.path.exists(filename + '.new'):
+                logger.debug(
+                    "MAIN: _action_updatefile; Renaming '.new' seed file to: %s"
+                    % filename)
+                os.rename(filename + '.new', filename)
         except IOError:
             raise
             return False

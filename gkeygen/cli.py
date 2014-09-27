@@ -63,7 +63,7 @@ class Main(object):
                             choices=list(log_levels),
                             help='The logging level to set for the logfile')
         parser.add_argument('-H', '--homedir', dest='homedir', default=None,
-                            help='The destination for the generate key')
+                            help='The destination for the generated key')
         parser.add_argument('-m', '--mail', dest='mail', default=None,
                             help='The email address to search for')
         parser.add_argument('-n', '--nick', dest='nick', default=None,

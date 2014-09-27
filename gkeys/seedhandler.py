@@ -66,7 +66,7 @@ class SeedHandler(object):
                                     '%s.seeds' % seedfile)
         self.logger.debug("SeedHandler: load_seeds; seeds filepath to load: "
             "%s" % filepath)
-        seeds = Seeds()
+        seeds = Seeds(config=self.config)
         seeds.load(filepath)
         return seeds
 

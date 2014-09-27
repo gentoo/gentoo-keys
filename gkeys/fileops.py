@@ -2,7 +2,7 @@ import os
 from snakeoil.osutils import (ensure_dirs as snakeoil_ensure_dirs)
 
 
-def ensure_dirs(path, gid=-1, uid=-1, mode=0700, minimal=True, failback=None, fatal=False):
+def ensure_dirs(path, gid=-1, uid=-1, mode=0o700, minimal=True, failback=None, fatal=False):
     '''Wrapper to snakeoil.osutil's ensure_dirs()
     This additionally allows for failures to run
     cleanup or other code and/or raise fatal errors.

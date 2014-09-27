@@ -95,7 +95,7 @@ class Actions(object):
 
     def create_seedfile(self, devs, filename):
         self.output("Creating seeds from LDAP data...")
-        self.seeds = Seeds(filename)
+        self.seeds = Seeds(filename, self.config)
         count = 0
         error_count = 0
         for dev in sorted(devs):

@@ -84,6 +84,8 @@ class GKeysConfig(GPGConfig):
         self.defaults['dev-timestamp'] = '%(keysdir)s/.developer_seeds_timestamp'
         self.defaults['rel-timestamp'] = '%(keysdir)s/.release_seeds_timestamp'
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
+        # NOTE: files is umask mode in octal, directories is chmod mode in octal
+        self.defaults['permissions'] = {'files': '0o002', 'directories': '0o775',}
         self.defaults['seedurls'] = {
             'release.seeds': 'https://dev.gentoo.org/~dolsen/gkey-seeds/release.seeds',
             'developers.seeds': 'https://dev.gentoo.org/~dolsen/gkey-seeds/developer.seeds',
@@ -111,7 +113,17 @@ class GKeysConfig(GPGConfig):
 
 
     def _get_(self, key, subkey=None):
-        if self.configparser and self.configparser.has_option('MAIN', key):
+        if subkey:
+            if self.configparser.get(key, subkey):
+                if logger:
+                    logger.debug("Found %s in configparser... %s"
+                        % (key, str(self.configparser.get(key, subkey))))
+                return self._sub_(self.configparser.get(key, subkey))
+            if subkey in self.options[key]:
+                return self._sub_(self.options[key][subkey])
+            elif subkey in self.defaults[key]:
+                return self._sub_(self.defaults[key][subkey])
+        elif self.configparser and self.configparser.has_option('MAIN', key):
             if logger:
                 logger.debug("Found %s in configparser... %s"
                     % (key, str(self.configparser.get('MAIN', key))))

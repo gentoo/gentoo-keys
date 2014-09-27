@@ -120,7 +120,9 @@ class Main(object):
         self.config.read_config()
 
         # establish our logger and update it in the imported files
-        logger = set_logger('gkeys', self.config['logdir'], args.debug)
+        logger = set_logger('gkeys', self.config['logdir'], args.debug,
+            dirmode=int(self.config.get_key('permissions', 'directories'),0),
+            filemask=int(self.config.get_key('permissions', 'files'),0))
         config.logger = logger
         fileops.logger = logger
         seed.logger = logger

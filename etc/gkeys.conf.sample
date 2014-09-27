@@ -20,9 +20,11 @@ dev-keydir: %(keysdir)s/devs
 # will be stored.
 rel-keydir: %(keysdir)s/release
 
+
 # keyring: the directory where the official keyring  with the specified keys
 # will be exported.
 keyring: %(keysdir)s/keyring
+
 
 # overlayskeydir: the directory where the overlay keys
 # will be stored.
@@ -52,9 +54,19 @@ dev-seedfile: %(seedsdir)s/developer.seeds
 # logfile directory
 logdir: %(keysdir)s/logs
 
+
+[permissions]
+
+# Permissions settings (octal)
+# chmod setting (octal)
+directories: 0775
+
+#umask setting (octal)
+files: 0o002
+
+
 [seedurls]
 # Use the filenames as the keys.
 # The will be paired to the seed file of the same name for fetching, updating
-
 release.seeds: https://api.gentoo.org/gentoo-keys/seeds/release.seeds
 developers.seeds: https://api.gentoo.org/gentoo-keys/seeds/developer.seeds

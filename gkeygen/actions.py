@@ -18,9 +18,11 @@ import sys
 if sys.hexversion >= 0x30200f0:
     from urllib.request import urlopen
     py_input = input
+    _unicode = str
 else:
     from urllib2 import urlopen
     py_input = raw_input
+    _unicode = unicode
 
 from gkeys.fileops import ensure_dirs
 
@@ -71,7 +73,7 @@ class Actions(object):
             shutil.copy('/usr/share/gnupg/gpg-conf.skel', newgpgconfpath)
             with open(newgpgconfpath, 'a') as conf:
                 for line in urlopen(GPG_CONF):
-                    conf.write(line)
+                    conf.write(_unicode(line))
             # Key generation
             ctx = gpgme.Context()
             self.logger.info("MAIN: _action_genkey: Generating GPG key...")
@@ -120,4 +122,4 @@ class Actions(object):
             email = py_input("Give your Email: ")
         print("\nReview:\n Full Name: %s\n Email: %s\n" % (name, email))
         key_properties = urlopen(SPEC).read()
-        return key_properties.format(name, email)
+        return _unicode(key_properties).format(name, email)

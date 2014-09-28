@@ -15,22 +15,26 @@ with gentoo-keys specific convienience functions.
              Brian Dolbec <dolsen@gentoo.org>
 
 '''
+
 import json
+import os
 
 from gkeys.log import logger
 from gkeys.config import GKEY
+from gkeys.fileops import ensure_dirs
 
 
 class Seeds(object):
     '''Handles all seed key file operations'''
 
 
-    def __init__(self, filepath=None):
+    def __init__(self, filepath=None, config=None):
         '''Seeds class init function
 
         @param filepath: string of the file to load
         '''
         self.filename = filepath
+        self.config = config
         self.seeds = {}
 
 
@@ -70,6 +74,10 @@ class Seeds(object):
             logger.debug("Seed: save; Not a valid filename: '%s'" % str(self.filename))
             return False
         logger.debug("Seed: save; Begin saving seed file %s" % self.filename)
+        ensure_dirs(os.path.split(self.filename)[0],
+            mode=int(self.config.get_key('permissions', "directories"),0),
+            fatal=True)
+        os.umask(int(self.config.get_key("permissions", "files"),0))
         try:
             with open(self.filename, 'w') as seedfile:
                 seedfile.write(self._seeds2json(self.seeds))

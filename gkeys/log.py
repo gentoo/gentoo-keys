@@ -14,6 +14,8 @@ import logging
 import time
 import os
 
+from gkeys.fileops import ensure_dirs
+
 
 NAMESPACE = 'gentoo-keys'
 logger = None
@@ -31,7 +33,8 @@ log_levels = {
 }
 
 
-def set_logger(namespace=None, logpath='', level=None):
+def set_logger(namespace=None, logpath='', level=None,
+               dirmode=0o775, filemask=0o002):
     global logger, NAMESPACE, Console_handler
     if not namespace:
         namespace = NAMESPACE
@@ -44,6 +47,8 @@ def set_logger(namespace=None, logpath='', level=None):
     formatter = logging.Formatter(log_format)
     # add the handlers to logger
     if logpath:
+        ensure_dirs(logpath, mode=dirmode, fatal=True)
+        os.umask(filemask)
         logname = os.path.join(logpath,
             '%s-%s.log' % (namespace, time.strftime('%Y%m%d-%H:%M')))
         file_handler = logging.FileHandler(logname)

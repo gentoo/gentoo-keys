@@ -63,7 +63,7 @@ class Main(object):
                             choices=list(log_levels),
                             help='The logging level to set for the logfile')
         parser.add_argument('-H', '--homedir', dest='homedir', default=None,
-                            help='The destination for the generate key')
+                            help='The destination for the generated key')
         parser.add_argument('-m', '--mail', dest='mail', default=None,
                             help='The email address to search for')
         parser.add_argument('-n', '--nick', dest='nick', default=None,
@@ -90,7 +90,9 @@ class Main(object):
         self.config.read_config()
 
         # establish our logger and update it in the imported files
-        logger = set_logger('gkeys-gen', self.config['logdir'], args.debug)
+        logger = set_logger('gkeys-gen', self.config['logdir'], args.debug,
+            dirmode=int(self.config.get_key('permissions', 'directories'),0),
+            filemask=int(self.config.get_key('permissions', 'files'),0))
         #config.logger = logger
 
         if message:

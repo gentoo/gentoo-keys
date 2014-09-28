@@ -75,7 +75,8 @@ class GkeysGPG(GPG):
             task_value = ['--import-options', 'import-clean']
             self.config.options['tasks'][task].extend(task_value)
             parent_dir = abspath(pjoin(keyring, pardir))
-            ensure_dirs(parent_dir)
+            ensure_dirs(parent_dir,
+                mode=int(self.config.get_key('permissions', 'directories'),0))
         task_value = ['--no-default-keyring', '--keyring', keyring]
         self.config.options['tasks'][task].extend(task_value)
         logger.debug("set_keyring: New task options: %s" %str(self.config.options['tasks'][task]))
@@ -304,4 +305,4 @@ class GkeysGPG(GPG):
 
 
     def set_keyseedfile(self):
-        self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'))
+        self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'), self.config)

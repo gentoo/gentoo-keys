@@ -2,7 +2,7 @@ import os
 from snakeoil.osutils import (ensure_dirs as snakeoil_ensure_dirs)
 
 
-def ensure_dirs(path, gid=-1, uid=-1, mode=0700, minimal=True, failback=None, fatal=False):
+def ensure_dirs(path, gid=-1, uid=-1, mode=0o700, minimal=True, failback=None, fatal=False):
     '''Wrapper to snakeoil.osutil's ensure_dirs()
     This additionally allows for failures to run
     cleanup or other code and/or raise fatal errors.
@@ -20,7 +20,7 @@ def ensure_dirs(path, gid=-1, uid=-1, mode=0700, minimal=True, failback=None, fa
     @return: True if the directory could be created/ensured to have those
         permissions, False if not.
     '''
-    succeeded = snakeoil_ensure_dirs(path, gid=-1, uid=-1, mode=0700, minimal=True)
+    succeeded = snakeoil_ensure_dirs(path, gid=-1, uid=-1, mode=mode, minimal=True)
     if not succeeded:
         if failback:
             failback()
@@ -45,10 +45,11 @@ def updatefiles(config, logger):
                     "MAIN: _action_updatefile; Renaming current seed file to: "
                     "%s" % old)
                 os.rename(filename, old)
-            logger.debug(
-                "MAIN: _action_updatefile; Renaming '.new' seed file to: %s"
-                % filename)
-            os.rename(filename + '.new', filename)
+            if os.path.exists(filename + '.new'):
+                logger.debug(
+                    "MAIN: _action_updatefile; Renaming '.new' seed file to: %s"
+                    % filename)
+                os.rename(filename + '.new', filename)
         except IOError:
             raise
             return False

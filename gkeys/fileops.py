@@ -20,7 +20,7 @@ def ensure_dirs(path, gid=-1, uid=-1, mode=0o700, minimal=True, failback=None, f
     @return: True if the directory could be created/ensured to have those
         permissions, False if not.
     '''
-    succeeded = snakeoil_ensure_dirs(path, gid=-1, uid=-1, mode=0700, minimal=True)
+    succeeded = snakeoil_ensure_dirs(path, gid=-1, uid=-1, mode=mode, minimal=True)
     if not succeeded:
         if failback:
             failback()

@@ -59,7 +59,7 @@ logdir: /var/log/gkeys
 
 # Permissions settings (octal)
 # chmod setting (octal)
-directories: 0775
+directories: 0o775
 
 #umask setting (octal)
 files: 0o002

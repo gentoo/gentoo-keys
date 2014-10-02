@@ -93,10 +93,15 @@ class Main(object):
         subparsers = parser.add_subparsers(help='actions')
         for name in Available_Actions:
             action_method = getattr(Actions, name)
+            actiondoc = action_method.__doc__
+            try:
+                text = actiondoc.splitlines()[0]
+            except AttributeError:
+                text = ""
             action_parser = subparsers.add_parser(
                 name,
-                help=action_method.__doc__.splitlines()[0],
-                description=action_method.__doc__,
+                help=text,
+                description=actiondoc,
                 formatter_class=argparse.RawDescriptionHelpFormatter)
             action_parser.set_defaults(action=name)
 

@@ -13,7 +13,7 @@
 import os
 import re
 
-from gkeys.config import GKEY
+from gkeys.config import GKEY, MAPSEEDS
 from gkeys.seed import Seeds
 from sslfetch.connections import Connector
 
@@ -72,7 +72,6 @@ class SeedHandler(object):
 
     def fetch_seeds(self, seeds):
         '''Fetch new seed files'''
-        # TODO: add support for separated fetching
         # setup the ssl-fetch ouptut map
         connector_output = {
             'info': self.logger.info,
@@ -83,12 +82,17 @@ class SeedHandler(object):
         http_check = re.compile(r'^(http|https)://')
         urls = []
         messages = []
-        devseeds = self.config.get_key('developers.seeds')
-        relseeds = self.config.get_key('release.seeds')
-        if not http_check.match(devseeds) and not http_check.match(relseeds):
-            urls.extend([self.config['seedurls']['developers.seeds'], self.config['seedurls']['release.seeds']])
-        else:
-            urls.extend([devseeds, relseeds])
+        try:
+            for seed in [seeds]:
+                seedurl = self.config.get_key(MAPSEEDS[seed])
+                if http_check.match(seedurl):
+                    urls.extend([seedurl])
+                else:
+                    self.logger.info("Wrong seed file URLs... Switching to default URLs.")
+                    urls.extend([self.config['seedurls'][MAPSEEDS[seed]]])
+        except KeyError:
+            for key, value in MAPSEEDS.items():
+                urls.extend([self.config['seedurls'][value]])
         fetcher = Connector(connector_output, None, "Gentoo Keys")
         for url in urls:
             seed = url.rsplit('/', 1)[1]

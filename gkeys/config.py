@@ -43,10 +43,14 @@ GKEY_STRING = '''    ----------
     Nick.........: %(nick)s
     Keydir.......: %(keydir)s
 '''
+
 GKEY_FINGERPRINTS = \
 '''    Keyid........: %(keyid)s
       Fingerprint: %(fingerprint)s
 '''
+
+MAPSEEDS = { 'dev' : 'developers.seeds', 'rel': 'release.seeds' }
+
 
 class GKeysConfig(GPGConfig):
     """ Configuration superclass which holds our gentoo-keys

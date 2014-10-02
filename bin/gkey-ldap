@@ -18,8 +18,12 @@
 
 from __future__ import print_function
 
+from gkeyldap.cli import Main
+
 import os
 import sys
+
+
 # This block ensures that ^C interrupts are handled quietly.
 try:
     import signal
@@ -38,14 +42,9 @@ except KeyboardInterrupt:
     print()
     sys.exit(1)
 
-
-from gkeyldap.cli import Main
-
 root = None
-try:
+if 'ROOT' in os.environ:
     root = os.environ['ROOT']
-except KeyError:
-    pass
 
 main = Main(root=root)
 main()

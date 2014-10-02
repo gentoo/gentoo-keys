@@ -233,6 +233,7 @@ class Actions(object):
             return ["Completed"]
         return ["No seeds to search or install"]
 
+
     def checkkey(self, args):
         '''Check keys actions'''
         if not args.seeds:
@@ -268,6 +269,7 @@ class Actions(object):
         return ['\nFound:\n-------', 'Expired: %d\nRevoked: %d\nInvalid: %d\nNo signing capabilities: %d'
                 % (len(failed['expired']), len(failed['revoked']),
                     len(failed['invalid']), len(failed['sign']))]
+
 
     def removekey(self, args):
         '''Remove an installed key'''
@@ -376,6 +378,7 @@ class Actions(object):
         @return boolean: confirmation to proceed or abort
         '''
         pass
+
 
     def verify(self, args):
         '''File verification action'''

@@ -74,19 +74,19 @@ class GKeysConfig(GPGConfig):
 
 
     def _add_gkey_defaults(self):
-        self.defaults['keysdir'] = path([self.root, EPREFIX, '/var/lib/gentoo/gkeys'])
-        self.defaults['dev-keydir'] = '%(keysdir)s/devs'
-        self.defaults['rel-keydir'] = '%(keysdir)s/release'
-        self.defaults['keyring'] = '%(keysdir)s/keyring'
-        self.defaults['overlays-keydir'] = '%(keysdir)s/overlays'
+        self.defaults['gkeysdir'] = path([self.root, EPREFIX, '/var/lib/gentoo/gkeys'])
+        self.defaults['dev-keydir'] = '%(gkeysdir)s/devs'
+        self.defaults['rel-keydir'] = '%(gkeysdir)s/release'
+        self.defaults['keyring'] = '%(gkeysdir)s/keyring'
+        self.defaults['overlays-keydir'] = '%(gkeysdir)s/overlays'
         self.defaults['logdir'] = '/var/log/gkeys'
         # local directory to scan for seed files installed via ebuild, layman
         # or manual install.
-        self.defaults['seedsdir'] = '%(keysdir)s/seeds'
+        self.defaults['seedsdir'] = '%(gkeysdir)s/seeds'
         self.defaults['dev-seedfile'] = '%(seedsdir)s/developer.seeds'
         self.defaults['rel-seedfile'] = '%(seedsdir)s/release.seeds'
-        self.defaults['dev-timestamp'] = '%(keysdir)s/.developer_seeds_timestamp'
-        self.defaults['rel-timestamp'] = '%(keysdir)s/.release_seeds_timestamp'
+        self.defaults['dev-timestamp'] = '%(gkeysdir)s/.developer_seeds_timestamp'
+        self.defaults['rel-timestamp'] = '%(gkeysdir)s/.release_seeds_timestamp'
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
         # NOTE: files is umask mode in octal, directories is chmod mode in octal
         self.defaults['permissions'] = {'files': '0o002', 'directories': '0o775',}

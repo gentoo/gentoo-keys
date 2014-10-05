@@ -7,38 +7,37 @@
 keyserver: pool.sks-keyservers.net
 
 
-# keysdir: base directory to store the binary keyrings and data
-keysdir: /var/lib/gentoo/gkeys
+# Base directory to use as the path prefix to use
+# for the gkey directories, keyring settings
+# eg: '/' for root if absolute paths are used
+#     for sub-directories, keyrings
+# eg: /var/lib/gentoo/gkeys if using relative paths
+gkeysdir: /var/lib/gentoo/gkeys
 
 
 # devkeydir: the directory where the gentoo developer keys
 # will be stored.
-dev-keydir: %(keysdir)s/devs
+dev-category: %(gkeysdir)s/devs
 
 
-# releaskeydir: the directory where the official release media keys
+# release key directory: the directory where the official release media keys
 # will be stored.
-rel-keydir: %(keysdir)s/release
+rel-category: %(gkeysdir)s/release
 
 
 # keyring: the directory where the official keyring  with the specified keys
 # will be exported.
-keyring: %(keysdir)s/keyring
+keyring: %(gkeysdir)s/keyring
 
 
 # overlayskeydir: the directory where the overlay keys
 # will be stored.
-overlays-keydir: %(keysdir)s/overlays
-
-
-# knownkeysfile: txt file to hold a cache of the
-# installed (name, keyid, fingerprint) keys
-known-keysfile:  %(keysdir)s/knownkeys
+overlays-category: %(gkeysdir)s/overlays
 
 
 # seedsdir: base directory for all seed files
 # used when searching all seed files.
-seedsdir: %(keysdir)s/seeds
+seedsdir: %(gkeysdir)s/seeds
 
 
 # releaseseedfile: txt file of one tuple of (name, keyid, fingerprint)
@@ -66,6 +65,7 @@ files: 0o002
 
 
 [seedurls]
+
 # Use the filenames as the keys.
 # The will be paired to the seed file of the same name for fetching, updating
 release.seeds: https://api.gentoo.org/gentoo-keys/seeds/release.seeds

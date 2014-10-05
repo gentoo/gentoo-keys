@@ -33,7 +33,7 @@ class GkeysGPG(GPG):
     '''Gentoo-keys primary gpg class'''
 
 
-    def __init__(self, config, keydir):
+    def __init__(self, config, basedir):
         '''class init function
 
         @param config: GKeysConfig config instance to use
@@ -42,7 +42,7 @@ class GkeysGPG(GPG):
         '''
         GPG.__init__(self, config, logger)
         self.config = config
-        self.basedir = keydir
+        self.basedir = basedir
         self.keydir = None
         self.server = None
 

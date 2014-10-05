@@ -62,7 +62,7 @@ class Actions(object):
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
             try:
-                self.seeds = handler.load_seeds(args.seeds, args.seedfile)
+                self.seeds = handler.load_seeds(args.category, args.seedfile)
             except ValueError:
                 return ["Failed to load seed file. Consider fetching seedfiles."]
         if self.seeds:
@@ -75,7 +75,7 @@ class Actions(object):
     def fetchseed(self, args):
         '''Download the selected seed file(s)'''
         handler = SeedHandler(self.logger, self.config)
-        messages = handler.fetch_seeds(args.seeds)
+        messages = handler.fetch_seeds(args.category)
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
         return messages
 
@@ -127,7 +127,7 @@ class Actions(object):
         searchkey = handler.new(args, needkeyid=False, checkintegrity=False)
         self.logger.debug("ACTIONS: moveseed; gkey: %s" % str(searchkey))
         if not self.seeds:
-            self.seeds = self.load_seeds(args.seeds)
+            self.seeds = self.load_seeds(args.category)
         kwargs = handler.build_gkeydict(args)
         sourcekeys = self.seeds.list(**kwargs)
         dest = self.load_seeds(args.destination)
@@ -145,7 +145,7 @@ class Actions(object):
                 self.logger.debug("ACTIONS: moveseed; destination saved... %s" %str(success))
                 success = self.seeds.save()
             messages.extend(["Successfully Moved %s seed: %s"
-                % (args.seeds, str(success)), sourcekeys[0]])
+                % (args.category, str(success)), sourcekeys[0]])
             return messages
         elif len(sourcekeys):
             messages = ["Too many seeds found to move"]
@@ -182,9 +182,9 @@ class Actions(object):
                 messages = ["Search failed for search term"]
         # get confirmation
         # fill in code here
-        keydir = self.config.get_key(args.seeds + "-keydir")
-        self.logger.debug("ACTIONS: listkey; keysdir = %s" % keydir)
-        self.gpg = GkeysGPG(self.config, keydir)
+        catdir = self.config.get_key(args.category + "-category")
+        self.logger.debug("ACTIONS: listkey; catdir = %s" % catdir)
+        self.gpg = GkeysGPG(self.config, catdir)
         results = {}
         print(" GPG output:")
         for key in keyresults:
@@ -225,9 +225,9 @@ class Actions(object):
                     return ["Search failed for search term"]
             # get confirmation
             # fill in code here
-            keydir = self.config.get_key(args.seeds + "-keydir")
-            self.logger.debug("ACTIONS: installkey; keysdir = %s" % keydir)
-            self.gpg = GkeysGPG(self.config, keydir)
+            catdir = self.config.get_key(args.category + "-category")
+            self.logger.debug("ACTIONS: installkey; catdir = %s" % catdir)
+            self.gpg = GkeysGPG(self.config, catdir)
             results = {}
             failed = []
             for key in gkey:
@@ -253,13 +253,13 @@ class Actions(object):
 
     def checkkey(self, args):
         '''Check keys actions'''
-        if not args.seeds:
+        if not args.category:
             return ["Please specify seeds type (-s)."]
         self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
         installed_keys = self.installed(args)[1]
-        keydir = self.config.get_key(args.seeds + "-keydir")
-        self.logger.debug("ACTIONS: checkkey; keysdir = %s" % keydir)
-        self.gpg = GkeysGPG(self.config, keydir)
+        catdir = self.config.get_key(args.category + "-category")
+        self.logger.debug("ACTIONS: checkkey; catdir = %s" % catdir)
+        self.gpg = GkeysGPG(self.config, catdir)
         results = {}
         failed = defaultdict(list)
         self.output('', '\n Checking keys...')
@@ -309,10 +309,10 @@ class Actions(object):
                 if ans in ["no", "n"]:
                     messages = ["Key removal aborted... Nothing to be done."]
                 else:
-                    keydir = self.config.get_key(args.seeds + "-keydir")
-                    rm_candidate = os.path.join(keydir, gkey.nick)
-                    self.logger.debug("ACTIONS: removekey; keysdir = %s" % keydir)
-                    if args.seeds:
+                    catdir = self.config.get_key(args.category + "-category")
+                    rm_candidate = os.path.join(catdir, gkey.nick)
+                    self.logger.debug("ACTIONS: removekey; catdir = %s" % catdir)
+                    if args.category:
                         try:
                             rmtree(rm_candidate)
                             messages = ["Done removing %s key." % kwargs['nick']]
@@ -328,11 +328,11 @@ class Actions(object):
 
     def importkey(self, args):
         '''Add a specified key to a specified keyring'''
-        if args.seeds:
-            keydir = self.config.get_key(args.seeds + "-keydir")
+        if args.category:
+            catdir = self.config.get_key(args.category + "-category")
             keyring_dir = self.config.get_key("keyring")
-            self.logger.debug("ACTIONS: importkey; keydir = %s" % keydir)
-            self.gpg = GkeysGPG(self.config, keydir)
+            self.logger.debug("ACTIONS: importkey; catdir = %s" % catdir)
+            self.gpg = GkeysGPG(self.config, catdir)
             handler = SeedHandler(self.logger, self.config)
             gkeys = self.listseed(args)[1]
             results = {}
@@ -354,7 +354,7 @@ class Actions(object):
                     print("Importing: ", gkey.name)
                     self.logger.debug("ACTIONS: importkey; importing key: %s", gkey.name)
                     keyring = os.path.join(keyring_dir,args.keyring + '.gpg')
-                    self.gpg.add_to_keyring(gkey, keydir, keyring)
+                    self.gpg.add_to_keyring(gkey, catdir, keyring)
             if failed and self.output:
                 self.output([failed], "\n Failed to install:")
             return ["Completed."]
@@ -363,19 +363,19 @@ class Actions(object):
 
     def installed(self, args):
         '''Lists the installed key directories'''
-        if args.seeds:
-            keydir = self.config.get_key(args.seeds + "-keydir")
+        if args.category:
+            catdir = self.config.get_key(args.category + "-category")
         else:
             return ["Please specify a seed file."]
-        self.logger.debug("ACTIONS: installed; keysdir = %s" % keydir)
+        self.logger.debug("ACTIONS: installed; catdir = %s" % catdir)
         installed_keys = []
         try:
             if args.nick:
                 keys = [args.nick]
             else:
-                keys = os.listdir(keydir)
+                keys = os.listdir(catdir)
             for key in keys:
-                seed_path = os.path.join(keydir, key)
+                seed_path = os.path.join(catdir, key)
                 gkey_path = os.path.join(seed_path, 'gkey.seeds')
                 try:
                     with open(gkey_path, 'r') as fileseed:
@@ -384,8 +384,8 @@ class Actions(object):
                     return ["No seed file found in %s." % gkey_path, ""]
                 installed_keys.append(GKEY(**seed.values()[0]))
         except OSError:
-            return ["%s keydir does not exist." % keydir, ""]
-        return ['Found Key/s:', installed_keys]
+            return ["%s catdir does not exist." % catdir, ""]
+        return ['Found Key(s):', installed_keys]
 
 
     def user_confirm(self, message):
@@ -407,14 +407,14 @@ class Actions(object):
         }
         if not args.filename:
             return ['Please provide a signed file.']
-        if not args.seeds:
+        if not args.category:
             return ['Please specifiy type of seed file.']
         keys = self.installed(args)[1]
         if not keys:
             return ['No installed keys, try installkey action.']
-        keydir = self.config.get_key(args.seeds + "-keydir")
-        self.logger.debug("ACTIONS: verify; keysdir = %s" % keydir)
-        self.gpg = GkeysGPG(self.config, keydir)
+        catdir = self.config.get_key(args.category + "-category")
+        self.logger.debug("ACTIONS: verify; catdir = %s" % catdir)
+        self.gpg = GkeysGPG(self.config, catdir)
         filepath, signature  = args.filename, args.signature
         isurl = success = False
         if filepath.startswith('http'):

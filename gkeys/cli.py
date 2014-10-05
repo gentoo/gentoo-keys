@@ -17,7 +17,7 @@ import argparse
 import sys
 
 from gkeys import config, fileops, seed, lib
-from gkeys.actions import Actions, Available_Actions
+from gkeys.actions import Actions, Available_Actions, Action_Options
 from gkeys.config import GKeysConfig
 from gkeys.log import log_levels, set_logger
 
@@ -47,6 +47,64 @@ class Main(object):
             self.run(self.parse_args(sys.argv[1:]))
 
 
+    def _add_options(self, parser, options):
+        for opt in options:
+            getattr(self, '_option_%s' % opt)(parser)
+
+    @staticmethod
+    def _option_dest(parser=None):
+        parser.add_argument('-d', '--dest', dest='destination', default=None,
+            help='The destination seed file or keydir for move, copy operations')
+
+    @staticmethod
+    def _option_fingerprint(parser=None):
+        parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
+            help='The fingerprint of the the key')
+
+    @staticmethod
+    def _option_keyring(parser=None):
+        parser.add_argument('-k', '--keyring', dest='keyring', default='trusted_keyring',
+            help='The name of the keyring to use')
+
+    @staticmethod
+    def _option_nick(parser=None):
+        parser.add_argument('-n', '--nick', dest='nick', default=None,
+            help='The nick associated with the the key')
+
+    @staticmethod
+    def _option_name(parser=None):
+        parser.add_argument('-N', '--name', dest='name', nargs='*',
+            default=None, help='The name of the the key')
+
+    @staticmethod
+    def _option_category(parser=None):
+        parser.add_argument('-c', '--category',
+            choices=['rel', 'dev', 'overlays', 'sign'], dest='category', default=None,
+            help='The key or seed directory category to use or update')
+
+    @staticmethod
+    def _option_keydir(parser=None):
+        parser.add_argument('-r', '--keydir', dest='keydir', default=None,
+            help='The keydir to use or update')
+
+    @staticmethod
+    def _option_seedfile(parser=None):
+        parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
+            help='The seedfile path to use')
+
+    @staticmethod
+    def _option_file(parser=None):
+        parser.add_argument('-F', '--file', dest='filename', default=None,
+            nargs='+',
+            help='The path/URL to use for the signed file')
+
+    @staticmethod
+    def _option_signature(parser=None):
+        parser.add_argument('-z','--signature', dest='signature', default=None,
+           help='The path/URL to use for the signature')
+
+
+
     def parse_args(self, args):
         '''Parse a list of aruments
 
@@ -63,31 +121,9 @@ class Main(object):
         # options
         parser.add_argument('-c', '--config', dest='config', default=None,
             help='The path to an alternate config file')
-        parser.add_argument('-d', '--dest', dest='destination', default=None,
-            help='The destination seed file or keydir for move, copy operations')
         parser.add_argument('-D', '--debug', default='DEBUG',
             choices=list(log_levels),
             help='The logging level to set for the logfile')
-        parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
-            help='The fingerprint of the the key')
-        parser.add_argument('-k', '--keyring', dest='keyring', default='trusted_keyring',
-            help='The name of the keyring to use')
-        parser.add_argument('-n', '--nick', dest='nick', default=None,
-            help='The nick associated with the the key')
-        parser.add_argument('-N', '--name', dest='name', nargs='*',
-            default=None, help='The name of the the key')
-        parser.add_argument('-r', '--keydir',
-            choices=['rel', 'dev', 'overlays'], dest='keydir', default=None,
-            help='The keydir to use or update')
-        parser.add_argument('-s', '--seeds',
-            choices=['rel', 'dev'], dest='seeds', default=None,
-            help='The seeds file to use or update')
-        parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
-            help='The seedfile path to use')
-        parser.add_argument('-F', '--file', dest='filename', default=None,
-               help='The path/URL to use for the signed file')
-        parser.add_argument('-z','--signature', dest='signature', default=None,
-           help='The path/URL to use for the signature')
 
 
         subparsers = parser.add_subparsers(help='actions')
@@ -104,6 +140,7 @@ class Main(object):
                 description=actiondoc,
                 formatter_class=argparse.RawDescriptionHelpFormatter)
             action_parser.set_defaults(action=name)
+            self._add_options(action_parser, Action_Options[name])
 
         return parser.parse_args(args)
 

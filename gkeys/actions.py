@@ -28,6 +28,23 @@ Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed
             'installed', 'importkey', 'verify', 'checkkey']
 
 
+Action_Options = {
+    'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
+    'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
+    'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
+    'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile', 'dest'],
+    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
+    'listseedfiles': ['nick', 'name', 'keydir', 'fingerprint', 'category',],
+    'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'removekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'movekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
+    'installed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'importkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'verify': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'file', 'signature', 'keyring'],
+    'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+}
+
 class Actions(object):
     '''Primary API actions'''
 

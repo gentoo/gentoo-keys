@@ -306,3 +306,27 @@ class GkeysGPG(GPG):
 
     def set_keyseedfile(self):
         self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'), self.config)
+
+
+    def sign_file(self, gkey, mode, fingerprint, filepath):
+        '''Verify the file specified at filepath or url
+
+        @param gkey: GKEY instance
+        @param mode: string of the signing task to use
+        @param fingerprint: string of the fingerprint to sign with
+        @param filepath: string with the path of the file to sign
+        '''
+        keyid = gkey.keyid[0]
+        self.set_keydir(gkey.keydir, mode, reset=True)
+        logger.debug("** Calling runGPG with Running 'gpg %s --%s %s %s'"
+                % (' '.join(self.config['tasks'][mode]), mode, fingerprint, filepath))
+        results = self.runGPG(task=mode, inputfile=filepath)
+
+        if results.verified[0]:
+            logger.info("GPG signing succeeded. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            logger.info("\tSignature result:" + str(results.verified))
+        else:
+            logger.debug("GPG signing failed. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            logger.debug("\t Signature result:"+ str(results.verified))
+            logger.debug("LIB: sign; stderr_out:" + str(results.stderr_out))
+        return results

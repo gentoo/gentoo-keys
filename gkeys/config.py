@@ -79,6 +79,7 @@ class GKeysConfig(GPGConfig):
         self.defaults['rel-keydir'] = '%(gkeysdir)s/release'
         self.defaults['keyring'] = '%(gkeysdir)s/keyring'
         self.defaults['overlays-keydir'] = '%(gkeysdir)s/overlays'
+        self.defaults['sign-keydir'] = '%(gkeysdir)s/sign',
         self.defaults['logdir'] = '/var/log/gkeys'
         # local directory to scan for seed files installed via ebuild, layman
         # or manual install.
@@ -93,6 +94,12 @@ class GKeysConfig(GPGConfig):
         self.defaults['seedurls'] = {
             'release.seeds': 'https://api.gentoo.org/gentoo-keys/release.seeds',
             'developers.seeds': 'https://api.gentoo.org/gentoo-keys/developer.seeds',
+        }
+        self.defaults['sign'] = {
+            'key': 'fingerprint',
+            'keydir': '~/.gkeys',
+            'keyring': None,
+            'type': 'clearsign',
         }
 
 
@@ -118,7 +125,7 @@ class GKeysConfig(GPGConfig):
 
     def _get_(self, key, subkey=None):
         if subkey:
-            if self.configparser.get(key, subkey):
+            if self.configparser and self.configparser.has_option(key, subkey):
                 if logger:
                     logger.debug("Found %s in configparser... %s"
                         % (key, str(self.configparser.get(key, subkey))))
@@ -127,6 +134,8 @@ class GKeysConfig(GPGConfig):
                 return self._sub_(self.options[key][subkey])
             elif subkey in self.defaults[key]:
                 return self._sub_(self.defaults[key][subkey])
+            else:
+                return super(GKeysConfig, self)._get_(key, subkey)
         elif self.configparser and self.configparser.has_option('MAIN', key):
             if logger:
                 logger.debug("Found %s in configparser... %s"

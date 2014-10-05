@@ -70,3 +70,28 @@ files: 0o002
 # The will be paired to the seed file of the same name for fetching, updating
 release.seeds: https://api.gentoo.org/gentoo-keys/seeds/release.seeds
 developers.seeds: https://api.gentoo.org/gentoo-keys/seeds/developer.seeds
+
+
+[sign]
+
+# Base directory to use as the path prefix to use
+# for the signing capable keyrings, keyring settings
+# eg: '/' for root if absolute paths are used for homedir, keyring
+# eg: %(gkeysdir)s if using relative paths
+sign-category: %(gkeysdir)s/sign
+
+
+# The home or key directory to use for signing files
+#keydir: foo
+
+
+# keyring to use if not the default
+# keyring: bar
+
+
+# The key fingerprint to use for signing
+# key: 0x01234567891012345
+
+
+# the gpg signature option to use for signing
+# type: detach-sign

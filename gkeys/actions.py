@@ -25,8 +25,7 @@ from gkeys.config import GKEY
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
-            'installed', 'importkey', 'verify', 'checkkey']
-
+            'installed', 'importkey', 'verify', 'checkkey', 'sign']
 
 Action_Options = {
     'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
@@ -43,7 +42,9 @@ Action_Options = {
     'importkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'verify': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'file', 'signature', 'keyring'],
     'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
 }
+
 
 class Actions(object):
     '''Primary API actions'''
@@ -430,7 +431,7 @@ class Actions(object):
             messages = ["File %s cannot be retrieved." % filepath]
         else:
             if not signature:
-                EXTENSIONS = ['.asc','.sig','.gpgsig']
+                EXTENSIONS = ['.asc', '.sig', 'gpg','.gpgsig']
                 success_fetch = False
                 for ext in EXTENSIONS:
                     signature = filepath + ext
@@ -467,3 +468,34 @@ class Actions(object):
         seedfile = [f for f in os.listdir(seedsdir) if f[-5:] == 'seeds']
         return {"Seed files found at path: %s\n  %s"
             % (seedsdir, "\n  ".join(seedfile)): True}
+
+
+    def sign(self, args):
+        '''Sign a file'''
+        if not args.filename:
+            return ['Please provide a file to sign.']
+
+        # load our installed signing keys db
+        handler = SeedHandler(self.logger, self.config)
+        self.seeds = handler.load_category('sign', args.nick)
+        if not self.seeds.seeds:
+            return ['No installed keys, try installkey action.', '']
+        basedir = self.config.get_key("sign-category")
+        keydir  = self.config.get_key("sign", "keydir")
+        task = self.config.get_key("sign", "type")
+        keyring = self.config.get_key("sign", "keyring")
+
+        self.config.options['gpg_defaults'] = ['--status-fd', '2']
+
+        self.logger.debug("ACTIONS: sign; keydir = %s" % keydir)
+
+        self.gpg = GkeysGPG(self.config, basedir)
+        self.gpg.set_keydir(keydir, task)
+        if keyring not in ['', None]:
+            self.gpg.set_keyring(keyring, task)
+        results = self.gpg.sign(task, None, " ".join(args.filename))
+        verified, trust = results.verified
+        if not results.verified[0]:
+            return ['', ['Failed Signature, verified: %s, trust: %s' % (verified, trust), 'GPG output:', "\n".join(results.stderr_out)]]
+        return ['', ['Signature result, verified: %s, trust: %s' % (verified, trust)]] #, 'GPG output:', "\n".join(results.stderr_out)]]
+

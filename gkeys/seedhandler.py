@@ -12,6 +12,7 @@
 
 import os
 import re
+from json import load
 
 from gkeys.config import GKEY, MAPSEEDS
 from gkeys.seed import Seeds
@@ -68,6 +69,38 @@ class SeedHandler(object):
             "%s" % filepath)
         seeds = Seeds(config=self.config)
         seeds.load(filepath)
+        return seeds
+
+    def load_category(self, category, nicks=None):
+        '''Loads the designated key directories
+
+        @param category: string
+        @param nicks: list of string nick ids to load
+        @return Seeds class object
+        '''
+        seeds = Seeds(config=self.config)
+        if category:
+            catdir = self.config.get_key(category + "-category")
+        else:
+            self.logger.debug("SeedHandler: load_category; Error invalid category: %s." % (str(category)))
+            return seeds
+        self.logger.debug("SeedHandler: load_category; catdir = %s" % catdir)
+        try:
+            if not nicks:
+                nicks = os.listdir(catdir)
+            for nick in nicks:
+                seed_path = os.path.join(catdir, nick)
+                gkey_path = os.path.join(seed_path, 'gkey.seeds')
+                try:
+                    with open(gkey_path, 'r') as fileseed:
+                        seed = load(fileseed)
+                except IOError as error:
+                    self.logger.debug("SeedHandler: load_category; IOError loading seed file %s." % gkey_path)
+                    self.logger.debug("Error was: %s" % str(error))
+                seeds.add(nick, GKEY(**seed.values()[0]))
+        except OSError as error:
+            self.logger.debug("SeedHandler: load_category; OSError for %s" % catdir)
+            self.logger.debug("Error was: %s" % str(error))
         return seeds
 
     def fetch_seeds(self, seeds):

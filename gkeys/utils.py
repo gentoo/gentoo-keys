@@ -1,10 +1,10 @@
 #
 # -*- coding: utf-8 -*-
 
-'''# File:       xml.py
+'''# File:       utils.py
 
              Utilities to deal with things...
-             copied/edited from app-portage/layman
+             copied/edited from app-portage/layman's xml.py
 
 
  Copyright:

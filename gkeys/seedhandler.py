@@ -55,16 +55,22 @@ class SeedHandler(object):
         return keyinfo
 
     def load_seeds(self, seeds=None, seedfile=None):
+        '''Load seed file
+
+        @param seeds: string of the short name seed file
+        @param seedfile: string filepath of the file to load
+        @return Seeds class instance of the file loaded
+        '''
         if not seeds and not seedfile:
             self.logger.error("SeedHandler: load_seeds; no filename to load: "
             "setting = %s.  Please use the -s option to indicate: which seed "
             "file to use." % seedfile)
             return False
         if seeds:
-            filepath = self.config.get_key(seeds + "-seedfile")
+            filepath = self.config.get_key(
+                self.config.get_key('seedsdir'),seeds + "-seedfile")
         elif seedfile:
-            filepath = os.path.join(self.config.get_key('seedsdir'),
-                                    '%s.seeds' % seedfile)
+            filepath = seedfile
         self.logger.debug("SeedHandler: load_seeds; seeds filepath to load: "
             "%s" % filepath)
         seeds = Seeds(config=self.config)

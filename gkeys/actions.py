@@ -493,9 +493,18 @@ class Actions(object):
         self.gpg.set_keydir(keydir, task)
         if keyring not in ['', None]:
             self.gpg.set_keyring(keyring, task)
-        results = self.gpg.sign(task, None, " ".join(args.filename))
-        verified, trust = results.verified
-        if not results.verified[0]:
-            return ['', ['Failed Signature, verified: %s, trust: %s' % (verified, trust), 'GPG output:', "\n".join(results.stderr_out)]]
-        return ['', ['Signature result, verified: %s, trust: %s' % (verified, trust)]] #, 'GPG output:', "\n".join(results.stderr_out)]]
-
+        msgs = []
+        for fname in args.filename:
+            results = self.gpg.sign(task, None, fname)
+            verified, trust = results.verified
+            if not results.verified[0]:
+                msgs.extend(
+                    ['Failed Signature for %s verified: %s, trust: %s'
+                        % (fname, verified, trust), 'GPG output:', "\n".join(results.stderr_out)]
+                )
+            else:
+                msgs.extend(
+                    ['Signature result for: %s -- verified: %s, trust: %s'
+                        % (fname, verified, trust)] #, 'GPG output:', "\n".join(results.stderr_out)]
+                )
+        return ['', msgs]

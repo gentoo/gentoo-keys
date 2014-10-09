@@ -122,7 +122,10 @@ class Seeds(object):
         keys = kwargs
         result = self.seeds
         for key in keys:
-            result = {dev: gkey for dev, gkey in result.items() if kwargs[key] in getattr(gkey, key)}
+            if key in ['fingerprint']:
+                result = {dev: gkey for dev, gkey in result.items() if kwargs[key] in getattr(gkey, key)}
+            else:
+                result = {dev: gkey for dev, gkey in result.items() if kwargs[key] == getattr(gkey, key)}
         return result.values()
 
 
@@ -151,7 +154,9 @@ class Seeds(object):
 
     def _seeds2json(self, seeds):
         is_gkey = False
-        if isinstance(seeds.values()[0], GKEY):
+        if not seeds:
+            seeds = {}
+        elif isinstance(seeds.values()[0], GKEY):
             is_gkey = True
         for dev, value in seeds.items():
             if is_gkey:

@@ -58,7 +58,8 @@ class Main(object):
 
     @staticmethod
     def _option_fingerprint(parser=None):
-        parser.add_argument('-f', '--fingerprint', dest='fingerprint', default=None,
+        parser.add_argument('-f', '--fingerprint', dest='fingerprint',
+            default=None, nargs='+',
             help='The fingerprint of the the key')
 
     @staticmethod

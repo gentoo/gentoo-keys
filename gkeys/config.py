@@ -130,9 +130,10 @@ class GKeysConfig(GPGConfig):
                     logger.debug("Found %s in configparser... %s"
                         % (key, str(self.configparser.get(key, subkey))))
                 return self._sub_(self.configparser.get(key, subkey))
-            if subkey in self.options[key]:
+            #print("CONFIG: key, subkey", key, subkey)
+            if key in self.options and subkey in self.options[key]:
                 return self._sub_(self.options[key][subkey])
-            elif subkey in self.defaults[key]:
+            elif key in self.defaults and subkey in self.defaults[key]:
                 return self._sub_(self.defaults[key][subkey])
             else:
                 return super(GKeysConfig, self)._get_(key, subkey)

@@ -82,12 +82,15 @@ class Actions(object):
 
 
     def addseed(self, args):
-        '''Add a key to the selected seed file(s)'''
+        '''Add or replace a key in the selected seed file(s)'''
         handler = SeedHandler(self.logger, self.config)
         gkeys = self.listseed(args)[1]
         if not args.nick or not args.name or not args.fingerprint:
             return ["Provide a nickname, a name and a fingerprint."]
         gkey = handler.new(args, checkgkey=True)
+        if not gkey:
+            return ["Failed to create a valid GKEY instance.",
+                "Check for invalid data entries"]
         if len(gkeys) == 0:
             self.logger.debug("ACTIONS: installkey; now adding gkey: %s" % str(gkey))
             success = self.seeds.add(getattr(gkey, 'nick'), gkey)
@@ -103,15 +106,13 @@ class Actions(object):
     def removeseed(self, args):
         '''Remove a key from the selected seed file(s)'''
         handler = SeedHandler(self.logger, self.config)
-        searchkey = handler.build_gkeydict(args)
-        self.logger.debug("ACTIONS: removeseed; gkey: %s" % str(searchkey))
         gkeys = self.listseed(args)[1]
         if not gkeys:
             return ["Failed to remove seed: No gkeys returned from listseed()",
-                None]
+                []]
         if len(gkeys) == 1:
             self.logger.debug("ACTIONS: removeseed; now deleting gkey: %s" % str(gkeys))
-            success = self.seeds.delete(gkeys)
+            success = self.seeds.delete(gkeys[0])
             if success:
                 success = self.seeds.save()
             return ["Successfully removed seed: %s" % str(success),

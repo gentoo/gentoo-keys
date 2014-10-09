@@ -175,7 +175,7 @@ class SeedHandler(object):
                     raise
             else:
                 messages.append("Failed to fetch %s." % seed)
-        return messages
+        return (success, messages)
 
     def check_gkey(self, args):
         # assume it's good until an error is found

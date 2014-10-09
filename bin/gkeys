@@ -47,4 +47,7 @@ if 'ROOT' in os.environ:
     root = os.environ['ROOT']
 
 main = Main(root=root)
-main()
+success = main()
+
+# exit is boolean opposite normal True/False
+sys.exit(not success)

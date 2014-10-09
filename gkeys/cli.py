@@ -42,9 +42,9 @@ class Main(object):
 
     def __call__(self, args=None):
         if args:
-            self.run(self.parse_args(args))
+            return self.run(self.parse_args(args))
         else:
-            self.run(self.parse_args(sys.argv[1:]))
+            return self.run(self.parse_args(sys.argv[1:]))
 
 
     def _add_options(self, parser, options):
@@ -185,14 +185,15 @@ class Main(object):
         # run the action
         func = getattr(self.actions, '%s' % args.action)
         logger.debug('Main: run; Found action: %s' % args.action)
-        results = func(args)
+        success, results = func(args)
         if not results:
             print("No results found.  Check your configuration and that the",
                 "seed file exists.")
-            return
+            return success
         if self.config.options['print_results'] and 'done' not in list(results):
             self.output_results(results, '\n Gkey task results:')
             print()
+        return success
 
 
     @staticmethod

@@ -99,13 +99,15 @@ class SeedHandler(object):
             for nick in nicks:
                 seed_path = os.path.join(catdir, nick)
                 gkey_path = os.path.join(seed_path, 'gkey.seeds')
+                seed = None
                 try:
                     with open(gkey_path, 'r') as fileseed:
                         seed = load(fileseed)
                 except IOError as error:
                     self.logger.debug("SeedHandler: load_category; IOError loading seed file %s." % gkey_path)
                     self.logger.debug("Error was: %s" % str(error))
-                seeds.add(nick, GKEY(**seed.values()[0]))
+                if seed:
+                    seeds.add(nick, GKEY(**seed.values()[0]))
         except OSError as error:
             self.logger.debug("SeedHandler: load_category; OSError for %s" % catdir)
             self.logger.debug("Error was: %s" % str(error))

@@ -379,12 +379,14 @@ class Actions(object):
             for key in keys:
                 seed_path = os.path.join(catdir, key)
                 gkey_path = os.path.join(seed_path, 'gkey.seeds')
+                seed = None
                 try:
                     with open(gkey_path, 'r') as fileseed:
                         seed = load(fileseed)
                 except IOError:
                     return ["No seed file found in %s." % gkey_path, ""]
-                installed_keys.append(GKEY(**seed.values()[0]))
+                if seed:
+                    installed_keys.append(GKEY(**seed.values()[0]))
         except OSError:
             return ["%s catdir does not exist." % catdir, ""]
         return ['Found Key(s):', installed_keys]

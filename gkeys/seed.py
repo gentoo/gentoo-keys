@@ -116,7 +116,7 @@ class Seeds(object):
         @returns list
         '''
         if not kwargs or kwargs['nick'] == '*':
-            return self.seeds.values()
+            return sorted(self.seeds.values())
         # proceed with the search
         # discard any invalid keys
         keys = kwargs
@@ -126,7 +126,8 @@ class Seeds(object):
                 result = {dev: gkey for dev, gkey in result.items() if kwargs[key] in getattr(gkey, key)}
             else:
                 result = {dev: gkey for dev, gkey in result.items() if kwargs[key] == getattr(gkey, key)}
-        return result.values()
+
+        return sorted(result.values())
 
 
     def search(self, pattern):

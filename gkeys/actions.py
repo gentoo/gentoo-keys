@@ -490,9 +490,13 @@ class Actions(object):
         if not args.filename:
             return (False, ['Please provide a file to sign.'])
 
+        if isinstance(args.nick, str):
+            nicks = [args.nick]
+        else:
+            nicks = args.nick
         # load our installed signing keys db
         handler = SeedHandler(self.logger, self.config)
-        self.seeds = handler.load_category('sign', args.nick)
+        self.seeds = handler.load_category('sign', nicks)
         if not self.seeds.seeds:
             return (False, ['No installed keys, try installkey action.', ''])
         basedir = self.config.get_key("sign-category")

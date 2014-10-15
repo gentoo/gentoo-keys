@@ -107,7 +107,9 @@ class SeedHandler(object):
                     self.logger.debug("SeedHandler: load_category; IOError loading seed file %s." % gkey_path)
                     self.logger.debug("Error was: %s" % str(error))
                 if seed:
-                    seeds.add(nick, GKEY(**seed.values()[0]))
+                    for nick in sorted(seed):
+                        key = seed[nick]
+                        seeds.add(nick, GKEY(**key))
         except OSError as error:
             self.logger.debug("SeedHandler: load_category; OSError for %s" % catdir)
             self.logger.debug("Error was: %s" % str(error))

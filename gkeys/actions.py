@@ -170,13 +170,18 @@ class Actions(object):
         catdir = self.config.get_key(args.category + "-category")
         self.logger.debug("ACTIONS: listkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
-        self.gpg.set_keydir(args.keydir, "list-keys")
-        self.gpg.set_keyseedfile()
+        handler = SeedHandler(self.logger, self.config)
+        if args.keydir:
+            self.gpg.set_keydir(args.keydir, "list-keys")
+            self.gpg.set_keyseedfile()
+            seeds = self.gpg.seedfile
+        else:
+            seeds = handler.load_category(args.category)
         results = {}
         success = []
         messages = []
         if args.gpgsearch:
-            keyresults = self.gpg.seedfile.seeds
+            keyresults = seeds.seeds
             # pick any key
             key = keyresults[sorted(keyresults)[0]]
             result = self.gpg.list_keys(key.keydir, args.gpgsearch)
@@ -195,7 +200,7 @@ class Actions(object):
                 fpr = keyinfo[1].split('= ')[1]
                 # search for the matching gkey
                 kwargs = {'keydir': args.keydir, 'fingerprint': [fpr]}
-                keyresults = self.gpg.seedfile.list(**kwargs)
+                keyresults = seeds.list(**kwargs)
                 # list the results
                 for key in sorted(keyresults):
                     ls, lr = self._list_it(key, '\n'.join(keyinfo))
@@ -203,9 +208,8 @@ class Actions(object):
                     results[key.name] = lr
             messages = ["Done."]
         else:
-            handler = SeedHandler(self.logger, self.config)
             kwargs = handler.build_gkeydict(args)
-            keyresults = self.gpg.seedfile.list(**kwargs)
+            keyresults = seeds.list(**kwargs)
             for key in sorted(keyresults):
                 result = self.gpg.list_keys(key.keydir, key.fingerprint)
                 ls, lr = self._list_it(key, result.output)

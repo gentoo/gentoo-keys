@@ -115,7 +115,7 @@ class Seeds(object):
         @param kwargs: dict of GKEY._fields and values
         @returns list
         '''
-        if not kwargs or kwargs['nick'] == '*':
+        if not kwargs or ('nick' in kwargs and kwargs['nick'] == '*'):
             return sorted(self.seeds.values())
         # proceed with the search
         # discard any invalid keys
@@ -123,10 +123,10 @@ class Seeds(object):
         result = self.seeds
         for key in keys:
             if key in ['fingerprint']:
-                result = {dev: gkey for dev, gkey in result.items() if kwargs[key] in getattr(gkey, key)}
+                kwargs[key] = [x.replace(' ', '').upper() for x in kwargs[key]]
+                result = {dev: gkey for dev, gkey in result.items() if kwargs[key][0] in getattr(gkey, key)}
             else:
-                result = {dev: gkey for dev, gkey in result.items() if kwargs[key] == getattr(gkey, key)}
-
+                result = {dev: gkey for dev, gkey in result.items() if kwargs[key].lower() in getattr(gkey, key).lower()}
         return sorted(result.values())
 
 

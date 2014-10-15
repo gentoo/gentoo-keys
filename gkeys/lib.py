@@ -189,7 +189,7 @@ class GkeysGPG(GPG):
         return []
 
 
-    def list_keys(self, keydir, nick=None, colons=False):
+    def list_keys(self, keydir, fingerprint=None, colons=False):
         '''List all keys in the specified keydir or
         all keys in all keydir if keydir=None
 
@@ -200,9 +200,9 @@ class GkeysGPG(GPG):
             logger.debug("LIB: list_keys(), invalid keydir parameter: %s"
                 % str(keydir))
             return []
-        if nick:
+        if fingerprint:
             task = 'list-key'
-            target = nick
+            target = fingerprint
         else:
             task = 'list-keys'
             target = keydir

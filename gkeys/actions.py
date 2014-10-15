@@ -165,45 +165,46 @@ class Actions(object):
 
     def listkey(self, args):
         '''Pretty-print the selected seed file or nick'''
-        # get the desired seed
-        success, keyresults = self.listseed(args)[1]
-        if not keyresults:
-            return (False, ["No keydirs to list"])
-        elif keyresults and not args.nick == '*' and self.output:
-            self.output(['', keyresults], "\n Found GKEY seeds:")
-        elif keyresults and self.output:
-            self.output(['all'], "\n Installed seeds:")
-        else:
-            self.logger.info("ACTIONS: listkey; "
-                "Matching seed entry not found")
-            if args.nick:
-                messages = ["Search failed for: %s" % args.nick]
-            elif args.name:
-                messages = ["Search failed for: %s" % args.name]
-            else:
-                messages = ["Search failed for search term"]
         # get confirmation
         # fill in code here
         catdir = self.config.get_key(args.category + "-category")
         self.logger.debug("ACTIONS: listkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
+        self.gpg.set_keydir(args.keydir, "list-keys")
+        self.gpg.set_keyseedfile()
+        keyresults = self.gpg.seedfile.seeds
         results = {}
-        success = [success]
-        for key in keyresults:
-            if not key.keydir and not args.nick == '*':
+        success = []
+        messages = []
+        for key in sorted(keyresults):
+            if not keyresults[key].keydir and not args.nick == '*':
                 self.logger.debug("ACTIONS: listkey; NO keydir... Ignoring")
-                messages = ["Failed: No keyid's found for %s" % key.name]
+                messages = ["Failed: No keyid's found for %s" % keyresults[key].name]
                 success.append(False)
-            else:
-                self.logger.debug("ACTIONS: listkey; listing keydir:" + str(key.keydir))
-                results[key.name] = self.gpg.list_keys(key.keydir)
+            elif key == args.nick:
+                self.logger.debug("ACTIONS: listkey; listing keydir:" + str(keyresults[key].keydir))
+                results[keyresults[key].name] = self.gpg.list_keys(keyresults[key].keydir, args.nick)
                 success.append(True)
                 if self.config.options['print_results']:
-                    print(results[key.name].output)
-                    self.logger.debug("data output:\n" + str(results[key.name].output))
+                    print("key nick:", key)
+                    print(results[keyresults[key].name].output)
+                    self.logger.debug("data output:\n" + str(results[keyresults[key].name].output))
                     messages = ["Done."]
                 else:
                     return (False not in success, results)
+            elif args.nick == '*':
+                self.logger.debug("ACTIONS: listkey; listing keydir:" + str(keyresults[key].keydir))
+                results[keyresults[key].name] = self.gpg.list_keys(keyresults[key].keydir, key)
+                success.append(True)
+                if self.config.options['print_results']:
+                    print("key nick:", key)
+                    print(results[keyresults[key].name].output)
+                    self.logger.debug("data output:\n" + str(results[keyresults[key].name].output))
+                    messages = ["Done."]
+                else:
+                    return (False not in success, results)
+        if not messages:
+            messages = ['No results found meeting criteria', "Did you specify -n foo or -n '*'"]
         return (False not in success, messages)
 
 

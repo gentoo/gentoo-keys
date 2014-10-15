@@ -83,13 +83,16 @@ class GkeysGPG(GPG):
         return
 
 
-    def set_keydir(self, keydir, task, reset=True):
+    def set_keydir(self, keydir, task, fingerprint=True, reset=True):
         logger.debug("basedir: %s, keydir: %s" % (self.basedir, keydir))
         self.keydir = pjoin(self.basedir, keydir)
         self.task = task
         if reset:
             self.config.options['tasks'][task] = self.config.defaults['tasks'][task][:]
-        task_value = ['--homedir', self.keydir]
+        task_value = []
+        if fingerprint:
+            task_value.append('--fingerprint')
+        task_value.extend(['--homedir', self.keydir])
         self.config.options['tasks'][task].extend(task_value)
         logger.debug("set_keydir: New task options: %s" %str(self.config.options['tasks'][task]))
         return
@@ -186,7 +189,7 @@ class GkeysGPG(GPG):
         return []
 
 
-    def list_keys(self, keydir, colons=False):
+    def list_keys(self, keydir, nick=None, colons=False):
         '''List all keys in the specified keydir or
         all keys in all keydir if keydir=None
 
@@ -197,14 +200,21 @@ class GkeysGPG(GPG):
             logger.debug("LIB: list_keys(), invalid keydir parameter: %s"
                 % str(keydir))
             return []
-        self.set_keydir(keydir, 'list-keys')
-        logger.debug("** Calling runGPG with Running 'gpg %s --list-keys %s'"
-            % (' '.join(self.config['tasks']['list-keys']), keydir)
-            )
+        if nick:
+            task = 'list-key'
+            target = nick
+        else:
+            task = 'list-keys'
+            target = keydir
+        self.set_keydir(keydir, task, fingerprint=True)
+        self.config.options['tasks'][task].extend(['--keyid-format', 'long'])
         if colons:
             task_value = ['--with-colons']
-            self.config.options['tasks']['list-keys'].extend(task_value)
-        result = self.runGPG(task='list-keys', inputfile=keydir)
+            self.config.options['tasks'][task].extend(task_value)
+        logger.debug("** Calling runGPG with Running 'gpg %s --%s %s'"
+            % (' '.join(self.config['tasks'][task]), task, keydir)
+            )
+        result = self.runGPG(task=task, inputfile=target)
         logger.info('GPG return code: ' + str(result.returncode))
         return result
 
@@ -305,6 +315,8 @@ class GkeysGPG(GPG):
 
 
     def set_keyseedfile(self):
+        if not self.keydir:
+            print("!!!!!!!!!!!!!!!!!!! self.keydir error")
         self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'), self.config)
         self.seedfile.load()
 

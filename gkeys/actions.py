@@ -75,10 +75,13 @@ class Actions(object):
 
     def fetchseed(self, args):
         '''Download the selected seed file(s)'''
-        handler = SeedHandler(self.logger, self.config)
-        success, messages = handler.fetch_seeds(args.category)
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
-        return (success, messages)
+        handler = SeedHandler(self.logger, self.config)
+        success, messages = handler.fetch_seeds(args.category, args, self.verify)
+
+        messages.append("")
+        messages.append("Fetch operation completed")
+        return (False not in success, messages)
 
 
     def addseed(self, args):
@@ -455,19 +458,40 @@ class Actions(object):
             return (False, ['Please provide a signed file.'])
         if not args.category:
             return (False, ['Please specifiy a category key directory.'])
-        success, keys = self.installed(args)[1]
+        (success, data) = self.installed(args)
+        keys = data[1]
         if not keys:
             return (False, ['No installed keys found, try installkey action.'])
         catdir = self.config.get_key(args.category + "-category")
         self.logger.debug("ACTIONS: verify; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         filepath, signature  = args.filename, args.signature
-        isurl = success = False
+        timestamp_path = None
+        isurl = success = verified = False
         if filepath.startswith('http'):
             isurl = True
+            url = filepath
+            filepath = args.destination
+            # a bit hackish, but save it to current directory
+            # with download file name
+            if not filepath:
+                filepath = url.split('/')[-1]
+                self.logger.debug("ACTIONS: verify; destination filepath was "
+                    "not supplied, using current directory ./%s" % filepath)
+        if args.timestamp:
+            timestamp_path = filepath + ".timestamp"
+        if isurl:
+            from sslfetch.connections import Connector
+            connector_output = {
+                 'info': self.logger.debug,
+                 'error': self.logger.error,
+                 'kwargs-info': {},
+                 'kwargs-error': {},
+            }
             fetcher = Connector(connector_output, None, "Gentoo Keys")
             self.logger.debug("ACTIONS: verify; fetching %s signed file " % filepath)
-            success, signedfile, timestamp = fetcher.fetch_file(filepath)
+            self.logger.debug("ACTIONS: verify; timestamp path: %s" % timestamp_path)
+            success, signedfile, timestamp = fetcher.fetch_file(url, filepath, timestamp_path)
         else:
             filepath = os.path.abspath(filepath)
             self.logger.debug("ACTIONS: verify; local file %s" % filepath)
@@ -476,36 +500,34 @@ class Actions(object):
             messages = ["File %s cannot be retrieved." % filepath]
         else:
             if not signature:
-                EXTENSIONS = ['.asc', '.sig', 'gpg','.gpgsig']
+                EXTENSIONS = ['.sig', '.asc', 'gpg','.gpgsig']
                 success_fetch = False
                 for ext in EXTENSIONS:
-                    signature = filepath + ext
+                    sig_path = filepath + ext
                     if isurl:
+                        signature = url + ext
                         self.logger.debug("ACTIONS: verify; fetching %s signature " % signature)
-                        success_fetch, sig, timestamp = fetcher.fetch_file(signature)
+                        success_fetch, sig, timestamp = fetcher.fetch_file(signature, sig_path)
                     else:
+                        signature = filepath + ext
                         signature = os.path.abspath(signature)
                         self.logger.debug("ACTIONS: verify; checking %s signature " % signature)
                         success_fetch = os.path.isfile(signature)
                     if success_fetch:
                         break
             messages = []
-            #TODO: use file:// uri in the future
-            if isurl:
-                splitfile = filepath.split('/')[-1]
-                splitsig = signature.split('/')[-1]
-                filepath = os.path.abspath(splitfile)
-                signature = os.path.abspath(splitsig)
             self.logger.info("Verifying file...")
             verified = False
             for key in keys:
-                results = self.gpg.verify_file(key, signature, filepath)
+                results = self.gpg.verify_file(key, sig_path, filepath)
                 keyid = key.keyid[0]
-                if results.verified[0]:
+                (valid, trust) = results.verified
+                if valid:
                     verified = True
-                    messages = ["File %s has been successfully verified | %s (%s)." % (filepath, str(key.name), str(keyid))]
+                    messages = ["File %s has been successfully verified | %s (%s)." % (filepath, key.nick, keyid)]
+                    break
                 else:
-                    messages = ["File verification of %s failed | %s (%s)." % (filepath, str(key.name), str(keyid))]
+                    messages = ["File verification of %s failed | %s (%s)." % (filepath, key.nick, keyid)]
         return (verified, messages)
 
 

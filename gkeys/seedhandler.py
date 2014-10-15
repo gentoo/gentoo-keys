@@ -16,7 +16,7 @@ from json import load
 
 from gkeys.config import GKEY, MAPSEEDS
 from gkeys.seed import Seeds
-from sslfetch.connections import Connector
+from gkeys.fileops import ensure_dirs
 
 
 class SeedHandler(object):
@@ -115,69 +115,42 @@ class SeedHandler(object):
             self.logger.debug("Error was: %s" % str(error))
         return seeds
 
-    def fetch_seeds(self, seeds):
-        '''Fetch new seed files'''
-        # setup the ssl-fetch ouptut map
-        connector_output = {
-            'info': self.logger.info,
-            'error': self.logger.error,
-            'kwargs-info': {},
-            'kwargs-error': {},
-        }
+    def fetch_seeds(self, seeds, args, verified_dl=None):
+        '''Fetch new seed files
+
+        @param seeds: list of seed nicks to download
+        @param verified_dl: Function pointer to the Actions.verify()
+                instance needed to do the download and verification
+        '''
         http_check = re.compile(r'^(http|https)://')
         urls = []
         messages = []
         try:
             for seed in [seeds]:
-                seedurl = self.config.get_key(MAPSEEDS[seed])
+                seedurl = self.config.get_key('seedurls', MAPSEEDS[seed])
+                seedpath = self.config.get_key('%s-seedfile' % seed)
                 if http_check.match(seedurl):
-                    urls.extend([seedurl])
+                    urls.extend([(seedurl, seedpath)])
                 else:
                     self.logger.info("Wrong seed file URLs... Switching to default URLs.")
-                    urls.extend([self.config['seedurls'][MAPSEEDS[seed]]])
+                    urls.extend([(self.config['seedurls'][MAPSEEDS[seed]], seedpath)])
         except KeyError:
             for key, value in MAPSEEDS.items():
                 urls.extend([self.config['seedurls'][value]])
-        fetcher = Connector(connector_output, None, "Gentoo Keys")
-        for url in urls:
-            seed = url.rsplit('/', 1)[1]
-            timestamp_prefix = seed[:3]
-            timestamp_path = self.config['%s-timestamp' % timestamp_prefix]
-            filename = self.config['%s-seedfile' % timestamp_prefix]
-            file_exists = os.path.exists(filename)
-            success, seeds, timestamp = fetcher.fetch_content(url, timestamp_path)
-            if not timestamp and file_exists:
-                messages.append("%s is already up to date." % seed)
-            elif success:
-                self.logger.debug("SeedHandler: fetch_seed; got results.")
-                filename = filename + '.new'
-                with open(filename, 'w') as seedfile:
-                    seedfile.write(seeds)
-                filename = self.config['%s-seedfile' % timestamp_prefix]
-                old = filename + '.old'
-                try:
-                    self.logger.info("Backing up existing file...")
-                    if os.path.exists(old):
-                        self.logger.debug(
-                            "SeedHandler: fetch_seeds; Removing 'old' seed file: %s"
-                            % old)
-                        os.unlink(old)
-                    if os.path.exists(filename):
-                        self.logger.debug(
-                            "SeedHandler: fetch_seeds; Renaming current seed file to: "
-                            "%s" % old)
-                        os.rename(filename, old)
-                    self.logger.debug("SeedHandler: fetch_seeds; Renaming '.new' seed file to %s"
-                                      % filename)
-                    os.rename(filename + '.new', filename)
-                    with open(timestamp_path, 'w+') as timestampfile:
-                        timestampfile.write(str(timestamp) + '\n')
-                    messages.append("Successfully fetched %s." % seed)
-                except IOError:
-                    raise
-            else:
-                messages.append("Failed to fetch %s." % seed)
-        return (success, messages)
+        succeeded = []
+        seedsdir = self.config.get_key('seedsdir')
+        mode = int(self.config.get_key('permissions', 'directories'),0)
+        ensure_dirs(seedsdir, mode=mode)
+        for (url, filepath) in urls:
+            args.category = 'rel'
+            args.filename = url
+            args.signature = None
+            args.timestamp = True
+            args.destination = filepath
+            verified, messages_ = verified_dl(args)
+            succeeded.append(verified)
+            messages.append(messages_)
+        return (succeeded, messages)
 
     def check_gkey(self, args):
         # assume it's good until an error is found

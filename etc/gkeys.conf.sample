@@ -77,6 +77,10 @@ release.seeds: https://api.gentoo.org/gentoo-keys/seeds/release.seeds
 developers.seeds: https://api.gentoo.org/gentoo-keys/seeds/developer.seeds
 
 
+# GKEY nick used for verification of seeds and other gkey files
+gkey = gkeys
+
+
 [sign]
 
 # The home or key directory to use for signing files

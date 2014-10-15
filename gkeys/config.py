@@ -86,14 +86,13 @@ class GKeysConfig(GPGConfig):
         self.defaults['seedsdir'] = '%(gkeysdir)s/seeds'
         self.defaults['dev-seedfile'] = '%(seedsdir)s/developer.seeds'
         self.defaults['rel-seedfile'] = '%(seedsdir)s/release.seeds'
-        self.defaults['dev-timestamp'] = '%(gkeysdir)s/.developer_seeds_timestamp'
-        self.defaults['rel-timestamp'] = '%(gkeysdir)s/.release_seeds_timestamp'
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
         # NOTE: files is umask mode in octal, directories is chmod mode in octal
         self.defaults['permissions'] = {'files': '0o002', 'directories': '0o775',}
         self.defaults['seedurls'] = {
             'release.seeds': 'https://api.gentoo.org/gentoo-keys/release.seeds',
             'developers.seeds': 'https://api.gentoo.org/gentoo-keys/developer.seeds',
+            'gkey': 'gkeys',
         }
         self.defaults['sign'] = {
             'key': 'fingerprint',

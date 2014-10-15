@@ -63,6 +63,11 @@ class Main(object):
             help='The fingerprint of the the key')
 
     @staticmethod
+    def _option_gpgsearch(parser=None):
+        parser.add_argument('-g', '--gpgsearch', dest='gpgsearch', default=None,
+            help='Do a gpg search operations, rather than a gkey search')
+
+    @staticmethod
     def _option_keyring(parser=None):
         parser.add_argument('-k', '--keyring', dest='keyring', default='trusted_keyring',
             help='The name of the keyring to use')

@@ -34,7 +34,7 @@ Action_Options = {
     'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile', 'dest'],
     'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
     'listseedfiles': ['nick', 'name', 'keydir', 'fingerprint', 'category',],
-    'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch'],
     'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'seedfile'],
     'removekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'movekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
@@ -172,40 +172,69 @@ class Actions(object):
         self.gpg = GkeysGPG(self.config, catdir)
         self.gpg.set_keydir(args.keydir, "list-keys")
         self.gpg.set_keyseedfile()
-        keyresults = self.gpg.seedfile.seeds
         results = {}
         success = []
         messages = []
-        for key in sorted(keyresults):
-            if not keyresults[key].keydir and not args.nick == '*':
-                self.logger.debug("ACTIONS: listkey; NO keydir... Ignoring")
-                messages = ["Failed: No keyid's found for %s" % keyresults[key].name]
-                success.append(False)
-            elif key == args.nick:
-                self.logger.debug("ACTIONS: listkey; listing keydir:" + str(keyresults[key].keydir))
-                results[keyresults[key].name] = self.gpg.list_keys(keyresults[key].keydir, args.nick)
-                success.append(True)
-                if self.config.options['print_results']:
-                    print("key nick:", key)
-                    print(results[keyresults[key].name].output)
-                    self.logger.debug("data output:\n" + str(results[keyresults[key].name].output))
-                    messages = ["Done."]
-                else:
-                    return (False not in success, results)
-            elif args.nick == '*':
-                self.logger.debug("ACTIONS: listkey; listing keydir:" + str(keyresults[key].keydir))
-                results[keyresults[key].name] = self.gpg.list_keys(keyresults[key].keydir, key)
-                success.append(True)
-                if self.config.options['print_results']:
-                    print("key nick:", key)
-                    print(results[keyresults[key].name].output)
-                    self.logger.debug("data output:\n" + str(results[keyresults[key].name].output))
-                    messages = ["Done."]
-                else:
-                    return (False not in success, results)
+        if args.gpgsearch:
+            keyresults = self.gpg.seedfile.seeds
+            # pick any key
+            key = keyresults[sorted(keyresults)[0]]
+            result = self.gpg.list_keys(key.keydir, args.gpgsearch)
+            # now split the results and reverse lookup the gkey
+            lines = result.output.split('\n')
+            while lines:
+                # determine the end of the first key listing
+                index = lines.index('')
+                keyinfo = lines[:index]
+                # trim off the first keys info
+                lines = lines[index + 1:]
+                # make sure it is a key listing
+                if len(keyinfo) < 2:
+                    break
+                # get the fingerprint from the line
+                fpr = keyinfo[1].split('= ')[1]
+                # search for the matching gkey
+                kwargs = {'keydir': args.keydir, 'fingerprint': [fpr]}
+                keyresults = self.gpg.seedfile.list(**kwargs)
+                # list the results
+                for key in sorted(keyresults):
+                    ls, lr = self._list_it(key, '\n'.join(keyinfo))
+                    success.append(ls)
+                    results[key.name] = lr
+            messages = ["Done."]
+        else:
+            handler = SeedHandler(self.logger, self.config)
+            kwargs = handler.build_gkeydict(args)
+            keyresults = self.gpg.seedfile.list(**kwargs)
+            for key in sorted(keyresults):
+                result = self.gpg.list_keys(key.keydir, key.fingerprint)
+                ls, lr = self._list_it(key, result.output)
+                success.append(ls)
+                results[key.name] = lr
+                messages = ["Done."]
+
         if not messages:
             messages = ['No results found meeting criteria', "Did you specify -n foo or -n '*'"]
         return (False not in success, messages)
+
+
+    def _list_it(self, key, result, print_key=True):
+        self.logger.debug("ACTIONS: _list_it; listing key:" + str(key.nick))
+        if self.config.options['print_results']:
+            if print_key:
+                print()
+                print("Nick.....:", key.nick)
+                print("Name.....:", key.name)
+                print("Keydir...:", key.keydir)
+            c = 0
+            for line in result.split('\n'):
+                if c == 0:
+                    print("Gpg info.:", line)
+                else:
+                    print("          ", line)
+                c += 1
+            self.logger.debug("data output:\n" + str(result))
+        return (True, result)
 
 
     def installkey(self, args):

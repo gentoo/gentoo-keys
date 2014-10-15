@@ -35,7 +35,7 @@ Action_Options = {
     'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
     'listseedfiles': ['nick', 'name', 'keydir', 'fingerprint', 'category',],
     'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
-    'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'seedfile'],
     'removekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'movekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],

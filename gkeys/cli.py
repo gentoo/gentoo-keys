@@ -204,7 +204,8 @@ class Main(object):
     @staticmethod
     def output_results(results, header):
         # super simple output for the time being
-        print(header)
+        if header:
+            print(header)
         for msg in results:
             if isinstance(msg, str):
                 print(msg)
@@ -214,7 +215,6 @@ class Main(object):
                 except AttributeError:
                     for x in msg:
                         print(x)
-        print()
 
 
     def output_failed(self, failed):

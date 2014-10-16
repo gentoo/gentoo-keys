@@ -144,14 +144,14 @@ class GkeysGPG(GPG):
             if result.fingerprint in gkey.fingerprint:
                 result.failed = False
                 message = "Fingerprints match... Import successful: "
-                message += "fingerprint: %s" % fingerprint
+                message += "%s, fingerprint: %s" % (gkey.nick, fingerprint)
                 message += "\n result len: %s, %s" % (len(result.fingerprint), result.fingerprint)
                 message += "\n gkey len: %s, %s" % (len(gkey.fingerprint[0]), gkey.fingerprint[0])
                 logger.info(message)
             else:
                 result.failed = True
                 message = "Fingerprints do not match... Import failed for "
-                message += "fingerprint: %s" % fingerprint
+                message += "%s, fingerprint: %s" % (gkey.nick, fingerprint)
                 message += "\n result: %s" % (result.fingerprint)
                 message += "\n gkey..: %s" % (str(gkey.fingerprint))
                 logger.error(message)
@@ -161,8 +161,6 @@ class GkeysGPG(GPG):
                 logger.error("GkeysGPG.add_key(); failed to save seed: " + gkey.nick)
                 return []
             results.append(result)
-            print("lib.add_key(), result =")
-            print(result.stderr_out)
         return results
 
 

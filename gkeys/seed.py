@@ -103,8 +103,12 @@ class Seeds(object):
         @param gkey: GKEY, the matching GKEY to delete
         '''
         if gkey:
+            if isinstance(gkey, dict):
+                nick = gkey['nick']
+            elif isinstance(gkey, GKEY):
+                nick = gkey.nick
             try:
-                self.seeds.pop(gkey.nick, None)
+                self.seeds.pop(nick, None)
             except ValueError:
                 return False
             return True

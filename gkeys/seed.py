@@ -38,7 +38,7 @@ class Seeds(object):
         self.seeds = {}
 
 
-    def load(self, filename=None):
+    def load(self, filename=None, trap_errors=True):
         '''Load the seed file into memory'''
         if filename:
             self.filename = filename
@@ -53,7 +53,8 @@ class Seeds(object):
                 seedlines = json.load(seedfile)
         except IOError as err:
             logger.debug("Seed: load; IOError occurred while loading file")
-            self._error(err)
+            if trap_errors:
+                self._error(err)
             return False
         for seed in seedlines.items():
             #try:

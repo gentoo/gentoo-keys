@@ -132,7 +132,7 @@ class GkeysGPG(GPG):
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
         logger.debug("LIB: add_key; ensure dirs: " + self.keydir)
         ensure_dirs(str(self.keydir))
-        self.set_keyseedfile()
+        self.set_keyseedfile(trap_errors=False)
         results = []
         for fingerprint in gkey.fingerprint:
             logger.debug("LIB: add_key; adding fingerprint" + fingerprint)
@@ -314,11 +314,11 @@ class GkeysGPG(GPG):
         return results
 
 
-    def set_keyseedfile(self):
+    def set_keyseedfile(self, trap_errors):
         if not self.keydir:
-            print("!!!!!!!!!!!!!!!!!!! self.keydir error")
+            logger.debug("GkeysGPG.set_keyseedfile(); self.keydir error")
         self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'), self.config)
-        self.seedfile.load()
+        self.seedfile.load(trap_errors=trap_errors)
 
 
     def sign_file(self, gkey, mode, fingerprint, filepath):

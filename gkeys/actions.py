@@ -40,7 +40,7 @@ Action_Options = {
     'movekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'importkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
-    'verify': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'file', 'signature', 'keyring'],
+    'verify': ['dest', 'nick', 'name', 'keydir', 'fingerprint', 'category', 'file', 'signature', 'keyring', 'timestamp'],
     'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
 }

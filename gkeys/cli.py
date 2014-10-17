@@ -109,6 +109,11 @@ class Main(object):
         parser.add_argument('-z','--signature', dest='signature', default=None,
            help='The path/URL to use for the signature')
 
+    @staticmethod
+    def _option_timestamp(parser=None):
+        parser.add_argument('-t', '--timestamp', dest='timestamp', type=bool,
+            default=False,
+            help='Turn on timestamp use')
 
 
     def parse_args(self, args):

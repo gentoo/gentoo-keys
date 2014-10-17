@@ -431,7 +431,8 @@ class Actions(object):
                 except IOError:
                     return ["No seed file found in %s." % gkey_path, ""]
                 if seed:
-                    installed_keys.append(GKEY(**seed.values()[0]))
+                    for val in list(seed.values()):
+                        installed_keys.append(GKEY(**val))
         except OSError:
             return (False, ["%s directory does not exist." % catdir, ""])
         return (True, ['Found Key(s):', installed_keys])

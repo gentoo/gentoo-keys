@@ -484,9 +484,11 @@ class Actions(object):
         if isurl:
             from sslfetch.connections import Connector
             connector_output = {
-                 'info': self.logger.debug,
+                 'info': self.logger.info,
+                 'debug': self.logger.debug,
                  'error': self.logger.error,
                  'kwargs-info': {},
+                 'kwargs-debug': {},
                  'kwargs-error': {},
             }
             fetcher = Connector(connector_output, None, "Gentoo Keys")

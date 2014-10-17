@@ -518,16 +518,19 @@ class Actions(object):
             messages = []
             self.logger.info("Verifying file...")
             verified = False
+            # get correct key to use
+            use_gkey = self.config.get_key('seedurls', 'gkey')
             for key in keys:
-                results = self.gpg.verify_file(key, sig_path, filepath)
-                keyid = key.keyid[0]
-                (valid, trust) = results.verified
-                if valid:
-                    verified = True
-                    messages = ["File %s has been successfully verified | %s (%s)." % (filepath, key.nick, keyid)]
+                if key.nick == use_gkey:
                     break
-                else:
-                    messages = ["File verification of %s failed | %s (%s)." % (filepath, key.nick, keyid)]
+            results = self.gpg.verify_file(key, sig_path, filepath)
+            keyid = key.keyid[0]
+            (valid, trust) = results.verified
+            if valid:
+                verified = True
+                messages = ["File %s has been successfully verified | %s (%s)." % (filepath, key.nick, keyid)]
+            else:
+                messages = ["File verification of %s failed | %s (%s)." % (filepath, key.nick, keyid)]
         return (verified, messages)
 
 

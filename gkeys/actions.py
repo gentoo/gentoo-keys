@@ -531,9 +531,13 @@ class Actions(object):
             (valid, trust) = results.verified
             if valid:
                 verified = True
-                messages = ["File %s has been successfully verified | %s (%s)." % (filepath, key.nick, keyid)]
+                messages = ["Verification succeeded.: %s" % (filepath),
+                    "Key info...............: %s <%s>, %s"
+                    % ( key.name, key.nick,keyid)]
             else:
-                messages = ["File verification of %s failed | %s (%s)." % (filepath, key.nick, keyid)]
+                messages = ["Verification failed.....:" % (filepath),
+                    "Key info................: %s <%s>, %s"
+                    % ( key.name, key.nick,keyid)]
         return (verified, messages)
 
 

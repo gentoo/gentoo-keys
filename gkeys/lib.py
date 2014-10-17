@@ -303,10 +303,10 @@ class GkeysGPG(GPG):
             results = self.runGPG(task='decrypt', inputfile=filepath)
         keyid = gkey.keyid[0]
         if results.verified[0]:
-            logger.info("GPG verification succeeded. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            logger.info("GPG verification succeeded. Name: %s / Key: %s" % (gkey.name, keyid))
             logger.info("\tSignature result:" + str(results.verified))
         else:
-            logger.debug("GPG verification failed. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            logger.debug("GPG verification failed. Name: %s / Key: %s" % (gkey.name, keyid))
             logger.debug("\t Signature result:"+ str(results.verified))
             logger.debug("LIB: verify; stderr_out:" + str(results.stderr_out))
         return results

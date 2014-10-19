@@ -458,7 +458,7 @@ class Actions(object):
         if not args.filename:
             return (False, ['Please provide a signed file.'])
         if not args.category:
-            return (False, ['Please specifiy a category key directory.'])
+            args.category = 'rel'
         (success, data) = self.installed(args)
         keys = data[1]
         if not keys:

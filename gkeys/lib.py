@@ -135,7 +135,7 @@ class GkeysGPG(GPG):
         self.set_keyseedfile(trap_errors=False)
         results = []
         for fingerprint in gkey.fingerprint:
-            logger.debug("LIB: add_key; adding fingerprint" + fingerprint)
+            logger.debug("LIB: add_key; adding fingerprint " + fingerprint)
             logger.debug("** Calling runGPG with Running 'gpg %s --recv-keys %s' for: %s"
                 % (' '.join(self.config.get_key('tasks', 'recv-keys')),
                     fingerprint, gkey.name))

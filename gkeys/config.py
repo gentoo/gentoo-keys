@@ -90,8 +90,8 @@ class GKeysConfig(GPGConfig):
         # NOTE: files is umask mode in octal, directories is chmod mode in octal
         self.defaults['permissions'] = {'files': '0o002', 'directories': '0o775',}
         self.defaults['seedurls'] = {
-            'release.seeds': 'https://api.gentoo.org/gentoo-keys/release.seeds',
-            'developers.seeds': 'https://api.gentoo.org/gentoo-keys/developer.seeds',
+            'release.seeds': 'https://api.gentoo.org/gentoo-keys/seeds/release.seeds',
+            'developers.seeds': 'https://api.gentoo.org/gentoo-keys/seeds/developer.seeds',
             'gkey': 'gkeys',
         }
         self.defaults['sign'] = {
@@ -147,7 +147,6 @@ class GKeysConfig(GPGConfig):
             return super(GKeysConfig, self)._get_(key, subkey)
 
 
-
 class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
     '''Class to hold the relavent info about a key'''
 
@@ -170,6 +169,7 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'fingerprint'])):
             fingerprint = {'fingerprint': f, 'keyid': '0x' + f[-16:]}
             output += GKEY_FINGERPRINTS % fingerprint
         return output
+
 
 class GKEY_CHECK(namedtuple('GKEY_CHECK', ['keyid', 'revoked', 'expired', 'invalid', 'sign'])):
 

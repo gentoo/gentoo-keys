@@ -84,7 +84,7 @@ class Main(object):
 
     @staticmethod
     def _option_category(parser=None):
-        parser.add_argument('-c', '--category',
+        parser.add_argument('-C', '--category',
             choices=['rel', 'dev', 'overlays', 'sign'], dest='category', default=None,
             help='The key or seed directory category to use or update')
 
@@ -106,7 +106,7 @@ class Main(object):
 
     @staticmethod
     def _option_signature(parser=None):
-        parser.add_argument('-z','--signature', dest='signature', default=None,
+        parser.add_argument('-s','--signature', dest='signature', default=None,
            help='The path/URL to use for the signature')
 
     @staticmethod
@@ -202,7 +202,6 @@ class Main(object):
             return success
         if self.config.options['print_results'] and 'done' not in list(results):
             self.output_results(results, '\n Gkey task results:')
-            print()
         return success
 
 

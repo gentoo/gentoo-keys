@@ -127,6 +127,7 @@ class GkeysGPG(GPG):
         @param gkey: GKEY namedtuple with
             (name, nick, keydir, fingerprint)
         '''
+        self.config.defaults['gpg_defaults'].append('--no-permission-warning')
         self.set_keyserver()
         self.set_keydir(gkey.keydir, 'recv-keys', reset=True)
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)

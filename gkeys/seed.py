@@ -56,7 +56,7 @@ class Seeds(object):
             if trap_errors:
                 self._error(err)
             return False
-        for seed in seedlines.items():
+        for seed in list(seedlines.items()):
             #try:
             self.seeds[seed[0]] = GKEY(**seed[1])
             #except Exception as err:
@@ -129,9 +129,9 @@ class Seeds(object):
         for key in keys:
             if key in ['fingerprint']:
                 kwargs[key] = [x.replace(' ', '').upper() for x in kwargs[key]]
-                result = {dev: gkey for dev, gkey in result.items() if kwargs[key][0] in getattr(gkey, key)}
+                result = {dev: gkey for dev, gkey in list(result.items()) if kwargs[key][0] in getattr(gkey, key)}
             else:
-                result = {dev: gkey for dev, gkey in result.items() if kwargs[key].lower() in getattr(gkey, key).lower()}
+                result = {dev: gkey for dev, gkey in list(result.items()) if kwargs[key].lower() in getattr(gkey, key).lower()}
         return sorted(result.values())
 
 
@@ -162,9 +162,9 @@ class Seeds(object):
         is_gkey = False
         if not seeds:
             seeds = {}
-        elif isinstance(seeds.values()[0], GKEY):
+        elif isinstance(list(seeds.values())[0], GKEY):
             is_gkey = True
-        for dev, value in seeds.items():
+        for dev, value in list(seeds.items()):
             if is_gkey:
                 seeds[dev] = dict(value._asdict())
         return json.dumps(seeds, sort_keys=True, indent=4)

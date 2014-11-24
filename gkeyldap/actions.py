@@ -132,7 +132,7 @@ class Actions(object):
         keyinfo = defaultdict()
         keyid_missing = False
         # self.logger.debug("Actions: build_gkeylist; info = %s" % str(info))
-        for attr, field in gkey2ldap.items():
+        for attr, field in list(gkey2ldap.items()):
             try:
                 keyinfo[attr], keyid_found, is_good = self._fix_bad_ldap(info, attr, field)
             except KeyError:

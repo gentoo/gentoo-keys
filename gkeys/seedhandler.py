@@ -135,7 +135,7 @@ class SeedHandler(object):
                     self.logger.info("Wrong seed file URLs... Switching to default URLs.")
                     urls.extend([(self.config['seedurls'][MAPSEEDS[seed]], seedpath)])
         except KeyError:
-            for key, value in MAPSEEDS.items():
+            for key, value in list(MAPSEEDS.items()):
                 urls.extend([self.config['seedurls'][value]])
         succeeded = []
         seedsdir = self.config.get_key('seedsdir')

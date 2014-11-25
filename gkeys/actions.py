@@ -295,7 +295,7 @@ class Actions(object):
     def checkkey(self, args):
         '''Check keys actions'''
         if not args.category:
-            return (False, ["Please specify seeds type (-s)."])
+            return (False, ["Please specify seeds type."])
         self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
         success, installed_keys = self.installed(args)[1]
         catdir = self.config.get_key(args.category + "-category")

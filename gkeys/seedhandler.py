@@ -66,7 +66,7 @@ class SeedHandler(object):
         '''
         if not seeds and not seedfile:
             self.logger.error("SeedHandler: load_seeds; no filename to load: "
-            "setting = %s.  Please use the -s option to indicate: which seed "
+            "setting = %s.  Please use the -C option to indicate: which seed "
             "file to use." % seedfile)
             return False
         if seeds:

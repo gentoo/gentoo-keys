@@ -262,7 +262,7 @@ class GkeysGPG(GPG):
                     # check if subkey has signing capabilities
                     if 's' in data.key_capabilities:
                         sign = True
-                        logger.debug("INFO subkey %s : signing capabilities" % data.long_keyid)
+                        logger.debug("INFO subkey %s : subkey signing capabilities" % data.long_keyid)
         return GKEY_CHECK(keyid, revoked, expired, invalid, sign)
 
 

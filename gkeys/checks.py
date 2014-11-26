@@ -11,7 +11,6 @@
 
 
 from gkeys.config import GKEY_CHECK
-from gkeys.log import logger
 
 
 # Default glep 63 minimum gpg key specification
@@ -39,11 +38,12 @@ TEST_SPEC = {
 class KeyChecks(object):
     '''Primary gpg key validation and glep spec checks class'''
 
-    def __init__(self, spec=TEST_SPEC):
+    def __init__(self, logger, spec=TEST_SPEC):
         '''@param spec: optional gpg specification to test against
                         Defaults to TEST_SPEC
 
         '''
+        self.logger = logger
         self.spec = spec
 
 
@@ -62,36 +62,36 @@ class KeyChecks(object):
                     # check if revoked
                     if 'r' in data.validity:
                         revoked = True
-                        logger.debug("ERROR in key %s : revoked" % data.long_keyid)
+                        self.logger.debug("ERROR in key %s : revoked" % data.long_keyid)
                         break
                     # if primary key expired, all subkeys expire
                     if 'e' in data.validity:
                         expired = True
-                        logger.debug("ERROR in key %s : expired" % data.long_keyid)
+                        self.logger.debug("ERROR in key %s : expired" % data.long_keyid)
                         break
                     # check if invalid
                     if 'i' in data.validity:
                         invalid = True
-                        logger.debug("ERROR in key %s : invalid" % data.long_keyid)
+                        self.logger.debug("ERROR in key %s : invalid" % data.long_keyid)
                         break
             if data.name == "SUB":
                 if data.long_keyid == keyid[2:]:
                     # check if invalid
                     if 'i' in data.validity:
-                        logger.debug("WARNING in subkey %s : invalid" % data.long_keyid)
+                        self.logger.debug("WARNING in subkey %s : invalid" % data.long_keyid)
                         continue
                     # check if expired
                     if 'e' in data.validity:
-                        logger.debug("WARNING in subkey %s : expired" % data.long_keyid)
+                        self.logger.debug("WARNING in subkey %s : expired" % data.long_keyid)
                         continue
                     # check if revoked
                     if 'r' in data.validity:
-                        logger.debug("WARNING in subkey %s : revoked" % data.long_keyid)
+                        self.logger.debug("WARNING in subkey %s : revoked" % data.long_keyid)
                         continue
                     # check if subkey has signing capabilities
                     if 's' in data.key_capabilities:
                         sign = True
-                        logger.debug("INFO subkey %s : subkey signing capabilities" % data.long_keyid)
+                        self.logger.debug("INFO subkey %s : subkey signing capabilities" % data.long_keyid)
         return GKEY_CHECK(keyid, revoked, expired, invalid, sign)
 
 

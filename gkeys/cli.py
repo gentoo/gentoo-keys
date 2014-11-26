@@ -212,13 +212,13 @@ class Main(object):
             print(header)
         for msg in results:
             if isinstance(msg, str):
-                print(msg)
+                print('    ', msg)
             else:
                 try:
                     print("\n".join([x.pretty_print for x in msg]))
                 except AttributeError:
                     for x in msg:
-                        print(x)
+                        print('    ', x)
 
 
     def output_failed(self, failed):

@@ -316,21 +316,21 @@ class Actions(object):
             for key in gkey.keyid:
                 results[gkey.name] = self.gpg.check_keys(gkey.keydir, key)
                 if results[gkey.name].expired:
-                    failed['expired'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                    failed['expired'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key))
                 if results[gkey.name].revoked:
-                    failed['revoked'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                    failed['revoked'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key))
                 if results[gkey.name].invalid:
-                    failed['invalid'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                    failed['invalid'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key))
                 if not results[gkey.name].sign:
-                    failed['sign'].append("%s(%s): %s " % (gkey.name, gkey.nick, key))
+                    failed['sign'].append("%s <%s>: %s " % (gkey.name, gkey.nick, key))
         if failed['expired']:
-            self.output([failed['expired']], '\nExpired keys:\n')
+            self.output([failed['expired']], '\n Expired keys:\n')
         if failed['revoked']:
-            self.output([failed['revoked']], '\nRevoked keys:\n')
+            self.output([failed['revoked']], '\n Revoked keys:\n')
         if failed['invalid']:
-            self.output([failed['invalid']], '\nInvalid keys:\n')
+            self.output([failed['invalid']], '\n Invalid keys:\n')
         if failed['sign']:
-            self.output([failed['sign']], '\nNo signing capable subkeys:\n')
+            self.output([failed['sign']], '\n No signing capable subkeys:\n')
         return (len(failed) <1,
             ['\nFound:\n-------', 'Expired: %d\nRevoked: %d\nInvalid: %d\nNo signing capable subkeys: %d'
                 % (len(failed['expired']), len(failed['revoked']),

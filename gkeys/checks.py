@@ -74,6 +74,9 @@ class KeyChecks(object):
                         invalid = True
                         self.logger.debug("ERROR in key %s : invalid" % data.long_keyid)
                         break
+                    if 's' in data.key_capabilities:
+                        sign = True
+                        self.logger.debug("INFO primary key %s : key signing capabilities" % data.long_keyid)
             if data.name == "SUB":
                 # check if invalid
                 if 'i' in data.validity:

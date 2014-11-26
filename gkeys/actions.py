@@ -299,14 +299,17 @@ class Actions(object):
         if not args.category:
             return (False, ["Please specify seeds type."])
         self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
-        success, installed_keys = self.installed(args)[1]
+        handler = SeedHandler(self.logger, self.config)
+        seeds = handler.load_category(args.category)
         catdir = self.config.get_key(args.category + "-category")
         self.logger.debug("ACTIONS: checkkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         results = {}
         failed = defaultdict(list)
+        kwargs = handler.build_gkeydict(args)
+        keyresults = seeds.list(**kwargs)
         self.output('', '\n Checking keys...')
-        for gkey in installed_keys:
+        for gkey in sorted(keyresults):
             self.logger.debug("ACTIONS: checkkey; gkey = %s" % str(gkey))
             for key in gkey.keyid:
                 results[gkey.name] = self.gpg.check_keys(gkey.keydir, key)

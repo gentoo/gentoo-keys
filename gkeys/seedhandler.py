@@ -57,22 +57,22 @@ class SeedHandler(object):
                 pass
         return keyinfo
 
-    def load_seeds(self, seeds=None, seedfile=None):
+    def load_seeds(self, seedfile=None, filepath=None):
         '''Load seed file
 
         @param seeds: string of the short name seed file
         @param seedfile: string filepath of the file to load
         @return Seeds class instance of the file loaded
         '''
-        if not seeds and not seedfile:
+        if not seedfile and not filename:
             self.logger.error("SeedHandler: load_seeds; no filename to load: "
-            "setting = %s.  Please use the -C option to indicate: which seed "
+            "setting = %s.  Please use the -S or -F option to indicate: which seed "
             "file to use." % seedfile)
             return False
-        if seeds:
-            filepath = self.config.get_key(seeds + "-seedfile")
-        elif seedfile:
-            filepath = seedfile
+        if seedfile:
+            filepath = self.config.get_key('seeds', seedfile)
+        elif not filepath:
+            self.logger.error("SeedHandler: load_seeds; No filepath to load")
         self.logger.debug("SeedHandler: load_seeds; seeds filepath to load: "
             "%s" % filepath)
         seeds = Seeds(config=self.config)

@@ -28,12 +28,12 @@ Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed
             'installed', 'importkey', 'verify', 'checkkey', 'sign']
 
 Action_Options = {
-    'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
-    'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
-    'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
-    'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile', 'dest'],
-    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
-    'listseedfiles': ['nick', 'name', 'keydir', 'fingerprint', 'category',],
+    'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', 'file'],
+    'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
+    'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
+    'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', 'dest'],
+    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
+    'listseedfiles': [],
     'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch'],
     'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'seedfile'],
     'removekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
@@ -63,7 +63,7 @@ class Actions(object):
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
             try:
-                self.seeds = handler.load_seeds(args.category, args.seedfile)
+                self.seeds = handler.load_seeds(args.seedfile, args.filename)
             except ValueError:
                 return (False, ["Failed to load seed file. Consider fetching seedfiles."])
         if self.seeds:

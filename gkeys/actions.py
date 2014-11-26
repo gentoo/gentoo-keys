@@ -170,6 +170,8 @@ class Actions(object):
         '''Pretty-print the selected seed file or nick'''
         # get confirmation
         # fill in code here
+        if not args.category:
+            args.category = 'rel'
         catdir = self.config.get_key(args.category + "-category")
         self.logger.debug("ACTIONS: listkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)

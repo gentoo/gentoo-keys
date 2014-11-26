@@ -84,14 +84,16 @@ class GKeysConfig(GPGConfig):
         # local directory to scan for seed files installed via ebuild, layman
         # or manual install.
         self.defaults['seedsdir'] = '%(gkeysdir)s/seeds'
-        self.defaults['dev-seedfile'] = '%(seedsdir)s/developer.seeds'
-        self.defaults['rel-seedfile'] = '%(seedsdir)s/release.seeds'
+        self.defaults['seeds'] = {
+            'gentoo': '%(seedsdir)s/gentoo.seeds',
+            'gentoodevs': '%(seedsdir)s/gentoodevs.seeds',
+        }
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
         # NOTE: files is umask mode in octal, directories is chmod mode in octal
         self.defaults['permissions'] = {'files': '0o002', 'directories': '0o775',}
         self.defaults['seedurls'] = {
-            'release.seeds': 'https://api.gentoo.org/gentoo-keys/seeds/release.seeds',
-            'developers.seeds': 'https://api.gentoo.org/gentoo-keys/seeds/developer.seeds',
+            'gentoo.seeds': 'https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds',
+            'gentoodevs.seeds': 'https://api.gentoo.org/gentoo-keys/seeds/gentoodevs.seeds',
             'gkey': 'gkeys',
         }
         self.defaults['sign'] = {
@@ -114,7 +116,6 @@ class GKeysConfig(GPGConfig):
         for key in ['gpg_defaults', 'only_usable', 'refetch', 'tasks']:
             defaults.pop(key)
         self.configparser = ConfigParser.ConfigParser(defaults)
-        self.configparser.add_section('MAIN')
         self.configparser.read(defaults['config'])
 
 
@@ -136,13 +137,13 @@ class GKeysConfig(GPGConfig):
                 return self._sub_(self.defaults[key][subkey])
             else:
                 return super(GKeysConfig, self)._get_(key, subkey)
-        elif self.configparser and self.configparser.has_option('MAIN', key):
+        elif self.configparser and self.configparser.has_option('DEFAULT', key):
             if logger:
                 logger.debug("Found %s in configparser... %s"
-                    % (key, str(self.configparser.get('MAIN', key))))
+                    % (key, str(self.configparser.get('DEFAULT', key))))
                 #logger.debug("type(key)= %s"
-                #    % str(type(self.configparser.get('MAIN', key))))
-            return self.configparser.get('MAIN', key)
+                #    % str(type(self.configparser.get('DEFAULT', key))))
+            return self.configparser.get('DEFAULT', key)
         else:
             return super(GKeysConfig, self)._get_(key, subkey)
 

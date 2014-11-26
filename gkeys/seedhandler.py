@@ -66,7 +66,7 @@ class SeedHandler(object):
         '''
         if not seeds and not seedfile:
             self.logger.error("SeedHandler: load_seeds; no filename to load: "
-            "setting = %s.  Please use the -s option to indicate: which seed "
+            "setting = %s.  Please use the -C option to indicate: which seed "
             "file to use." % seedfile)
             return False
         if seeds:
@@ -136,7 +136,8 @@ class SeedHandler(object):
                     urls.extend([(self.config['seedurls'][MAPSEEDS[seed]], seedpath)])
         except KeyError:
             for key, value in list(MAPSEEDS.items()):
-                urls.extend([self.config['seedurls'][value]])
+                seedpath = self.config.get_key('%s-seedfile' % key)
+                urls.extend([(self.config['seedurls'][value], seedpath)])
         succeeded = []
         seedsdir = self.config.get_key('seedsdir')
         mode = int(self.config.get_key('permissions', 'directories'),0)

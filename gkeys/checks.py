@@ -75,23 +75,22 @@ class KeyChecks(object):
                         self.logger.debug("ERROR in key %s : invalid" % data.long_keyid)
                         break
             if data.name == "SUB":
-                if data.long_keyid == keyid[2:]:
-                    # check if invalid
-                    if 'i' in data.validity:
-                        self.logger.debug("WARNING in subkey %s : invalid" % data.long_keyid)
-                        continue
-                    # check if expired
-                    if 'e' in data.validity:
-                        self.logger.debug("WARNING in subkey %s : expired" % data.long_keyid)
-                        continue
-                    # check if revoked
-                    if 'r' in data.validity:
-                        self.logger.debug("WARNING in subkey %s : revoked" % data.long_keyid)
-                        continue
-                    # check if subkey has signing capabilities
-                    if 's' in data.key_capabilities:
-                        sign = True
-                        self.logger.debug("INFO subkey %s : subkey signing capabilities" % data.long_keyid)
+                # check if invalid
+                if 'i' in data.validity:
+                    self.logger.debug("WARNING in subkey %s : invalid" % data.long_keyid)
+                    continue
+                # check if expired
+                if 'e' in data.validity:
+                    self.logger.debug("WARNING in subkey %s : expired" % data.long_keyid)
+                    continue
+                # check if revoked
+                if 'r' in data.validity:
+                    self.logger.debug("WARNING in subkey %s : revoked" % data.long_keyid)
+                    continue
+                # check if subkey has signing capabilities
+                if 's' in data.key_capabilities:
+                    sign = True
+                    self.logger.debug("INFO subkey %s : subkey signing capabilities" % data.long_keyid)
         return GKEY_CHECK(keyid, revoked, expired, invalid, sign)
 
 

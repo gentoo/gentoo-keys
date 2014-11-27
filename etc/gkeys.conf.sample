@@ -1,7 +1,7 @@
 # Gentoo-keys configuration file
 #
 
-[MAIN]
+[DEFAULT]
 
 # keyserver: server to use to obtain the keys from
 keyserver: pool.sks-keyservers.net
@@ -45,18 +45,16 @@ overlays-category: %(gkeysdir)s/overlays
 seedsdir: %(gkeysdir)s/seeds
 
 
-# rel-seedfile: txt file of one tuple of (name, keyid, fingerprint)
-# entry per line
-rel-seedfile: %(seedsdir)s/release.seeds
-
-
-# dev-seedfile: txt file of one tuple of (name, keyid, fingerprint)
-# entry per line
-dev-seedfile: %(seedsdir)s/developer.seeds
-
-
 # logfile directory
 logdir: /var/log/gkeys
+
+
+[seeds]
+
+# *-seedfile: json txt file of name, keyid, fingerprint
+# entry per line
+gentoo: %(seedsdir)s/gentoo.seeds
+gentoodevs: %(seedsdir)s/gentoodevs.seeds
 
 
 [permissions]
@@ -73,8 +71,8 @@ files: 0o007
 
 # Use the filenames as the keys.
 # The will be paired to the seed file of the same name for fetching, updating
-release.seeds: https://api.gentoo.org/gentoo-keys/seeds/release.seeds
-developers.seeds: https://api.gentoo.org/gentoo-keys/seeds/developer.seeds
+gentoo.seeds: https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds
+gentoodevs.seeds: https://api.gentoo.org/gentoo-keys/seeds/gentoodevs.seeds
 
 
 # GKEY nick used for verification of seeds and other gkey files

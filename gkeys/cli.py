@@ -91,18 +91,18 @@ class Main(object):
     @staticmethod
     def _option_keydir(parser=None):
         parser.add_argument('-r', '--keydir', dest='keydir', default=None,
-            help='The keydir to use or update')
+            help='The keydir to use, update or search for/in')
 
     @staticmethod
     def _option_seedfile(parser=None):
         parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
-            help='The seedfile path to use')
+            help='The seedfile to use from the gkeys.conf file')
 
     @staticmethod
     def _option_file(parser=None):
         parser.add_argument('-F', '--file', dest='filename', default=None,
             nargs='+',
-            help='The path/URL to use for the signed file')
+            help='The path/URL to use for the (signed) file')
 
     @staticmethod
     def _option_signature(parser=None):
@@ -212,13 +212,13 @@ class Main(object):
             print(header)
         for msg in results:
             if isinstance(msg, str):
-                print(msg)
+                print('    ', msg)
             else:
                 try:
                     print("\n".join([x.pretty_print for x in msg]))
                 except AttributeError:
                     for x in msg:
-                        print(x)
+                        print('    ', x)
 
 
     def output_failed(self, failed):

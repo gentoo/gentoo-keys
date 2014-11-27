@@ -28,12 +28,12 @@ Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed
             'installed', 'importkey', 'verify', 'checkkey', 'sign']
 
 Action_Options = {
-    'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
-    'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
-    'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
-    'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile', 'dest'],
-    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'seedfile'],
-    'listseedfiles': ['nick', 'name', 'keydir', 'fingerprint', 'category',],
+    'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', 'file'],
+    'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
+    'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
+    'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', 'dest'],
+    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
+    'listseedfiles': [],
     'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch'],
     'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'seedfile'],
     'removekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
@@ -63,7 +63,7 @@ class Actions(object):
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
             try:
-                self.seeds = handler.load_seeds(args.category, args.seedfile)
+                self.seeds = handler.load_seeds(args.seedfile, args.filename)
             except ValueError:
                 return (False, ["Failed to load seed file. Consider fetching seedfiles."])
         if self.seeds:
@@ -170,6 +170,8 @@ class Actions(object):
         '''Pretty-print the selected seed file or nick'''
         # get confirmation
         # fill in code here
+        if not args.category:
+            args.category = 'rel'
         catdir = self.config.get_key(args.category + "-category")
         self.logger.debug("ACTIONS: listkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
@@ -297,33 +299,38 @@ class Actions(object):
         if not args.category:
             return (False, ["Please specify seeds type."])
         self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
-        success, installed_keys = self.installed(args)[1]
+        handler = SeedHandler(self.logger, self.config)
+        seeds = handler.load_category(args.category)
         catdir = self.config.get_key(args.category + "-category")
         self.logger.debug("ACTIONS: checkkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         results = {}
         failed = defaultdict(list)
+        kwargs = handler.build_gkeydict(args)
+        keyresults = seeds.list(**kwargs)
         self.output('', '\n Checking keys...')
-        for gkey in installed_keys:
+        for gkey in sorted(keyresults):
+            self.logger.info("Checking key %s, %s" % (gkey.nick, gkey.keyid))
+            self.output('', "     %s: %s" % (gkey.name, ', '.join(gkey.keyid)))
             self.logger.debug("ACTIONS: checkkey; gkey = %s" % str(gkey))
             for key in gkey.keyid:
                 results[gkey.name] = self.gpg.check_keys(gkey.keydir, key)
                 if results[gkey.name].expired:
-                    failed['expired'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                    failed['expired'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key))
                 if results[gkey.name].revoked:
-                    failed['revoked'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                    failed['revoked'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key))
                 if results[gkey.name].invalid:
-                    failed['invalid'].append("%s(%s): %s" % (gkey.name, gkey.nick, key))
+                    failed['invalid'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key))
                 if not results[gkey.name].sign:
-                    failed['sign'].append("%s(%s): %s " % (gkey.name, gkey.nick, key))
+                    failed['sign'].append("%s <%s>: %s " % (gkey.name, gkey.nick, key))
         if failed['expired']:
-            self.output([failed['expired']], '\nExpired keys:\n')
+            self.output([failed['expired']], '\n Expired keys:\n')
         if failed['revoked']:
-            self.output([failed['revoked']], '\nRevoked keys:\n')
+            self.output([failed['revoked']], '\n Revoked keys:\n')
         if failed['invalid']:
-            self.output([failed['invalid']], '\nInvalid keys:\n')
+            self.output([failed['invalid']], '\n Invalid keys:\n')
         if failed['sign']:
-            self.output([failed['sign']], '\nNo signing capable subkeys:\n')
+            self.output([failed['sign']], '\n No signing capable subkeys:\n')
         return (len(failed) <1,
             ['\nFound:\n-------', 'Expired: %d\nRevoked: %d\nInvalid: %d\nNo signing capable subkeys: %d'
                 % (len(failed['expired']), len(failed['revoked']),

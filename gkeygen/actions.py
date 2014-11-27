@@ -28,11 +28,8 @@ from gkeys.fileops import ensure_dirs
 
 Available_Actions = ["genkey"]
 
-# temp link till we move it in api.g.o
-GPG_CONF = "https://dev.gentoo.org/~dastergon/glep63-gpg-conf.skel"
-
-# temp spec file till we move it in api.g.o
-SPEC = 'https://dev.gentoo.org/~dastergon/glep63.spec'
+GPG_CONF = "https://api.gentoo.org/gentoo-keys/specs/glep63-gpg-conf.skel"
+SPEC = "https://api.gentoo.org/gentoo-keys/specs/glep63.spec"
 
 class Actions(object):
 

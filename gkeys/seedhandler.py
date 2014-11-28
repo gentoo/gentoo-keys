@@ -46,7 +46,7 @@ class SeedHandler(object):
     @staticmethod
     def build_gkeydict(args):
         keyinfo = {}
-        for attr in GKEY._fields:
+        for attr in GKEY._fields + ('keyid',):
             try:
                 value = getattr(args, attr)
                 if attr == 'name' and value:

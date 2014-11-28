@@ -127,9 +127,20 @@ class Seeds(object):
         keys = kwargs
         result = self.seeds
         for key in keys:
-            if key in ['fingerprint']:
+            if key in ['fingerprint', 'keyid']:
                 kwargs[key] = [x.replace(' ', '').upper() for x in kwargs[key]]
+            if key in ['fingerprint']:
                 result = {dev: gkey for dev, gkey in list(result.items()) if kwargs[key][0] in getattr(gkey, key)}
+            elif key in ['keyid']:
+                searchids = [x.lstrip('0X') for x in kwargs[key]]
+                res = {}
+                for dev, gkey in list(result.items()):
+                    keyids = [x.lstrip("0x") for x in getattr(gkey, key)]
+                    for keyid in searchids:
+                        if keyid in keyids:
+                            res[dev] = gkey
+                            break
+                result = res
             else:
                 result = {dev: gkey for dev, gkey in list(result.items()) if kwargs[key].lower() in getattr(gkey, key).lower()}
         return sorted(result.values())

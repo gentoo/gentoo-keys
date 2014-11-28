@@ -68,6 +68,12 @@ class Main(object):
             help='Do a gpg search operations, rather than a gkey search')
 
     @staticmethod
+    def _option_keyid(parser=None):
+        parser.add_argument('-i', '--keyid', dest='keyid', default=None,
+            nargs='+',
+            help='The long keyid of the gpg key to search for')
+
+    @staticmethod
     def _option_keyring(parser=None):
         parser.add_argument('-k', '--keyring', dest='keyring', default='trusted_keyring',
             help='The name of the keyring to use')

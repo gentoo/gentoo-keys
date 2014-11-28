@@ -34,14 +34,14 @@ Action_Options = {
     'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', 'dest'],
     'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
     'listseedfiles': [],
-    'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch'],
+    'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch', 'keyid'],
     'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'seedfile'],
     'removekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'movekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'importkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'verify': ['dest', 'nick', 'name', 'keydir', 'fingerprint', 'category', 'file', 'signature', 'keyring', 'timestamp'],
-    'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
 }
 

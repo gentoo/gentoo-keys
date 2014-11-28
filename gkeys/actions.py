@@ -22,10 +22,11 @@ from sslfetch.connections import Connector
 from gkeys.lib import GkeysGPG
 from gkeys.seedhandler import SeedHandler
 from gkeys.config import GKEY
+from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
-            'installed', 'importkey', 'verify', 'checkkey', 'sign']
+            'installed', 'importkey', 'verify', 'checkkey', 'sign', 'speccheck']
 
 Action_Options = {
     'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', 'file'],
@@ -43,6 +44,7 @@ Action_Options = {
     'verify': ['dest', 'nick', 'name', 'keydir', 'fingerprint', 'category', 'file', 'signature', 'keyring', 'timestamp'],
     'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
+    'speccheck': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
 }
 
 
@@ -311,7 +313,9 @@ class Actions(object):
         self.output('', '\n Checking keys...')
         for gkey in sorted(keyresults):
             self.logger.info("Checking key %s, %s" % (gkey.nick, gkey.keyid))
-            self.output('', "     %s: %s" % (gkey.name, ', '.join(gkey.keyid)))
+            self.output('',
+                "\n  %s, %s: %s" % (gkey.nick, gkey.name, ', '.join(gkey.keyid)) +
+                "\n  ==============================================")
             self.logger.debug("ACTIONS: checkkey; gkey = %s" % str(gkey))
             for key in gkey.keyid:
                 results[gkey.name] = self.gpg.check_keys(gkey.keydir, key)
@@ -336,6 +340,133 @@ class Actions(object):
                 'Revoked: %d' % len(failed['revoked']),
                 'Invalid: %d' % len(failed['invalid']),
                 'No signing capable subkeys: %d' % len(failed['sign'])
+            ])
+
+
+    def speccheck(self, args):
+        '''Check keys actions'''
+        if not args.category:
+            return (False, ["Please specify seeds type."])
+        self.logger.debug("ACTIONS: speccheck; args: %s" % str(args))
+        handler = SeedHandler(self.logger, self.config)
+        seeds = handler.load_category(args.category)
+        catdir = self.config.get_key(args.category + "-category")
+        self.logger.debug("ACTIONS: speccheck; catdir = %s" % catdir)
+        self.gpg = GkeysGPG(self.config, catdir)
+        results = {}
+        failed = defaultdict(list)
+        kwargs = handler.build_gkeydict(args)
+        keyresults = seeds.list(**kwargs)
+        self.output('', '\n Checking keys...')
+        for gkey in sorted(keyresults):
+            self.logger.info("Checking key %s, %s" % (gkey.nick, gkey.keyid))
+            self.output('',
+                "\n  %s, %s: %s" % (gkey.nick, gkey.name, ', '.join(gkey.keyid)) +
+                "\n  ==============================================")
+            self.logger.debug("ACTIONS: speccheck; gkey = %s" % str(gkey))
+            for key in gkey.keyid:
+                results = self.gpg.speccheck(gkey.keydir, key)
+                for g in results:
+                    pub_pass = {}
+                    for key in results[g]:
+                        self.output('', key.pretty_print())
+
+                        if key.key is "PUB":
+                            pub_pass = {
+                                'key': key,
+                                'pub': key.passed_spec,
+                                'sign': False,
+                                'encrypt': False,
+                                'auth': False,
+                                'signs': [],
+                                'encrypts': [],
+                                'authens': [],
+                                'final': False,
+                            }
+                        if key.key is "SUB":
+                            if key.sign_capable and key.passed_spec:
+                                pub_pass['signs'].append(key.passed_spec)
+                                pub_pass['sign'] = True
+                            if key.encrypt_capable:
+                                pub_pass['encrypts'].append(key.passed_spec)
+                                pub_pass['encrypt'] = True
+                            if key.capabilities == 'a':
+                                pub_pass['authens'].append(key.passed_spec)
+                                if key.passed_spec:
+                                    pub_pass['auth'] = True
+                        validity = key.validity.split(',')[0]
+                        if not key.expire and not 'r' in validity:
+                            failed['expired'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key.fingerprint))
+                        if 'r' in validity:
+                            failed['revoked'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key.fingerprint))
+                        if 'i' in validity:
+                            failed['invalid'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key.fingerprint))
+                        if key.capabilities not in ['a', 'e']:
+                            if not key.algo:
+                                failed['algo'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key.fingerprint))
+                            if not key.bits:
+                                failed['bits'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key.fingerprint))
+                        if "Warning" in key.expire_reason:
+                            failed['warn'].append("%s <%s>: %s " % (gkey.name, gkey.nick, key.fingerprint))
+                    if True in pub_pass['signs']:
+                        pub_pass['sign'] = True
+                    if True in pub_pass['encrypts']:
+                        pub_pass['encrypt'] = True
+                    if not pub_pass['sign']:
+                        failed['sign'].append("%s <%s>: %s" % (gkey.name, gkey.nick, pub_pass['key'].fingerprint))
+                    if not pub_pass['encrypt']:
+                        failed['encrypt'].append("%s <%s>: %s" % (gkey.name, gkey.nick, pub_pass['key'].fingerprint))
+                    spec = "%s <%s>: %s" % (gkey.name, gkey.nick, pub_pass['key'].fingerprint)
+                    for k in ['pub', 'sign']:
+                        if pub_pass[k]:
+                            pub_pass['final'] = True
+                        else:
+                            pub_pass['final'] = False
+                            break
+                    if pub_pass['final']:
+                        if spec not in failed['spec-approved']:
+                            failed['spec-approved'].append(spec)
+                    else:
+                        if spec not in failed['spec']:
+                            failed['spec'].append(spec)
+                    sdata = convert_pf(pub_pass, ['pub', 'sign', 'final'])
+                    sdata = convert_yn(sdata, ['auth', 'encrypt'])
+                    self.output('', SPECCHECK_SUMMARY % sdata)
+
+        if failed['revoked']:
+            self.output([sorted(set(failed['revoked']))], '\n Revoked keys:')
+        if failed['invalid']:
+            self.output([sorted(set(failed['invalid']))], '\n Invalid keys:')
+        if failed['sign']:
+            self.output([sorted(set(failed['sign']))], '\n No signing capable subkey:')
+        if failed['encrypt']:
+            self.output([sorted(set(failed['encrypt']))], '\n No Encryption capable subkey (Notice only):')
+        if failed['algo']:
+            self.output([sorted(set(failed['algo']))], '\n Incorrect Algorithm:')
+        if failed['bits']:
+            self.output([sorted(set(failed['bits']))], '\n Incorrect bit length:')
+        if failed['expired']:
+            self.output([sorted(set(failed['expired']))], '\n Expiry keys:')
+        if failed['warn']:
+            self.output([sorted(set(failed['warn']))], '\n Expiry Warnings:')
+        if failed['spec']:
+            self.output([sorted(set(failed['spec']))], '\n Failed to pass SPEC requirements:')
+        if failed['spec-approved']:
+            self.output([sorted(set(failed['spec-approved']))], '\n SPEC Approved:')
+
+        return (len(failed) <1,
+            ['\nFound Failures:\n-------',
+                'Revoked................: %d' % len(set(failed['revoked'])),
+                'Invalid................: %d' % len(set(failed['invalid'])),
+                'No Signing subkey......: %d' % len(set(failed['sign'])),
+                'No Encryption subkey...: %d' % len(set(failed['encrypt'])),
+                'Algorithm..............: %d' % len(set(failed['algo'])),
+                'Bit length.............: %d' % len(set(failed['bits'])),
+                'Expiry.................: %d' % len(set(failed['expired'])),
+                'Expiry Warnings........: %d' % len(set(failed['warn'])),
+                'SPEC requirements......: %d' % len(set(failed['spec'])),
+                '=============================',
+                'SPEC Approved..........: %d' % len(set(failed['spec-approved'])),
             ])
 
 

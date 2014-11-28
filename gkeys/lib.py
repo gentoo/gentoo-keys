@@ -206,7 +206,7 @@ class GkeysGPG(GPG):
             task = 'list-keys'
             target = keydir
         self.set_keydir(keydir, task, fingerprint=True)
-        self.config.options['tasks'][task].extend(['--keyid-format', 'long'])
+        self.config.options['tasks'][task].extend(['--keyid-format', 'long', '--with-fingerprint'])
         if colons:
             task_value = ['--with-colons']
             self.config.options['tasks'][task].extend(task_value)
@@ -228,8 +228,24 @@ class GkeysGPG(GPG):
         '''
         if not result:
             result = self.list_keys(keydir, fingerprint=keyid, colons=True)
-        checker = KeyChecks(logger)
+        checker = KeyChecks(logger, qualified_id_check=True)
         return checker.validity_checks(keydir, keyid, result)
+
+
+    def speccheck(self, keydir, keyid, result=None):
+        '''Check specified or all keys based on the seed type
+        specifications are met.
+
+        @param keydir: the keydir to list the keys for
+        @param keyid: the keyid to check
+        @param result: optional pyGPG.output.GPGResult object
+        @returns: SpecCheck instance
+        '''
+        if not result:
+            result = self.list_keys(keydir, fingerprint=keyid, colons=True)
+        checker = KeyChecks(logger, qualified_id_check=True)
+        specchecks = checker.spec_check(keydir, keyid, result)
+        return specchecks
 
 
     def list_keydirs(self):

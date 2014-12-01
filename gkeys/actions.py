@@ -332,9 +332,10 @@ class Actions(object):
         if failed['sign']:
             self.output([failed['sign']], '\n No signing capable subkeys:\n')
         return (len(failed) <1,
-            ['\nFound:\n-------', 'Expired: %d\nRevoked: %d\nInvalid: %d\nNo signing capable subkeys: %d'
-                % (len(failed['expired']), len(failed['revoked']),
-                    len(failed['invalid']), len(failed['sign']))
+            ['\nFound:\n-------', 'Expired: %d' % len(failed['expired']),
+                'Revoked: %d' % len(failed['revoked']),
+                'Invalid: %d' % len(failed['invalid']),
+                'No signing capable subkeys: %d' % len(failed['sign'])
             ])
 
 

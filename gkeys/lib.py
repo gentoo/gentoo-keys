@@ -255,6 +255,7 @@ class GkeysGPG(GPG):
     def verify_file(self, gkey, signature, filepath):
         '''Verify the file specified at filepath or url
 
+        @param gkey: GKEY instance of the gpg key used to verify it
         @param signature: string with the signature file
         @param filepath: string with the path or url of the signed file
         '''

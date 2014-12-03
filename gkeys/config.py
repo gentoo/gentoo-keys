@@ -65,8 +65,12 @@ class GKeysConfig(GPGConfig):
             self.defaults['config'] = config
             self.defaults['configdir'] = os.path.dirname(config)
         else:
-            self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gkeys'])
-            self.defaults['config'] = '%(configdir)s/gkeys.conf'
+            homedir = os.path.expanduser('~')
+            self.defaults['configdir'] = homedir
+            self.defaults['config']= os.path.join(homedir, '.gkeys.conf')
+            if not os.path.exists(self.defaults['config']):
+                self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gkeys'])
+                self.defaults['config'] = '%(configdir)s/gkeys.conf'
         self.configparser = None
         self._add_gkey_defaults()
         if read_configfile:

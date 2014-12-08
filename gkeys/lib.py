@@ -227,7 +227,7 @@ class GkeysGPG(GPG):
         @returns: GKEY_CHECK instance
         '''
         if not result:
-            result = self.list_keys(keydir, colons=True)
+            result = self.list_keys(keydir, fingerprint=keyid, colons=True)
         checker = KeyChecks(logger)
         return checker.validity_checks(keydir, keyid, result)
 

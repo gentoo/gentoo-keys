@@ -64,7 +64,7 @@ class SeedHandler(object):
         @param seedfile: string filepath of the file to load
         @return Seeds class instance of the file loaded
         '''
-        if not seedfile and not filename:
+        if not seedfile and not filepath:
             self.logger.error("SeedHandler: load_seeds; no filename to load: "
             "setting = %s.  Please use the -S or -F option to indicate: which seed "
             "file to use." % seedfile)

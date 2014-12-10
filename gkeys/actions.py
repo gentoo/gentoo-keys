@@ -77,7 +77,7 @@ class Actions(object):
         '''Download the selected seed file(s)'''
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
         handler = SeedHandler(self.logger, self.config)
-        success, messages = handler.fetch_seeds(args.category, args, self.verify)
+        success, messages = handler.fetch_seeds(args.seedfile, args, self.verify)
 
         messages.append("")
         messages.append("Fetch operation completed")

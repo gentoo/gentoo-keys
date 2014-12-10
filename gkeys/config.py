@@ -49,7 +49,7 @@ GKEY_FINGERPRINTS = \
       Fingerprint: %(fingerprint)s
 '''
 
-MAPSEEDS = { 'dev' : 'developers.seeds', 'rel': 'release.seeds' }
+MAPSEEDS = { 'dev' : 'gentoodevs.seeds', 'rel': 'gentoo.seeds' }
 
 
 class GKeysConfig(GPGConfig):
@@ -96,8 +96,8 @@ class GKeysConfig(GPGConfig):
         # NOTE: files is umask mode in octal, directories is chmod mode in octal
         self.defaults['permissions'] = {'files': '0o002', 'directories': '0o775',}
         self.defaults['seedurls'] = {
-            'gentoo.seeds': 'https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds',
-            'gentoodevs.seeds': 'https://api.gentoo.org/gentoo-keys/seeds/gentoodevs.seeds',
+            'gentoo': 'https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds',
+            'gentoodevs': 'https://api.gentoo.org/gentoo-keys/seeds/gentoodevs.seeds',
             'gkey': 'gkeys',
         }
         self.defaults['sign'] = {

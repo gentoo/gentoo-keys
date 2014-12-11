@@ -225,6 +225,7 @@ class Main(object):
                 except AttributeError:
                     for x in msg:
                         print('    ', x)
+        print()
 
 
     def output_failed(self, failed):

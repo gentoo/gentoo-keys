@@ -123,6 +123,16 @@ class CliBase(object):
             default=False,
             help='Turn on timestamp use')
 
+    @staticmethod
+    def _option_mail(parser=None):
+        parser.add_argument('-m', '--mail', dest='mail', default=None,
+            help='The email address to search for')
+
+    @staticmethod
+    def _option_status(parser=None):
+        parser.add_argument('-A', '--status', default=False,
+            help='The active status of the member')
+
 
     def parse_args(self, args):
         '''Parse a list of aruments

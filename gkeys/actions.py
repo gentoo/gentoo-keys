@@ -27,6 +27,7 @@ from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
             'installed', 'importkey', 'verify', 'checkkey', 'sign', 'speccheck']
+            'refreshkey']
 
 Action_Options = {
     'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', 'file'],
@@ -45,6 +46,7 @@ Action_Options = {
     'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
     'speccheck': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
+    'refreshkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
 }
 
 
@@ -733,3 +735,31 @@ class Actions(object):
                 )
                 success.append(True)
         return (False not in success, ['', msgs])
+
+
+    def refreshkey(self, args):
+        '''Calls gpg with the --refresh-keys option
+        for in place updates of the installed keys'''
+        if not args.category:
+            return (False, ["Please specify seeds type."])
+        self.logger.debug("ACTIONS: refreshkey; args: %s" % str(args))
+        handler = SeedHandler(self.logger, self.config)
+        seeds = handler.load_category(args.category)
+        catdir = self.config.get_key(args.category + "-category")
+        self.logger.debug("ACTIONS: refreshkey; catdir = %s" % catdir)
+        self.gpg = GkeysGPG(self.config, catdir)
+        results = {}
+        kwargs = handler.build_gkeydict(args)
+        keyresults = seeds.list(**kwargs)
+        self.output('', '\n Refreshig keys...')
+        for gkey in sorted(keyresults):
+            self.logger.info("Refreshig key %s, %s" % (gkey.nick, gkey.keyid))
+            self.output('', "  %s: %s" % (gkey.name, ', '.join(gkey.keyid)))
+            #self.output('', "  ===============")
+            self.logger.debug("ACTIONS: refreshkey; gkey = %s" % str(gkey))
+            results[gkey.keydir] = self.gpg.refresh_key(gkey)
+        return (True, ['Completed'])
+
+
+
+

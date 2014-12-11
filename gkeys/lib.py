@@ -179,6 +179,24 @@ class GkeysGPG(GPG):
         return []
 
 
+    def refresh_key(self, gkey):
+        '''Refresh the specified key in the specified keydir
+
+        @param key: tuple of (name, nick, keydir, fingerprint)
+        @param keydir: the keydir to add the key to
+        '''
+        self.config.defaults['gpg_defaults'].append('--no-permission-warning')
+        self.set_keyserver()
+        self.set_keydir(gkey.keydir, 'refresh-keys', reset=True)
+        self.set_keyring('pubring.gpg', 'refresh-keys', reset=False)
+        logger.debug("LIB: refresh_key, gkey: %s" % str(gkey))
+        logger.debug("** Calling runGPG with Running 'gpg %s --refresh-keys' for: %s"
+            % (' '.join(self.config.get_key('tasks', 'refresh-keys')), str(gkey)))
+        result = self.runGPG(task='refresh-keys', inputfile='')
+        logger.info('GPG return code: ' + str(result.returncode))
+        return result
+
+
     def update_key(self, gkey, keydir):
         '''Update the specified key in the specified keydir
 

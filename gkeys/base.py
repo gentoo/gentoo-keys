@@ -113,6 +113,11 @@ class CliBase(object):
             help='The path/URL to use for the (signed) file')
 
     @staticmethod
+    def _option_1file(parser=None):
+        parser.add_argument('-F', '--file', dest='filename', default=None,
+            help='The path/URL to use for the (signed) file')
+
+    @staticmethod
     def _option_signature(parser=None):
         parser.add_argument('-s','--signature', dest='signature', default=None,
            help='The path/URL to use for the signature')

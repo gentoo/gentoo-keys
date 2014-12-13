@@ -659,6 +659,8 @@ class Actions(object):
                         success_fetch = os.path.isfile(signature)
                     if success_fetch:
                         break
+            else:
+                sig_path = signature
             messages = []
             self.logger.info("Verifying file...")
             verified = False

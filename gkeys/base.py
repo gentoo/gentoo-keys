@@ -238,7 +238,7 @@ class CliBase(object):
         if header:
             print(header)
         for msg in results:
-            if isinstance(msg, str):
+            if isinstance(msg, str) or isinstance(msg, unicode):
                 print('    ', msg)
             else:
                 try:

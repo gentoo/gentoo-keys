@@ -12,9 +12,9 @@
 # $ esearch some-package
 
 if [[ "$SHELL" =~ "zsh" ]]; then
-    export PATH="$(dirname $0)/../pyGPG/bin:$(dirname $0)/bin:${PATH}"
-    export PYTHONPATH="$(dirname $0)/../pyGPG/:$(dirname $0)/../ssl-fetch/:$(dirname $0)/:${PYTHONPATH}"
+    export PATH="$(dirname $0)/../pyGPG/bin:$(dirname $0)/gkeys/bin:$(dirname $0)/gkeys-ldap/bin:$(dirname $0)/gkeys-gen/bin:${PATH}"
+    export PYTHONPATH="$(dirname $0)/../pyGPG/:$(dirname $0)/../ssl-fetch/:$(dirname $0)/gkeys/:$(dirname $0)/gkeys-ldap/:$(dirname $0)/gkeys-gen/:${PYTHONPATH}"
 else
-    export PATH="$(dirname $BASH_SOURCE[0])/../pyGPG/bin:$(dirname $BASH_SOURCE[0])/bin:${PATH}"
-    export PYTHONPATH="$(dirname $BASH_SOURCE[0])/../pyGPG/:$(dirname $BASH_SOURCE[0])/../ssl-fetch/:$(dirname $BASH_SOURCE[0])/:${PYTHONPATH}"
+    export PATH="$(dirname $BASH_SOURCE[0])/../pyGPG/bin:$(dirname $BASH_SOURCE[0])/gkeys/bin:$(dirname $BASH_SOURCE[0])/gkeys-ldap/bin:$(dirname $BASH_SOURCE[0])/gkeys-gen/bin:${PATH}"
+    export PYTHONPATH="$(dirname $BASH_SOURCE[0])/../pyGPG/:$(dirname $BASH_SOURCE[0])/../ssl-fetch/:$(dirname $BASH_SOURCE[0])/gkeys/:$(dirname $BASH_SOURCE[0])/gkeys-gen/:$(dirname $BASH_SOURCE[0])/gkeys-ldap/:${PYTHONPATH}"
 fi

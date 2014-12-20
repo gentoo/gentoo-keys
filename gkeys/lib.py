@@ -179,6 +179,24 @@ class GkeysGPG(GPG):
         return []
 
 
+    def refresh_key(self, gkey):
+        '''Refresh the specified key in the specified keydir
+
+        @param key: tuple of (name, nick, keydir, fingerprint)
+        @param keydir: the keydir to add the key to
+        '''
+        self.config.defaults['gpg_defaults'].append('--no-permission-warning')
+        self.set_keyserver()
+        self.set_keydir(gkey.keydir, 'refresh-keys', reset=True)
+        self.set_keyring('pubring.gpg', 'refresh-keys', reset=False)
+        logger.debug("LIB: refresh_key, gkey: %s" % str(gkey))
+        logger.debug("** Calling runGPG with Running 'gpg %s --refresh-keys' for: %s"
+            % (' '.join(self.config.get_key('tasks', 'refresh-keys')), str(gkey)))
+        result = self.runGPG(task='refresh-keys', inputfile='')
+        logger.info('GPG return code: ' + str(result.returncode))
+        return result
+
+
     def update_key(self, gkey, keydir):
         '''Update the specified key in the specified keydir
 
@@ -206,7 +224,7 @@ class GkeysGPG(GPG):
             task = 'list-keys'
             target = keydir
         self.set_keydir(keydir, task, fingerprint=True)
-        self.config.options['tasks'][task].extend(['--keyid-format', 'long'])
+        self.config.options['tasks'][task].extend(['--keyid-format', 'long', '--with-fingerprint'])
         if colons:
             task_value = ['--with-colons']
             self.config.options['tasks'][task].extend(task_value)
@@ -227,9 +245,25 @@ class GkeysGPG(GPG):
         @returns: GKEY_CHECK instance
         '''
         if not result:
-            result = self.list_keys(keydir, colons=True)
-        checker = KeyChecks(logger)
+            result = self.list_keys(keydir, fingerprint=keyid, colons=True)
+        checker = KeyChecks(logger, qualified_id_check=True)
         return checker.validity_checks(keydir, keyid, result)
+
+
+    def speccheck(self, keydir, keyid, result=None):
+        '''Check specified or all keys based on the seed type
+        specifications are met.
+
+        @param keydir: the keydir to list the keys for
+        @param keyid: the keyid to check
+        @param result: optional pyGPG.output.GPGResult object
+        @returns: SpecCheck instance
+        '''
+        if not result:
+            result = self.list_keys(keydir, fingerprint=keyid, colons=True)
+        checker = KeyChecks(logger, qualified_id_check=True)
+        specchecks = checker.spec_check(keydir, keyid, result)
+        return specchecks
 
 
     def list_keydirs(self):
@@ -255,6 +289,7 @@ class GkeysGPG(GPG):
     def verify_file(self, gkey, signature, filepath):
         '''Verify the file specified at filepath or url
 
+        @param gkey: GKEY instance of the gpg key used to verify it
         @param signature: string with the signature file
         @param filepath: string with the path or url of the signed file
         '''

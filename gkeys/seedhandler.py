@@ -14,7 +14,7 @@ import os
 import re
 from json import load
 
-from gkeys.config import GKEY, MAPSEEDS
+from gkeys.config import GKEY
 from gkeys.seed import Seeds
 from gkeys.fileops import ensure_dirs
 
@@ -64,7 +64,7 @@ class SeedHandler(object):
         @param seedfile: string filepath of the file to load
         @return Seeds class instance of the file loaded
         '''
-        if not seedfile and not filename:
+        if not seedfile and not filepath:
             self.logger.error("SeedHandler: load_seeds; no filename to load: "
             "setting = %s.  Please use the -S or -F option to indicate: which seed "
             "file to use." % seedfile)
@@ -127,17 +127,15 @@ class SeedHandler(object):
         messages = []
         try:
             for seed in [seeds]:
-                seedurl = self.config.get_key('seedurls', MAPSEEDS[seed])
-                seedpath = self.config.get_key('%s-seedfile' % seed)
+                seedurl = self.config.get_key('seedurls', seed)
+                seedpath = self.config.get_key('seeds', seed)
                 if http_check.match(seedurl):
                     urls.extend([(seedurl, seedpath)])
                 else:
                     self.logger.info("Wrong seed file URLs... Switching to default URLs.")
-                    urls.extend([(self.config['seedurls'][MAPSEEDS[seed]], seedpath)])
+                    urls.extend([(self.config['seedurls'][seed], seedpath)])
         except KeyError:
-            for key, value in list(MAPSEEDS.items()):
-                seedpath = self.config.get_key('%s-seedfile' % key)
-                urls.extend([(self.config['seedurls'][value], seedpath)])
+            pass
         succeeded = []
         seedsdir = self.config.get_key('seedsdir')
         mode = int(self.config.get_key('permissions', 'directories'),0)

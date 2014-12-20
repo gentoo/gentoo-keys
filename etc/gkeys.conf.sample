@@ -49,14 +49,6 @@ seedsdir: %(gkeysdir)s/seeds
 logdir: /var/log/gkeys
 
 
-[seeds]
-
-# *-seedfile: json txt file of name, keyid, fingerprint
-# entry per line
-gentoo: %(seedsdir)s/gentoo.seeds
-gentoodevs: %(seedsdir)s/gentoodevs.seeds
-
-
 [permissions]
 
 # Permissions settings (octal)
@@ -67,12 +59,20 @@ directories: 0o775
 files: 0o007
 
 
+[seeds]
+
+# *-seedfile: json txt file of name, keyid, fingerprint
+# entry per line
+gentoo: %(seedsdir)s/gentoo.seeds
+gentoodevs: %(seedsdir)s/gentoodevs.seeds
+
+
 [seedurls]
 
 # Use the filenames as the keys.
 # The will be paired to the seed file of the same name for fetching, updating
-gentoo.seeds: https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds
-gentoodevs.seeds: https://api.gentoo.org/gentoo-keys/seeds/gentoodevs.seeds
+gentoo: https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds
+gentoodevs: https://api.gentoo.org/gentoo-keys/seeds/gentoodevs.seeds
 
 
 # GKEY nick used for verification of seeds and other gkey files

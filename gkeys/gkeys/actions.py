@@ -26,7 +26,7 @@ from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
 Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
-            'installed', 'importkey', 'verify', 'checkkey', 'sign', 'speccheck']
+            'installed', 'importkey', 'verify', 'checkkey', 'sign', 'speccheck',
             'refreshkey']
 
 Action_Options = {

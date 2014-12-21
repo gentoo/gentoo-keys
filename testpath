@@ -18,3 +18,15 @@ else
     export PATH="$(dirname $BASH_SOURCE[0])/../pyGPG/bin:$(dirname $BASH_SOURCE[0])/gkeys/bin:$(dirname $BASH_SOURCE[0])/gkeys-ldap/bin:$(dirname $BASH_SOURCE[0])/gkeys-gen/bin:${PATH}"
     export PYTHONPATH="$(dirname $BASH_SOURCE[0])/../pyGPG/:$(dirname $BASH_SOURCE[0])/../ssl-fetch/:$(dirname $BASH_SOURCE[0])/gkeys/:$(dirname $BASH_SOURCE[0])/gkeys-gen/:$(dirname $BASH_SOURCE[0])/gkeys-ldap/:${PYTHONPATH}"
 fi
+
+# Create our LICENSE and README.md hardlinks
+# This way we only need one copy of each file,
+# but they get included in all 3 pkgs
+
+ln LICENSE gkeys/LICENSE
+ln LICENSE gkeys-gen/LICENSE
+ln LICENSE gkeys-ldap/LICENSE
+
+ln README.md gkeys/README.md
+ln README.md gkeys-gen/README.md
+ln README.md gkeys-ldap/README.md

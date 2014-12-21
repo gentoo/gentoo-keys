@@ -12,7 +12,7 @@ from gkeys import seed
 from gkeys.base import CliBase
 from gkeys.config import GKeysConfig
 from gkeyldap import connect, search
-from gkeyldap.actions import Actions, Available_Actions
+from gkeyldap.actions import Actions, Available_Actions, Action_Options
 
 
 class Main(CliBase):

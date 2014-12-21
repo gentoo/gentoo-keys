@@ -1,2 +1,8 @@
 gkeys.conf
 *.py[co]
+/gkeys-gen/LICENSE
+/gkeys-gen/README.md
+/gkeys-ldap/LICENSE
+/gkeys-ldap/README.md
+/gkeys/LICENSE
+/gkeys/README.md

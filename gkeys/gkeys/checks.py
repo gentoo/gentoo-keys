@@ -54,15 +54,15 @@ TEST_SPEC = {
         'DSA': 2048,
         'RSA': 2048,
         },
-    'expire': 3 * 365,      # in days
+    'expire': 5 * 365,      # in days
     'subkeys': {        # warning/error mode
         'encrypt': {
             'mode': 'notice',
-            'expire': 3 * 365,
+            'expire': 5 * 365,
             },
         'sign': {
             'mode': 'error',
-            'expire': 365,
+            'expire': 5 * 365,
             },
         },
     'algorithms': ['DSA', 'RSA', '1', '2', '3', '17'],

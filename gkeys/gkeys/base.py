@@ -221,8 +221,6 @@ class CliBase(object):
         cat = None
         if 'category' in args:
             cat = args.category
-        elif 'seedfile' in args:
-            cat = args.seedfile
         if not self._check_category(cat):
             return False
 

@@ -31,14 +31,14 @@ Available_Actions = ['listcats', 'listseed', 'addseed', 'removeseed', 'moveseed'
 
 Action_Options = {
     'listcats': [],
-    'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', '1file'],
-    'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
-    'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
-    'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', 'dest'],
-    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
+    'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', '1file'],
+    'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
+    'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
+    'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'dest'],
+    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
     'listseedfiles': [],
     'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch', 'keyid'],
-    'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'seedfile', '1file'],
+    'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', '1file'],
     'removekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'movekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
@@ -68,7 +68,7 @@ class Actions(object):
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
             try:
-                self.seeds = handler.load_seeds(args.seedfile, args.nick)
+                self.seeds = handler.load_seeds(args.category, args.nick)
             except ValueError:
                 return (False, ["Failed to load seed file. Consider fetching seedfiles."])
         if self.seeds:
@@ -82,7 +82,7 @@ class Actions(object):
         '''Download the selected seed file(s)'''
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
         handler = SeedHandler(self.logger, self.config)
-        success, messages = handler.fetch_seeds(args.seedfile, args, self.verify)
+        success, messages = handler.fetch_seeds(args.category, args, self.verify)
 
         messages.append("")
         messages.append("Fetch operation completed")
@@ -273,7 +273,7 @@ class Actions(object):
             # get confirmation
             # fill in code here
             keyring = self.config.get_key('keyring')
-            catdir = os.path.join(keyring, args.seedfile)
+            catdir = os.path.join(keyring, args.category)
             self.logger.debug("ACTIONS: installkey; catdir = %s" % catdir)
             self.gpg = GkeysGPG(self.config, catdir)
             results = {}
@@ -696,7 +696,7 @@ class Actions(object):
     def listcats(self, args):
         '''List seed file definitions found in the config'''
         seeds = list(self.config.get_key('seeds'))
-        return (True, {"Categories/Seedfiles defined: %s\n"
+        return (True, {"Categories defined: %s\n"
             % (",  ".join(seeds)): True})
 
 

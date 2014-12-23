@@ -24,12 +24,13 @@ from gkeys.seedhandler import SeedHandler
 from gkeys.config import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
-Available_Actions = ['listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
+Available_Actions = ['listcats', 'listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
             'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
             'installed', 'importkey', 'verify', 'checkkey', 'sign', 'speccheck',
             'refreshkey']
 
 Action_Options = {
+    'listcats': [],
     'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile', '1file'],
     'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
     'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'seedfile'],
@@ -690,6 +691,13 @@ class Actions(object):
                     "Key info................: %s <%s>, %s"
                     % ( key.name, key.nick,keyid)]
         return (verified, messages)
+
+
+    def listcats(self, args):
+        '''List seed file definitions found in the config'''
+        seeds = list(self.config.get_key('seeds'))
+        return (True, {"Categories/Seedfiles defined: %s\n"
+            % (",  ".join(seeds)): True})
 
 
     def listseedfiles(self, args):

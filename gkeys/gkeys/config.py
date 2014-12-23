@@ -11,22 +11,13 @@
 """
 
 import os
-import sys
 
 from collections import OrderedDict
-
-# py3.2
-if sys.hexversion >= 0x30200f0:
-    import configparser as ConfigParser
-else:
-    import ConfigParser
-
 from collections import namedtuple
-
 
 from pyGPG.config import GPGConfig
 
-from gkeys import log
+from gkeys.SaneConfigParser import SaneConfigParser
 from gkeys.utils import path
 
 
@@ -82,27 +73,17 @@ class GKeysConfig(GPGConfig):
 
     def _add_gkey_defaults(self):
         self.defaults['gkeysdir'] = path([self.root, EPREFIX, '/var/lib/gentoo/gkeys'])
-        self.defaults['dev-keydir'] = '%(gkeysdir)s/devs'
-        self.defaults['rel-keydir'] = '%(gkeysdir)s/release'
         self.defaults['keyring'] = '%(gkeysdir)s/keyring'
-        self.defaults['overlays-keydir'] = '%(gkeysdir)s/overlays'
         self.defaults['sign-keydir'] = '%(gkeysdir)s/sign',
         self.defaults['logdir'] = '/var/log/gkeys'
         # local directory to scan for seed files installed via ebuild, layman
         # or manual install.
         self.defaults['seedsdir'] = '%(gkeysdir)s/seeds'
-        self.defaults['seeds'] = {
-            'gentoo': '%(seedsdir)s/gentoo.seeds',
-            'gentoodevs': '%(seedsdir)s/gentoodevs.seeds',
-        }
+        self.defaults['seeds'] = {}
         self.defaults['keyserver'] = 'pool.sks-keyservers.net'
         # NOTE: files is umask mode in octal, directories is chmod mode in octal
         self.defaults['permissions'] = {'files': '0o002', 'directories': '0o775',}
-        self.defaults['seedurls'] = {
-            'gentoo': 'https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds',
-            'gentoodevs': 'https://api.gentoo.org/gentoo-keys/seeds/gentoodevs.seeds',
-            'gkey': 'gkeys',
-        }
+        self.defaults['seedurls'] = {}
         self.defaults['sign'] = {
             'key': 'fingerprint',
             'keydir': '~/.gkeys',
@@ -120,13 +101,24 @@ class GKeysConfig(GPGConfig):
                 % {'configdir': self.defaults['configdir']}
         for key in self.defaults:
             self.defaults[key] = self._sub_(self.defaults[key])
-        defaults = self.get_defaults()
-        # remove some defaults from being entered into the configparser
-        for key in ['gpg_defaults', 'only_usable', 'refetch', 'tasks']:
-            defaults.pop(key)
-        self.configparser = ConfigParser.ConfigParser(defaults)
-        self.configparser.read(defaults['config'])
-
+        defaults = OrderedDict()
+        # Add only the defaults we want in the configparser
+        for key in ['gkeysdir', 'keyring', 'sign-keydir', 'logdir', 'seedsdir',
+            'keyserver']:
+            defaults[key] = self.defaults[key]
+        self.configparser = SaneConfigParser(defaults)
+        self.configparser.read(self.defaults['config'])
+        # I consider this hacky, but due to shortcomings of ConfigParser
+        # we need to reset the defaults redefined in the 'base' section
+        for key in self.configparser.options('base'):
+            self.defaults[key] = self.configparser.get('base', key)
+            defaults[key] = self.defaults[key]
+        self.configparser._defaults = defaults
+        for section in self.configparser.sections():
+            if section == 'base':
+                continue
+            for key in self.configparser.options(section):
+                self.defaults[section][key] = self.configparser.get(section, key)
 
     def get_key(self, key, subkey=None):
         return self._get_(key, subkey)
@@ -134,25 +126,12 @@ class GKeysConfig(GPGConfig):
 
     def _get_(self, key, subkey=None):
         if subkey:
-            if self.configparser and self.configparser.has_option(key, subkey):
-                if self.logger:
-                    self.logger.debug("Found %s in configparser... %s"
-                        % (key, str(self.configparser.get(key, subkey))))
-                return self._sub_(self.configparser.get(key, subkey))
-            #print("CONFIG: key, subkey", key, subkey)
             if key in self.options and subkey in self.options[key]:
                 return self._sub_(self.options[key][subkey])
             elif key in self.defaults and subkey in self.defaults[key]:
                 return self._sub_(self.defaults[key][subkey])
             else:
                 return super(GKeysConfig, self)._get_(key, subkey)
-        elif self.configparser and self.configparser.has_option('DEFAULT', key):
-            if self.logger:
-                self.logger.debug("Found %s in configparser... %s"
-                    % (key, str(self.configparser.get('DEFAULT', key))))
-                #self.logger.debug("type(key)= %s"
-                #    % str(type(self.configparser.get('DEFAULT', key))))
-            return self.configparser.get('DEFAULT', key)
         else:
             return super(GKeysConfig, self)._get_(key, subkey)
 

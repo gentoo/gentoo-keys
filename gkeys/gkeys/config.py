@@ -13,6 +13,8 @@
 import os
 import sys
 
+from collections import OrderedDict
+
 # py3.2
 if sys.hexversion >= 0x30200f0:
     import configparser as ConfigParser
@@ -27,7 +29,6 @@ from pyGPG.config import GPGConfig
 from gkeys import log
 from gkeys.utils import path
 
-logger = log.logger
 
 
 # establish the eprefix, initially set so eprefixify can
@@ -60,7 +61,9 @@ class GKeysConfig(GPGConfig):
         """ Class initialiser """
         GPGConfig.__init__(self)
 
+        self.logger = None
         self.root = root or ''
+        self.defaults = OrderedDict(self.defaults)
         if config:
             self.defaults['config'] = config
             self.defaults['configdir'] = os.path.dirname(config)
@@ -115,6 +118,8 @@ class GKeysConfig(GPGConfig):
             # fix the config path
             self.defaults['config'] = self.defaults['config'] \
                 % {'configdir': self.defaults['configdir']}
+        for key in self.defaults:
+            self.defaults[key] = self._sub_(self.defaults[key])
         defaults = self.get_defaults()
         # remove some defaults from being entered into the configparser
         for key in ['gpg_defaults', 'only_usable', 'refetch', 'tasks']:
@@ -130,8 +135,8 @@ class GKeysConfig(GPGConfig):
     def _get_(self, key, subkey=None):
         if subkey:
             if self.configparser and self.configparser.has_option(key, subkey):
-                if logger:
-                    logger.debug("Found %s in configparser... %s"
+                if self.logger:
+                    self.logger.debug("Found %s in configparser... %s"
                         % (key, str(self.configparser.get(key, subkey))))
                 return self._sub_(self.configparser.get(key, subkey))
             #print("CONFIG: key, subkey", key, subkey)
@@ -142,10 +147,10 @@ class GKeysConfig(GPGConfig):
             else:
                 return super(GKeysConfig, self)._get_(key, subkey)
         elif self.configparser and self.configparser.has_option('DEFAULT', key):
-            if logger:
-                logger.debug("Found %s in configparser... %s"
+            if self.logger:
+                self.logger.debug("Found %s in configparser... %s"
                     % (key, str(self.configparser.get('DEFAULT', key))))
-                #logger.debug("type(key)= %s"
+                #self.logger.debug("type(key)= %s"
                 #    % str(type(self.configparser.get('DEFAULT', key))))
             return self.configparser.get('DEFAULT', key)
         else:

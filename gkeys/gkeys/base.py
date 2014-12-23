@@ -203,7 +203,7 @@ class CliBase(object):
         logger = set_logger('gkeys', self.config['logdir'], args.debug,
             dirmode=int(self.config.get_key('permissions', 'directories'),0),
             filemask=int(self.config.get_key('permissions', 'files'),0))
-        config.logger = logger
+        self.config.logger = logger
         fileops.logger = logger
         seed.logger = logger
         lib.logger = logger

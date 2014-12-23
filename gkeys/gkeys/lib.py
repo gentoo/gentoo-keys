@@ -132,7 +132,8 @@ class GkeysGPG(GPG):
         self.set_keydir(gkey.keydir, 'recv-keys', reset=True)
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
         logger.debug("LIB: add_key; ensure dirs: " + self.keydir)
-        ensure_dirs(str(self.keydir))
+        mode = int(self.config.get_key('permissions', 'directories'),0)
+        ensure_dirs(str(self.keydir), mode=mode)
         self.set_keyseedfile(trap_errors=False)
         results = []
         for fingerprint in gkey.fingerprint:

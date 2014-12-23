@@ -175,8 +175,9 @@ class Actions(object):
         # get confirmation
         # fill in code here
         if not args.category:
-            args.category = 'rel'
-        catdir = self.config.get_key(args.category + "-category")
+            args.category = 'gentoo'
+        keyring = self.config.get_key('keyring')
+        catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: listkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         handler = SeedHandler(self.logger, self.config)
@@ -270,7 +271,8 @@ class Actions(object):
                     return (False, ["Search failed for search term"])
             # get confirmation
             # fill in code here
-            catdir = self.config.get_key(args.category + "-category")
+            keyring = self.config.get_key('keyring')
+            catdir = os.path.join(keyring, args.seedfile)
             self.logger.debug("ACTIONS: installkey; catdir = %s" % catdir)
             self.gpg = GkeysGPG(self.config, catdir)
             results = {}
@@ -305,7 +307,8 @@ class Actions(object):
         self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
         handler = SeedHandler(self.logger, self.config)
         seeds = handler.load_category(args.category)
-        catdir = self.config.get_key(args.category + "-category")
+        keyring = self.config.get_key('keyring')
+        catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: checkkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         results = {}
@@ -352,7 +355,8 @@ class Actions(object):
         self.logger.debug("ACTIONS: speccheck; args: %s" % str(args))
         handler = SeedHandler(self.logger, self.config)
         seeds = handler.load_category(args.category)
-        catdir = self.config.get_key(args.category + "-category")
+        keyring = self.config.get_key('keyring')
+        catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: speccheck; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         results = {}
@@ -494,7 +498,8 @@ class Actions(object):
                 if ans in ["no", "n"]:
                     messages = ["Key removal aborted... Nothing to be done."]
                 else:
-                    catdir = self.config.get_key(args.category + "-category")
+                    keyring = self.config.get_key('keyring')
+                    catdir = os.path.join(keyring, args.category)
                     rm_candidate = os.path.join(catdir, gkey.nick)
                     self.logger.debug("ACTIONS: removekey; catdir = %s" % catdir)
                     if args.category:
@@ -515,7 +520,8 @@ class Actions(object):
     def importkey(self, args):
         '''Add a specified key to a specified keyring'''
         if args.category:
-            catdir = self.config.get_key(args.category + "-category")
+            keyring = self.config.get_key('keyring')
+            catdir = os.path.join(keyring, args.category)
             keyring_dir = self.config.get_key("keyring")
             self.logger.debug("ACTIONS: importkey; catdir = %s" % catdir)
             self.gpg = GkeysGPG(self.config, catdir)
@@ -538,8 +544,8 @@ class Actions(object):
                 if not results[gkey.name][0].failed:
                     print("Importing: ", gkey.name)
                     self.logger.debug("ACTIONS: importkey; importing key: %s", gkey.name)
-                    keyring = os.path.join(keyring_dir,args.keyring + '.gpg')
-                    self.gpg.add_to_keyring(gkey, catdir, keyring)
+                    _keyring = os.path.join(catdir, args.keyring + '.gpg')
+                    self.gpg.add_to_keyring(gkey, catdir, _keyring)
             if failed and self.output:
                 self.output([failed], "\n Failed to install:")
             if len(failed):
@@ -552,7 +558,8 @@ class Actions(object):
     def installed(self, args):
         '''Lists the installed key directories'''
         if args.category:
-            catdir = self.config.get_key(args.category + "-category")
+            keyring = self.config.get_key('keyring')
+            catdir = os.path.join(keyring, args.category)
         else:
             return (False, ["Please specify a category."])
         self.logger.debug("ACTIONS: installed; catdir = %s" % catdir)
@@ -599,12 +606,13 @@ class Actions(object):
         if not args.filename:
             return (False, ['Please provide a signed file.'])
         if not args.category:
-            args.category = 'rel'
+            args.category = 'gentoo'
         (success, data) = self.installed(args)
         keys = data[1]
         if not keys:
             return (False, ['No installed keys found, try installkey action.'])
-        catdir = self.config.get_key(args.category + "-category")
+        keyring = self.config.get_key('keyring')
+        catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: verify; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         filepath, signature  = args.filename, args.signature
@@ -697,6 +705,8 @@ class Actions(object):
         if not args.filename:
             return (False, ['Please provide a file to sign.'])
 
+        if not args.nick:
+            args.nick = self.config.get_key("sign", "nick")
         if isinstance(args.nick, str):
             nicks = [args.nick]
         else:
@@ -706,7 +716,7 @@ class Actions(object):
         self.seeds = handler.load_category('sign', nicks)
         if not self.seeds.seeds:
             return (False, ['No installed keys, try installkey action.', ''])
-        basedir = self.config.get_key("sign-category")
+        basedir = self.config.get_key("sign-keydir")
         keydir  = self.config.get_key("sign", "keydir")
         task = self.config.get_key("sign", "type")
         keyring = self.config.get_key("sign", "keyring")
@@ -747,7 +757,8 @@ class Actions(object):
         self.logger.debug("ACTIONS: refreshkey; args: %s" % str(args))
         handler = SeedHandler(self.logger, self.config)
         seeds = handler.load_category(args.category)
-        catdir = self.config.get_key(args.category + "-category")
+        keyring = self.config.get_key('keyring')
+        catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: refreshkey; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         results = {}

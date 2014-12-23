@@ -87,11 +87,11 @@ class SeedHandler(object):
         @return Seeds class object
         '''
         seeds = Seeds(config=self.config)
-        if category:
-            catdir = self.config.get_key(category + "-category")
+        if category == 'sign':
+            catdir = self.config.get_key('sign-keydir')
         else:
-            self.logger.debug("SeedHandler: load_category; Error invalid category: %s." % (str(category)))
-            return seeds
+            keyrings = self.config.get_key('keyring')
+            catdir = os.path.join(keyrings, category)
         self.logger.debug("SeedHandler: load_category; catdir = %s" % catdir)
         try:
             if not nicks:

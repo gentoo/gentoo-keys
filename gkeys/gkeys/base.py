@@ -80,7 +80,7 @@ class CliBase(object):
     @staticmethod
     def _option_category(parser=None):
         parser.add_argument('-C', '--category',
-            choices=['rel', 'dev', 'overlays', 'sign'], dest='category', default=None,
+            dest='category', default=None,
             help='The key or seed directory category to use or update')
 
     @staticmethod
@@ -216,6 +216,16 @@ class CliBase(object):
             logger.debug("Main: run; Found alternate config request: %s"
                 % args.config)
 
+        # check if a -C, --category was input
+        # if it was, check if the category is listed in the [seeds]
+        cat = None
+        if 'category' in args:
+            cat = args.category
+        elif 'seedfile' in args:
+            cat = args.seedfile
+        if not self._check_category(cat):
+            return False
+
         # establish our actions instance
         self.actions = self.cli_config['Actions'](self.config, self.output_results, logger)
 
@@ -251,3 +261,18 @@ class CliBase(object):
 
     def output_failed(self, failed):
         pass
+
+
+    def _check_category(self, category=None):
+        '''Checks that the category (seedfile) is listed
+        in the [seeds] config or defaults['seeds'] section
+
+        @param args: configparser instance
+        @return boolean
+        '''
+        available_cats = list(self.config.defaults['seeds'])
+        if category and category not in available_cats:
+            self.config.logger.error("Invalid category or seedfile entered: %s" % category)
+            self.config.logger.error("Available categories or seedfiles: %s" % ', '.join(sorted(available_cats)))
+            return False
+        return True

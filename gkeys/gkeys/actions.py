@@ -304,7 +304,7 @@ class Actions(object):
     def checkkey(self, args):
         '''Check keys actions'''
         if not args.category:
-            return (False, ["Please specify seeds type."])
+            return (False, ["Please specify seeds category."])
         self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
         handler = SeedHandler(self.logger, self.config)
         seeds = handler.load_category(args.category)
@@ -352,7 +352,7 @@ class Actions(object):
     def speccheck(self, args):
         '''Check keys actions'''
         if not args.category:
-            return (False, ["Please specify seeds type."])
+            return (False, ["Please specify seeds category."])
         self.logger.debug("ACTIONS: speccheck; args: %s" % str(args))
         handler = SeedHandler(self.logger, self.config)
         seeds = handler.load_category(args.category)

@@ -68,7 +68,7 @@ class Actions(object):
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
         if not self.seeds:
             try:
-                self.seeds = handler.load_seeds(args.seedfile, args.filename)
+                self.seeds = handler.load_seeds(args.seedfile, args.nick)
             except ValueError:
                 return (False, ["Failed to load seed file. Consider fetching seedfiles."])
         if self.seeds:

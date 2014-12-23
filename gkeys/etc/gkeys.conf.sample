@@ -1,7 +1,7 @@
 # Gentoo-keys configuration file
 #
 
-[DEFAULT]
+[base]
 
 # keyserver: server to use to obtain the keys from
 keyserver: pool.sks-keyservers.net
@@ -15,29 +15,16 @@ keyserver: pool.sks-keyservers.net
 gkeysdir: /var/lib/gentoo/gkeys
 
 
-# dev-category: The directory where the gentoo developer keys
-# will be stored.
-dev-category: %(gkeysdir)s/devs
-
-
-# rel-category: The directory where the official release media keys
-# will be stored.
-rel-category: %(gkeysdir)s/release
-
-
-# sign-category: The directory to use as the path prefix to use
-# for the signing capable keyrings, keyring settings
-sign-category: %(gkeysdir)s/sign
-
-
 # keyring: The directory where the official keyring  with the specified keys
 # will be exported.
-keyring: %(gkeysdir)s/keyring
+keyring: %(gkeysdir)s/keyrings
 
 
-# overlayskeydir: The directory where the overlay keys
-# will be stored.
-overlays-category: %(gkeysdir)s/overlays
+# Base directory to use as the path prefix to use
+# for the signing capable keyrings, keyring settings
+# eg: '/' for root if absolute paths are used for homedir, keyring
+# eg: %(gkeysdir)s if using relative paths
+sign-keydir: %(gkeysdir)s/sign
 
 
 # seedsdir: The directory for all seed files
@@ -75,11 +62,11 @@ gentoo: https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds
 gentoodevs: https://api.gentoo.org/gentoo-keys/seeds/gentoodevs.seeds
 
 
-# GKEY nick used for verification of seeds and other gkey files
-gkey = gkeys
-
-
 [sign]
+
+# GKEY nick used for verification of seeds and other gkey files
+#nick = foo
+
 
 # The home or key directory to use for signing files
 #keydir: foo

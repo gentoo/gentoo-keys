@@ -1,4 +1,3 @@
-gkeys.conf
 *.py[co]
 /gkeys-gen/LICENSE
 /gkeys-gen/README.md

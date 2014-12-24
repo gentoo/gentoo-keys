@@ -31,7 +31,7 @@ setup(
     packages=['gkeys'],
     scripts=['bin/gkeys'],
     data_files=(
-        #(os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys.conf']),
+        (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys.conf']),
         (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys.conf.sample']),
         ),
     license=__license__,

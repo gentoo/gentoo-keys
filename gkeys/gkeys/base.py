@@ -200,7 +200,7 @@ class CliBase(object):
         self.config.read_config()
 
         # establish our logger and update it in the imported files
-        logger = set_logger('gkeys', self.config['logdir'], args.debug,
+        logger = set_logger(self.cli_config['prog'], self.config['logdir'], args.debug,
             dirmode=int(self.config.get_key('permissions', 'directories'),0),
             filemask=int(self.config.get_key('permissions', 'files'),0))
         self.config.logger = logger

@@ -17,7 +17,6 @@ import os
 from collections import defaultdict
 from json import load
 from shutil import rmtree
-from sslfetch.connections import Connector
 
 from gkeys.lib import GkeysGPG
 from gkeys.seedhandler import SeedHandler

@@ -28,7 +28,7 @@ fi
 
 echo " *** Fetching new seeds from LDAP"
 cd ${GKEYS_DIR}
-gkey-ldap -c ${GKEYS_CONF} updateseeds || die "Seed file generation failed... aborting"
+gkeys-ldap -c ${GKEYS_CONF} updateseeds || die "Seed file generation failed... aborting"
 
 echo " *** Checking if seed files are up-to-date"
 if ! diff -q ${GKEYS_DIR}/${GKEYS_SEEDS} ${API_DIR}/${API_SEEDS} > /dev/null ;then
@@ -46,8 +46,8 @@ gkeys -c ${GKEYS_CONF} sign -n ${GKEYS_SIGN} -F ${API_DIR}/${API_SEEDS} || die "
 
 echo "Committing changes to api repo..."
 cd ${API_DIR}
-git add ${API_SEEDS}  || die " *** Failed to add modified developers.seeds file"
-git add ${API_SEEDS}.${GKEYS_SIG} || die " *** Failed to add developer.seeds.sig file"
+git add ${API_SEEDS}  || die " *** Failed to add modified ${GKEYS_SEEDS} file"
+git add ${API_SEEDS}.${GKEYS_SIG} || die " *** Failed to add ${GKEYS_SEEDS}.sig file"
 git commit -m "${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
 git push origin master || die " *** git push failed"
 

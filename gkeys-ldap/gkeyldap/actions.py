@@ -86,7 +86,7 @@ class Actions(object):
         self.logger.debug(
             "MAIN: _action_updateseeds; got results :) converted to info")
         if args.category:
-            filename = self.config.get('seeds', args.category) + '.new'
+            filename = self.config.get_key('seeds', args.category) + '.new'
         if not self.create_seedfile(info, filename):
             self.logger.error("Developer seed file update failure: "
                 "Original seed file is intact & untouched.")

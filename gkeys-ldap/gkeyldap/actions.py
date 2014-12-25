@@ -71,7 +71,7 @@ class Actions(object):
         self.output('', "Total number of developers in results:", len(devs))
         self.logger.info("============================================")
         self.logger.info("Total number of developers in results: %d" % len(devs))
-        return True
+        return (True, ['Completed'])
 
 
     def updateseeds(self, args):
@@ -96,7 +96,7 @@ class Actions(object):
             self.output('', "Develope seed failed to update!")
             return False
         self.output('', "Developer seed file updated!")
-        return True
+        return (True, ['Completed'])
 
 
     def create_seedfile(self, devs, filename):

@@ -27,7 +27,7 @@ class LdapSearch(object):
         self.logger = logger
         self.logger.debug('LdapSearch: __init__; fields...: %s' % self.fields)
         self.logger.debug('LdapSearch: __init__; criteria.: %s' % self.criteria)
-        self.ldap_connection = LdapConnect().connect(action='Search')
+        self.ldap_connection = LdapConnect(logger=self.logger).connect(action='Search')
         self.status = True
         if not self.ldap_connection:
             self.status = False

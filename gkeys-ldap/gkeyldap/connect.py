@@ -14,15 +14,15 @@ except ImportError:
         raise
 
 
-from gkeys.log import logger
 from gkeyldap.config import default_server
 
 class LdapConnect(object):
     '''Class to connect on the configured LDAP server'''
 
-    def __init__(self, server=None):
+    def __init__(self, server=None, logger=None):
         self.server = server or default_server
-        logger.debug('LdapConnect: __init__; server...: %s' % self.server)
+        self.logger = logger
+        self.logger.debug('LdapConnect: __init__; server...: %s' % self.server)
         self.ldap_connection = None
 
     def connect(self, server=None, action='LDAP'):
@@ -30,21 +30,21 @@ class LdapConnect(object):
 
         @param server: string URI path for the LDAP server
         '''
-        logger.info("%s... Establishing connection" % action)
+        self.logger.info("%s... Establishing connection" % action)
         if server:
             self.server = server
-            logger.debug('LdapConnect: connect; new server: %s' % self.server)
+            self.logger.debug('LdapConnect: connect; new server: %s' % self.server)
         try:
             self.ldap_connection = ldap.initialize(self.server)
             self.ldap_connection.set_option(ldap.OPT_X_TLS_DEMAND, True)
             self.ldap_connection.start_tls_s()
             self.ldap_connection.simple_bind_s()
         except Exception as e:
-            logger.error(
+            self.logger.error(
                 'LdapConnect: connect; failed to connect to server: %s' % self.server)
-            logger.error("Exception was: %s" % str(e))
-            logger.error("Aborting %s... Connection failed" % action)
+            self.logger.error("Exception was: %s" % str(e))
+            self.logger.error("Aborting %s... Connection failed" % action)
             return False
-        logger.debug(
+        self.logger.debug(
             'LdapConnect: connect; connection: %s' % self.ldap_connection)
         return self.ldap_connection

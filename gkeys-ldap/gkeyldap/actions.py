@@ -58,17 +58,17 @@ class Actions(object):
     def ldapsearch(self, args):
         l = LdapSearch(logger=self.logger)
         self.logger.debug("MAIN: _action_ldapsearch; args = %s" % str(args))
-        self.output("Search... Establishing connection\n")
+        self.output('', "Search... Establishing connection\n")
         if not l.status:
-            self.output("Aborting Search... Connection failed")
+            self.output('', "Aborting Search... Connection failed")
             return False
         attr, target, search_field = self.get_args(args)
         results = l.search(target, search_field)
         devs = l.result2dict(results, gkey2ldap[attr])
         for dev in sorted(devs):
-            self.output(dev, devs[dev])
-        self.output("============================================")
-        self.output("Total number of developers in results:", len(devs))
+            self.output('', dev, devs[dev])
+        self.output('', "============================================")
+        self.output('', "Total number of developers in results:", len(devs))
         self.logger.info("============================================")
         self.logger.info("Total number of developers in results: %d" % len(devs))
         return True
@@ -77,9 +77,9 @@ class Actions(object):
     def updateseeds(self, args):
         l = LdapSearch(logger=self.logger)
         self.logger.debug("MAIN: _action_updateseeds; args = %s" % str(args))
-        self.output("Search... Establishing connection")
+        self.output('', "Search... Establishing connection")
         if not l.status:
-            self.output("Aborting update... Connection failed")
+            self.output('', "Aborting update... Connection failed")
             return False
         results = l.search('*', UID)
         info = l.result2dict(results, 'uid')
@@ -92,17 +92,17 @@ class Actions(object):
         if not self.create_seedfile(info, filename):
             self.logger.error("Developer seed file update failure: "
                 "Original seed file is intact & untouched.")
-        self.output("Backing up existing file...")
+        self.output('', "Backing up existing file...")
         status = updatefiles(self.config, self.logger)
         if not status:
-            self.output("Develope seed failed to update!")
+            self.output('', "Develope seed failed to update!")
             return False
-        self.output("Developer seed file updated!")
+        self.output('', "Developer seed file updated!")
         return True
 
 
     def create_seedfile(self, devs, filename):
-        self.output("Creating seeds from LDAP data...")
+        self.output('', "Creating seeds from LDAP data...")
         self.seeds = Seeds(filename, self.config)
         count = 0
         error_count = 0
@@ -117,9 +117,9 @@ class Actions(object):
                 count += 1
             else:
                 error_count += 1
-        self.output("Total number of seeds created:", count)
-        self.output("Seeds created... Saving file: %s" % filename)
-        self.output("Total number of Dev's with GPG errors:", error_count)
+        self.output('', "Total number of seeds created:", count)
+        self.output('', "Seeds created... Saving file: %s" % filename)
+        self.output('', "Total number of Dev's with GPG errors:", error_count)
         self.logger.info("Total number of seeds created: %d" % count)
         self.logger.info("Seeds created... Saving file: %s" % filename)
         self.logger.info("Total number of Dev's with GPG errors: %d" % error_count)

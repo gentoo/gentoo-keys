@@ -28,7 +28,7 @@ fi
 
 echo " *** Fetching new seeds from LDAP"
 cd ${GKEYS_DIR}
-gkeys-ldap -c ${GKEYS_CONF} updateseeds || die "Seed file generation failed... aborting"
+gkeys-ldap -c ${GKEYS_CONF} updateseeds -C gentoo-devs || die "Seed file generation failed... aborting"
 
 echo " *** Checking if seed files are up-to-date"
 if ! diff -q ${GKEYS_DIR}/${GKEYS_SEEDS} ${API_DIR}/${API_SEEDS} > /dev/null ;then

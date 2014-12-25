@@ -21,8 +21,8 @@ from gkeys.fileops import updatefiles
 Available_Actions = ['ldapsearch', 'updateseeds']
 
 Action_Options = {
-    'ldapsearch': ['fingerprint', 'mail', 'name', 'nick', 'seedfile', 'status'],
-    'updateseeds': ['fingerprint', 'mail', 'name', 'nick', 'seedfile', 'status'],
+    'ldapsearch': ['fingerprint', 'mail', 'name', 'nick', 'status'],
+    'updateseeds': ['fingerprint', 'mail', 'name', 'nick', 'category', 'status'],
 }
 
 
@@ -85,10 +85,8 @@ class Actions(object):
         info = l.result2dict(results, 'uid')
         self.logger.debug(
             "MAIN: _action_updateseeds; got results :) converted to info")
-        if args.seedfile:
-            filename = self.config.get('seeds', args.seedfile) + '.new'
-        elif args.file:
-            filename = arg.file
+        if args.category:
+            filename = self.config.get('seeds', args.category) + '.new'
         if not self.create_seedfile(info, filename):
             self.logger.error("Developer seed file update failure: "
                 "Original seed file is intact & untouched.")

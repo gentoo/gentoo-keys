@@ -180,7 +180,12 @@ class CliBase(object):
             action_parser.set_defaults(action=name)
             self._add_options(action_parser, self.cli_config['Action_Options'][name])
 
-        return parser.parse_args(args)
+        parsed_args = parser.parse_args(args)
+        action = getattr(parsed_args, 'action', None)
+        if not action:
+            parser.print_help()
+            sys.exit(1)
+        return parsed_args
 
 
     def _add_options(self, parser, options):

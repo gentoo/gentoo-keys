@@ -56,7 +56,7 @@ class Actions(object):
 
 
     def ldapsearch(self, args):
-        l = LdapSearch()
+        l = LdapSearch(logger=self.logger)
         self.logger.debug("MAIN: _action_ldapsearch; args = %s" % str(args))
         self.output("Search... Establishing connection\n")
         if not l.status:
@@ -75,7 +75,7 @@ class Actions(object):
 
 
     def updateseeds(self, args):
-        l = LdapSearch()
+        l = LdapSearch(logger=self.logger)
         self.logger.debug("MAIN: _action_updateseeds; args = %s" % str(args))
         self.output("Search... Establishing connection")
         if not l.status:

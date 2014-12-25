@@ -16,17 +16,17 @@ except ImportError:
 
 from gkeyldap.config import default_criteria, default_fields, UID
 from gkeyldap.connect import LdapConnect
-from gkeys.log import logger
 
 class LdapSearch(object):
     '''Class to perform searches on the configured LDAP server
     '''
 
-    def __init__(self, fields=None, criteria=None):
+    def __init__(self, fields=None, criteria=None, logger=None):
         self.fields = fields or default_fields
         self.criteria = criteria or default_criteria
-        logger.debug('LdapSearch: __init__; fields...: %s' % self.fields)
-        logger.debug('LdapSearch: __init__; criteria.: %s' % self.criteria)
+        self.logger = logger
+        self.logger.debug('LdapSearch: __init__; fields...: %s' % self.fields)
+        self.logger.debug('LdapSearch: __init__; criteria.: %s' % self.criteria)
         self.ldap_connection = LdapConnect().connect(action='Search')
         self.status = True
         if not self.ldap_connection:
@@ -36,19 +36,19 @@ class LdapSearch(object):
         '''Perform the LDAP search
         '''
         if not target:
-            logger.debug('LdapSearch: search; invalid target: "%s"' % target)
+            self.logger.debug('LdapSearch: search; invalid target: "%s"' % target)
             return {}
         if not fields:
             fields = self.fields
         else:
-            logger.debug('LdapSearch: search; new fields: %s' % str(fields))
+            self.logger.debug('LdapSearch: search; new fields: %s' % str(fields))
         if not criteria:
             criteria = self.criteria
         else:
-            logger.debug('LdapSearch: search; new criteria: %s' % criteria)
+            self.logger.debug('LdapSearch: search; new criteria: %s' % criteria)
         results = self.ldap_connection.search_s(criteria,
             ldap.SCOPE_ONELEVEL, search_field % target, fields)
-        #logger.debug('LdapSearch: search; result = %s' % str(results))
+        #self.logger.debug('LdapSearch: search; result = %s' % str(results))
         return results
 
 

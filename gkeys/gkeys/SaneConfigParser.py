@@ -1,14 +1,11 @@
 
 import sys
 
-# py3.2
-if sys.hexversion >= 0x30200f0:
-    from configparser import configparser as ConfigParser
+try:
+    from configparser import ConfigParser
     from configparser import NoSectionError
-    py3 = True
-else:
+except:
     from ConfigParser import ConfigParser, NoSectionError
-    py3 = False
 
 
 class SaneConfigParser(ConfigParser):

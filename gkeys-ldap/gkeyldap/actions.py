@@ -115,11 +115,11 @@ class Actions(object):
                 count += 1
             else:
                 error_count += 1
-        self.output('', "Total number of seeds created:", count)
-        self.output('', "Seeds created... Saving file: %s" % filename)
-        self.output('', "Total number of Dev's with GPG errors:", error_count)
-        self.logger.info("Total number of seeds created: %d" % count)
-        self.logger.info("Seeds created... Saving file: %s" % filename)
+        self.output('', "Total number of seeds created........: %s" % count)
+        self.output('', "Seeds created... Saving file.........: %s" % filename)
+        self.output('', "Total number of Dev's with GPG errors: %s" % error_count)
+        self.logger.info("Total number of seeds created........: %d" % count)
+        self.logger.info("Seeds created... Saving file.........: %s" % filename)
         self.logger.info("Total number of Dev's with GPG errors: %d" % error_count)
         return self.seeds.save()
 

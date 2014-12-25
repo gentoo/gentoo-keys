@@ -28,7 +28,7 @@ class Main(CliBase):
         """
         self.root = root or "/"
         self.config = config or GKeysConfig(root=root)
-        self.print_results = print_results
+        self.config.options['print_results'] = print_results
         self.args = None
         self.seeds = None
         self.cli_config = {

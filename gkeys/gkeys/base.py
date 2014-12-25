@@ -15,9 +15,14 @@ from __future__ import print_function
 
 
 import argparse
+import sys
 
 from gkeys import config, fileops, seed, lib
 from gkeys.log import log_levels, set_logger
+
+
+if sys.version_info[0] >= 3:
+    unicode = str
 
 
 class CliBase(object):
@@ -246,7 +251,7 @@ class CliBase(object):
         if header:
             print(header)
         for msg in results:
-            if isinstance(msg, str) or isinstance(msg, unicode):
+            if type(msg) in [str, unicode]:
                 print('    ', msg)
             else:
                 try:

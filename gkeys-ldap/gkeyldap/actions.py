@@ -25,6 +25,11 @@ Action_Options = {
     'updateseeds': ['fingerprint', 'mail', 'name', 'nick', 'category', 'status'],
 }
 
+Action_Map = {
+    'ldap-search': 'ldapsearch',
+    'update-seeds': 'updateseeds',
+}
+
 
 def get_key_ids(key_len, keyids):
     '''Small utility function to return only keyid (short)

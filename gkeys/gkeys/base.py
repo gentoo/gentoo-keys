@@ -31,9 +31,10 @@ class CliBase(object):
 
     def __init__(self):
         self.cli_config = {
-            'Actions': [],
+            'Actions': None,
             'Available_Actions': [],
-            'Action_Options': [],
+            'Action_Options': {},
+            'Action_Map': {},
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',
             'epilog': '''Caution: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
@@ -175,7 +176,8 @@ class CliBase(object):
             description='Valid subcommands',
             help='Additional help')
         for name in self.cli_config['Available_Actions']:
-            action_method = getattr(self.cli_config['Actions'], name)
+            action_method = getattr(self.cli_config['Actions'],
+                self.cli_config['Action_Map'][name])
             actiondoc = action_method.__doc__
             try:
                 text = actiondoc.splitlines()[0]
@@ -194,7 +196,7 @@ class CliBase(object):
         if not action:
             parser.print_usage()
             sys.exit(1)
-        elif action in ['GENERAL_COMMANDS', 'KEY_COMMANDS', 'SEED_COMMANDS']:
+        elif action in ['---general---', '----keys-----', '----seeds----']:
             parser.print_help()
             sys.exit(1)
         return parsed_args
@@ -250,7 +252,8 @@ class CliBase(object):
         self.actions = self.cli_config['Actions'](self.config, self.output_results, logger)
 
         # run the action
-        func = getattr(self.actions, '%s' % args.action)
+        func = getattr(self.actions, '%s'
+            % self.cli_config['Action_Map'][args.action])
         logger.debug('Main: run; Found action: %s' % args.action)
         success, results = func(args)
         if not results:

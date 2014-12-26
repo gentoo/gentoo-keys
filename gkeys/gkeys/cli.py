@@ -16,7 +16,7 @@ from __future__ import print_function
 import sys
 
 from gkeys.base import CliBase
-from gkeys.actions import Actions, Available_Actions, Action_Options
+from gkeys.actions import Actions, Available_Actions, Action_Options, Action_Map
 from gkeys.config import GKeysConfig
 
 
@@ -38,6 +38,7 @@ class Main(CliBase):
             'Actions': Actions,
             'Available_Actions': Available_Actions,
             'Action_Options': Action_Options,
+            'Action_Map': Action_Map,
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''

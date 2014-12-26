@@ -31,40 +31,64 @@ from gkeys.config import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
 
-Seed_Actions = ['SEED_COMMANDS', 'addseed', 'fetchseed', 'listcats', 'listseed', 'listseedfiles',
-    'moveseed', 'removeseed']
+Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed', 'list-cats',
+    'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
 
-Key_Actions = ['KEY_COMMANDS', 'checkkey', 'importkey', 'installed', 'installkey', 'listkey',
-    'movekey', 'refreshkey', 'removekey']
+Key_Actions = ['----keys-----', 'check-key', 'import-key', 'installed',
+    'install-key', 'list-key', 'move-key', 'refresh-key', 'remove-key',
+    'spec-check']
 
-General_Actions = ['GENERAL_COMMANDS', 'sign','verify']
+General_Actions = ['---general---', 'sign','verify']
 
-Available_Actions = Seed_Actions + Key_Actions + General_Actions
+Available_Actions = General_Actions + Key_Actions + Seed_Actions
 
 Action_Options = {
-    'listcats': [],
-    'listseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', '1file'],
-    'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
-    'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
-    'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'dest'],
-    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
-    'listseedfiles': [],
-    'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch', 'keyid'],
-    'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', '1file'],
-    'removekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
-    'movekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
+    'list-cats': [],
+    'list-seed': ['nick', 'name', 'keydir', 'fingerprint', 'category', '1file'],
+    'add-seed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
+    'remove-seed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
+    'move-seed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'dest'],
+    'fetch-seed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'list-seedfiles': [],
+    'list-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch', 'keyid'],
+    'install-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', '1file'],
+    'remove-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'move-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
-    'importkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'import-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'verify': ['dest', 'nick', 'name', 'keydir', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
-    'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
+    'check-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
-    'speccheck': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
-    'refreshkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
-    'GENERAL_COMMANDS': [],
-    'SEED_COMMANDS': [],
-    'KEY_COMMANDS': [],
+    'spec-check': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
+    'refresh-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
+    '---general---': [],
+    '----seeds----': [],
+    '----keys-----': [],
 }
 
+Action_Map = {
+    'list-cats': 'listcats',
+    'list-seed': 'listseed',
+    'add-seed': 'addseed',
+    'remove-seed': 'removeseed',
+    'move-seed': 'moveseed',
+    'fetch-seed': 'fetchseed',
+    'list-seedfiles': 'listseedfiles',
+    'list-key': 'listkey',
+    'install-key': 'installkey',
+    'remove-key': 'removekey',
+    'move-key': 'movekey',
+    'installed': 'installed',
+    'import-key': 'importkey',
+    'verify': 'verify',
+    'check-key': 'checkkey',
+    'sign': 'sign',
+    'spec-check': 'speccheck',
+    'refresh-key': 'refreshkey',
+    '---general---': 'GENERAL_COMMANDS',
+    '----seeds----': 'SEED_COMMANDS',
+    '----keys-----': 'KEY_COMMANDS',
+}
 
 class Actions(object):
     '''Primary API actions'''
@@ -103,7 +127,7 @@ class Actions(object):
             try:
                 self.seeds = handler.load_seeds(args.category, args.nick)
             except ValueError:
-                return (False, ["Failed to load seed file. Consider fetching seedfiles."])
+                return (False, ['', "Failed to load seed file. Consider fetching seedfiles."])
         if self.seeds:
             results = self.seeds.list(**kwargs)
         else:

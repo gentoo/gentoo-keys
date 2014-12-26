@@ -12,7 +12,8 @@ from gkeys import seed
 from gkeys.base import CliBase
 from gkeys.config import GKeysConfig
 from gkeyldap import connect, search
-from gkeyldap.actions import Actions, Available_Actions, Action_Options
+from gkeyldap.actions import (Actions, Available_Actions, Action_Options,
+    Action_Map)
 
 
 class Main(CliBase):
@@ -35,6 +36,7 @@ class Main(CliBase):
             'Actions': Actions,
             'Available_Actions': Available_Actions,
             'Action_Options': Action_Options,
+            'Action_Map': Action_Map,
             'prog': 'gkey-ldap',
             'description': 'Gentoo-keys LDAP interface and seed file generator program',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''

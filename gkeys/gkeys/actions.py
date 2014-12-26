@@ -34,7 +34,7 @@ Action_Options = {
     'addseed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
     'removeseed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
     'moveseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'dest'],
-    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category'],
+    'fetchseed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'listseedfiles': [],
     'listkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'gpgsearch', 'keyid'],
     'installkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', '1file'],
@@ -42,7 +42,7 @@ Action_Options = {
     'movekey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'importkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
-    'verify': ['dest', 'nick', 'name', 'keydir', 'fingerprint', 'category', '1file', 'signature', 'keyring', 'timestamp'],
+    'verify': ['dest', 'nick', 'name', 'keydir', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
     'checkkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
     'speccheck': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
@@ -80,6 +80,10 @@ class Actions(object):
     def fetchseed(self, args):
         '''Download the selected seed file(s)'''
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
+        if not args.keyring:
+            verify_info = self.config.get_key('verify-seeds', args.category).split()
+            args.keyring = verify_info[0]
+            args.nick = verify_info[1]
         handler = SeedHandler(self.logger, self.config)
         success, messages = handler.fetch_seeds(args.category, args, self.verify)
 
@@ -606,13 +610,15 @@ class Actions(object):
         if not args.filename:
             return (False, ['Please provide a signed file.'])
         if not args.category:
-            args.category = 'gentoo'
-        (success, data) = self.installed(args)
-        keys = data[1]
+            args.category = self.config.get_key('verify_keyring')
+            self.logger.debug("ACTIONS: verify; keyring category not specified, using default: %s"
+                % args.category)
+        handler = SeedHandler(self.logger, self.config)
+        keys = handler.load_category(args.category)
         if not keys:
             return (False, ['No installed keys found, try installkey action.'])
-        keyring = self.config.get_key('keyring')
-        catdir = os.path.join(keyring, args.category)
+        keyrings = self.config.get_key('keyring')
+        catdir = os.path.join(keyrings, args.category)
         self.logger.debug("ACTIONS: verify; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
         filepath, signature  = args.filename, args.signature
@@ -672,11 +678,11 @@ class Actions(object):
             messages = []
             self.logger.info("Verifying file...")
             verified = False
-            # get correct key to use
-            use_gkey = self.config.get_key('seedurls', 'gkey')
-            for key in keys:
-                if key.nick == use_gkey:
-                    break
+            key = keys.nick_search(args.nick)
+            if not key:
+                messages.append("Failed to find nick: %s in %s category"
+                    % (args.nick, args.category))
+                return (False, messages)
             results = self.gpg.verify_file(key, sig_path, filepath)
             keyid = key.keyid[0]
             (valid, trust) = results.verified

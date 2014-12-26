@@ -90,6 +90,8 @@ class GKeysConfig(GPGConfig):
             'keyring': None,
             'type': 'clearsign',
         }
+        self.defaults['verify-keyring'] = ''
+        self.defaults['verify-seeds'] = {}
 
 
     def read_config(self):

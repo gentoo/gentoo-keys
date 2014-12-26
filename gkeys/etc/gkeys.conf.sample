@@ -20,6 +20,11 @@ gkeysdir: /var/lib/gentoo/gkeys
 keyring: %(gkeysdir)s/keyrings
 
 
+# The default keyring to use
+# for verification if not specified
+verify-keyring: gentoo
+
+
 # Base directory to use as the path prefix to use
 # for the signing capable keyrings, keyring settings
 # eg: '/' for root if absolute paths are used for homedir, keyring
@@ -48,8 +53,12 @@ files: 0o002
 
 [seeds]
 
-# *-seedfile: json txt file of name, keyid, fingerprint
-# entry per line
+# file is a json text file of: nick, name, keydir, fingerprint
+# one file per line
+# category = category or seedfile name
+# these categories/seedfile nmaes are used for the
+# -C, --category input value validations
+# eg: category: filepath
 gentoo: %(seedsdir)s/gentoo.seeds
 gentoo-devs: %(seedsdir)s/gentoo-devs.seeds
 
@@ -60,6 +69,15 @@ gentoo-devs: %(seedsdir)s/gentoo-devs.seeds
 # The will be paired to the seed file of the same name for fetching, updating
 gentoo: https://api.gentoo.org/gentoo-keys/seeds/gentoo.seeds
 gentoo-devs: https://api.gentoo.org/gentoo-keys/seeds/gentoo-devs.seeds
+
+
+[verify-seeds]
+
+# mapping of the seedfile category name
+# to the category-name and gpg-key keydir to use to verify the seedfile
+# seedfile-name: category keydir
+gentoo: gentoo gkeys
+gentoo-devs: gentoo gkeys
 
 
 [sign]

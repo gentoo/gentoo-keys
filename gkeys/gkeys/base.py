@@ -46,9 +46,21 @@ class CliBase(object):
 
 
     @staticmethod
+    def _option_all(parser=None):
+        parser.add_argument('-a', '--all', dest='all',
+            action='store_true', default=False,
+            help='Match all inputs arguments in searches')
+
+    @staticmethod
     def _option_dest(parser=None):
         parser.add_argument('-d', '--dest', dest='destination', default=None,
             help='The destination seed file or keydir for move, copy operations')
+
+    @staticmethod
+    def _option_exact(parser=None):
+        parser.add_argument('-e', '--exact', dest='exact',
+            action='store_true', default=False,
+            help='Use CASE matching in searches')
 
     @staticmethod
     def _option_fingerprint(parser=None):
@@ -80,6 +92,11 @@ class CliBase(object):
     @staticmethod
     def _option_name(parser=None):
         parser.add_argument('-N', '--name', dest='name', nargs='*',
+            default=None, help='The name of the the key')
+
+    @staticmethod
+    def _option_1name(parser=None):
+        parser.add_argument('-N', '--name', dest='name',
             default=None, help='The name of the the key')
 
     @staticmethod

@@ -26,6 +26,7 @@ class SeedHandler(object):
         self.logger = logger
         self.fingerprint_re = re.compile('[0-9A-Fa-f]{40}')
         self.finerprint_re2 = re.compile('[0-9A-Fa-f]{4}( [0-9A-Fa-f]{4}){9}')
+        self.seeds = None
 
 
     def new(self, args, checkgkey=False):
@@ -77,6 +78,7 @@ class SeedHandler(object):
             "%s" % filepath)
         seeds = Seeds(config=self.config)
         seeds.load(filepath)
+        self.seeds = seeds
         return seeds
 
     def load_category(self, category, nicks=None):
@@ -113,6 +115,7 @@ class SeedHandler(object):
         except OSError as error:
             self.logger.debug("SeedHandler: load_category; OSError for %s" % catdir)
             self.logger.debug("Error was: %s" % str(error))
+        self.seeds = seeds
         return seeds
 
     def fetch_seeds(self, seeds, args, verified_dl=None):
@@ -188,3 +191,25 @@ class SeedHandler(object):
             self.logger.error('  GPGKey: Non hexadecimal digits in ' + 'fingerprint for fingerprint: ' + fingerprint)
             is_good = False
         return is_good, fingerprint
+
+    def key_search(self, args, search_args):
+        '''Performs a search for all listed args in the seeds'''
+        results = []
+        self.logger.debug("_field_search search_args: %s" % str(search_args))
+        found = {}
+        search_args.sort()
+        for arg in search_args:
+            seeds = self.seeds.field_search(arg, getattr(args, arg), args.exact)
+            for seed in seeds:
+                if seed.nick in found:
+                    found[seed.nick]['args'].append(arg)
+                else:
+                    found[seed.nick] = {'args': [arg], 'seed': seed}
+        if args.all:
+            for possible in sorted(found):
+                if search_args == found[possible]['args']:
+                    results.append(found[possible]['seed'])
+        else:
+            for nick in sorted(found):
+                results.append(found[nick]['seed'])
+        return results

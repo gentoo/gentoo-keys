@@ -35,7 +35,7 @@ Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed', 'list-cats',
     'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
 
 Key_Actions = ['----keys-----', 'check-key', 'import-key', 'installed',
-    'install-key', 'list-key', 'move-key', 'refresh-key', 'remove-key',
+    'install-key', 'key-search', 'list-key', 'move-key', 'refresh-key', 'remove-key',
     'spec-check']
 
 General_Actions = ['---general---', 'sign','verify']
@@ -56,6 +56,7 @@ Action_Options = {
     'move-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
     'import-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring'],
+    'key-search': ['nick', '1name', 'keydir', 'fingerprint', 'keyid', 'category', 'exact', 'all'],
     'verify': ['dest', 'nick', 'name', 'keydir', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
     'check-key': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
@@ -80,6 +81,7 @@ Action_Map = {
     'move-key': 'movekey',
     'installed': 'installed',
     'import-key': 'importkey',
+    'key-search': 'key_search',
     'verify': 'verify',
     'check-key': 'checkkey',
     'sign': 'sign',
@@ -845,5 +847,33 @@ class Actions(object):
         return (True, ['Completed'])
 
 
-
+    def key_search(self, args):
+        '''Search for a key's seed field in the installed keys db'''
+        handler = SeedHandler(self.logger, self.config)
+        results = {}
+        search_args = [x for x in
+            ['nick', 'name', 'keydir', 'fingerprint', 'keyid']
+            if getattr(args, x)]
+        if args.category:
+            handler.load_category(args.category)
+            results[args.category] = handler.key_search(args, search_args)
+        else:
+            for cat in list(self.config.get_key('seeds')):
+                handler.load_category(cat)
+                found = handler.key_search(args, search_args)
+                if found:
+                    if cat in results:
+                        results[cat].extend(found)
+                    else:
+                        results[cat] = found
+        msgs = []
+        for cat in results:
+            msgs.append("Category: %s" % cat)
+            seen = []
+            for result in results[cat]:
+                if result and result.nick not in seen:
+                    if isinstance(result, GKEY):
+                        seen.append(result)
+            msgs.append(seen)
+        return (True, msgs)
 

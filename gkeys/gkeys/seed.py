@@ -160,7 +160,48 @@ class Seeds(object):
         try:
             return self.seeds[nick]
         except KeyError:
-            return None
+            return []
+
+
+    def field_search(self, field, value, exact=False):
+        '''Searches the seeds for a matching nick
+
+        @param keyid: string
+        @returns GKEY instance or None
+        '''
+        results = []
+        if field == 'nick' and exact:
+            return self.nick_search(value)
+        for nick in self.seeds:
+            seed = self.seeds[nick]
+            val = getattr(seed, field)
+            if isinstance(val, list) or isinstance(value, list):
+                if  self._list_search(value, val, exact):
+                    results.append(seed)
+            elif exact:
+                if value in val:
+                    results.append(seed)
+            else:
+                if value.lower() in val.lower():
+                    results.append(seed)
+
+        return results
+
+
+    def _list_search(self, find, values, exact):
+        if isinstance(find, list):
+            found = []
+            for f in find:
+                found.append(self._list_search(f, values, exact))
+            return True in found
+        for val in values:
+            if exact:
+                if find in val:
+                    return True
+            else:
+                if find.lower() in val.lower():
+                    return True
+        return False
 
 
     def _error(self, err):

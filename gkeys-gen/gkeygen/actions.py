@@ -15,7 +15,7 @@ import re
 import shutil
 import sys
 
-if sys.hexversion >= 0x30200f0:
+if sys.version_info[0] >= 3:
     from urllib.request import urlopen
     py_input = input
     _unicode = str

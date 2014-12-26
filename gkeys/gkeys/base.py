@@ -128,8 +128,8 @@ class CliBase(object):
 
     @staticmethod
     def _option_timestamp(parser=None):
-        parser.add_argument('-t', '--timestamp', dest='timestamp', type=bool,
-            default=False,
+        parser.add_argument('-t', '--timestamp', dest='timestamp',
+            action='store_true', default=False,
             help='Turn on timestamp use')
 
     @staticmethod
@@ -139,8 +139,15 @@ class CliBase(object):
 
     @staticmethod
     def _option_status(parser=None):
-        parser.add_argument('-A', '--status', default=False,
+        parser.add_argument('-A', '--status', action='store_true',
+            default=False,
             help='The active status of the member')
+
+    @staticmethod
+    def _option_justdoit(parser=None):
+        parser.add_argument('--justdoit', dest='justdoit',
+            action='store_true', default=False,
+            help='Just Do It')
 
 
     def parse_args(self, args):

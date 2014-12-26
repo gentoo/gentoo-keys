@@ -36,8 +36,7 @@ class CliBase(object):
             'Action_Options': [],
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',
-            'epilog': '''Caution: adding untrusted keys to these keyrings can
-                be hazardous to your system!'''
+            'epilog': '''Caution: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
         }
         self.config = None
         self.args = None

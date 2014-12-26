@@ -40,8 +40,7 @@ class Main(CliBase):
             'Action_Options': Action_Options,
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',
-            'epilog': '''Caution: adding untrusted keys to these keyrings can
-                be hazardous to your system!'''
+            'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
         }
 
 

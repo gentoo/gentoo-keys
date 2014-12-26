@@ -30,10 +30,16 @@ from gkeys.seedhandler import SeedHandler
 from gkeys.config import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
-Available_Actions = ['listcats', 'listseed', 'addseed', 'removeseed', 'moveseed', 'fetchseed',
-            'listseedfiles', 'listkey', 'installkey', 'removekey', 'movekey',
-            'installed', 'importkey', 'verify', 'checkkey', 'sign', 'speccheck',
-            'refreshkey']
+
+Seed_Actions = ['SEED_COMMANDS', 'addseed', 'fetchseed', 'listcats', 'listseed', 'listseedfiles',
+    'moveseed', 'removeseed']
+
+Key_Actions = ['KEY_COMMANDS', 'checkkey', 'importkey', 'installed', 'installkey', 'listkey',
+    'movekey', 'refreshkey', 'removekey']
+
+General_Actions = ['GENERAL_COMMANDS', 'sign','verify']
+
+Available_Actions = Seed_Actions + Key_Actions + General_Actions
 
 Action_Options = {
     'listcats': [],
@@ -54,6 +60,9 @@ Action_Options = {
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
     'speccheck': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
     'refreshkey': ['nick', 'name', 'keydir', 'fingerprint', 'category', 'keyring', 'keyid'],
+    'GENERAL_COMMANDS': [],
+    'SEED_COMMANDS': [],
+    'KEY_COMMANDS': [],
 }
 
 
@@ -65,6 +74,24 @@ class Actions(object):
         self.output = output
         self.logger = logger
         self.seeds = None
+
+
+    @staticmethod
+    def SEED_COMMANDS(args):
+        '''------< seed actions >-------'''
+        pass
+
+
+    @staticmethod
+    def KEY_COMMANDS(args):
+        '''-------< key actions >--------'''
+        pass
+
+
+    @staticmethod
+    def GENERAL_COMMANDS(args):
+        '''-----< general actions >------'''
+        pass
 
 
     def listseed(self, args):

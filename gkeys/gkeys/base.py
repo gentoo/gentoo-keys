@@ -187,6 +187,9 @@ class CliBase(object):
         if not action:
             parser.print_usage()
             sys.exit(1)
+        elif action in ['GENERAL_COMMANDS', 'KEY_COMMANDS', 'SEED_COMMANDS']:
+            parser.print_help()
+            sys.exit(1)
         return parsed_args
 
 

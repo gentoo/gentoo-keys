@@ -69,8 +69,8 @@ class CliBase(object):
 
     @staticmethod
     def _option_keyring(parser=None):
-        parser.add_argument('-k', '--keyring', dest='keyring', default='trusted_keyring',
-            help='The name of the keyring to use')
+        parser.add_argument('-k', '--keyring', dest='keyring', default=None,
+            help='The name of the keyring to use for verification, etc.')
 
     @staticmethod
     def _option_nick(parser=None):

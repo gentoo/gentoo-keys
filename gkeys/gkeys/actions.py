@@ -697,11 +697,11 @@ class Actions(object):
                 verified = True
                 messages = ["Verification succeeded.: %s" % (filepath),
                     "Key info...............: %s <%s>, %s"
-                    % ( key.name, key.nick,keyid)]
+                    % ( key.name, key.nick, keyid)]
             else:
-                messages = ["Verification failed.....:" % (filepath),
+                messages = ["Verification failed..... %s:" % (filepath),
                     "Key info................: %s <%s>, %s"
-                    % ( key.name, key.nick,keyid)]
+                    % ( key.name, key.nick, keyid)]
         return (verified, messages)
 
 

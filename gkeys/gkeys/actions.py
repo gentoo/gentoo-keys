@@ -13,6 +13,13 @@
 from __future__ import print_function
 
 import os
+import sys
+
+if sys.version_info[0] >= 3:
+    py_input = input
+else:
+    py_input = raw_input
+
 
 from collections import defaultdict
 from json import load
@@ -494,10 +501,10 @@ class Actions(object):
                 success = False
             else:
                 self.output(['', [gkey]], '\n Found GKEY seed:')
-                ans = raw_input("Do you really want to remove %s?[y/n]: "
+                ans = py_input ("Do you really want to remove %s?[y/n]: "
                                 % kwargs['nick']).lower()
                 while ans not in ["yes", "y", "no", "n"]:
-                    ans = raw_input("Do you really want to remove %s?[y/n]: "
+                    ans = py_input ("Do you really want to remove %s?[y/n]: "
                                     % kwargs['nick']).lower()
                 if ans in ["no", "n"]:
                     messages = ["Key removal aborted... Nothing to be done."]

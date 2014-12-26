@@ -164,7 +164,10 @@ class CliBase(object):
             help='The logging level to set for the logfile')
 
 
-        subparsers = parser.add_subparsers(help='actions')
+        subparsers = parser.add_subparsers(
+            title='Subcommands',
+            description='Valid subcommands',
+            help='Additional help')
         for name in self.cli_config['Available_Actions']:
             action_method = getattr(self.cli_config['Actions'], name)
             actiondoc = action_method.__doc__
@@ -183,7 +186,7 @@ class CliBase(object):
         parsed_args = parser.parse_args(args)
         action = getattr(parsed_args, 'action', None)
         if not action:
-            parser.print_help()
+            parser.print_usage()
             sys.exit(1)
         return parsed_args
 

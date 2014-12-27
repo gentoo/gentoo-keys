@@ -158,9 +158,8 @@ class GkeysGPG(GPG):
                 message += "\n gkey..: %s" % (str(gkey.fingerprint))
                 logger.error(message)
             # Save the gkey seed to the installed db
-            self.seedfile.update(gkey)
-            if not self.seedfile.save():
-                logger.error("GkeysGPG.add_key(); failed to save seed: " + gkey.nick)
+            success = self.update_gkey(gkey, save=True)
+            if not success:
                 return []
             results.append(result)
         return results
@@ -190,21 +189,32 @@ class GkeysGPG(GPG):
         self.set_keyserver()
         self.set_keydir(gkey.keydir, 'refresh-keys', reset=True)
         self.set_keyring('pubring.gpg', 'refresh-keys', reset=False)
+        self.set_keyseedfile()
         logger.debug("LIB: refresh_key, gkey: %s" % str(gkey))
         logger.debug("** Calling runGPG with Running 'gpg %s --refresh-keys' for: %s"
             % (' '.join(self.config.get_key('tasks', 'refresh-keys')), str(gkey)))
         result = self.runGPG(task='refresh-keys', inputfile='')
         logger.info('GPG return code: ' + str(result.returncode))
+        self.update_gkey(gkey, save=True)
         return result
 
 
-    def update_key(self, gkey, keydir):
+    def update_gkey(self, gkey, save=False):
         '''Update the specified key in the specified keydir
 
         @param key: tuple of (name, nick, keydir, fingerprint)
         @param keydir: the keydir to add the key to
         '''
-        return []
+        # Update the gkey seed and save it to the installed db
+        lresults = []
+        for fpr in gkey.keys:
+            lresults.append(self.list_keys(gkey.keydir, fpr, colons=True))
+        self.seedfile.update(gkey.update(lresults))
+        if save and not self.seedfile.save():
+            logger.error("GkeysGPG.refresh_key(); failed to save seed: " + gkey.nick)
+            return False
+        return True
+
 
 
     def list_keys(self, keydir, fingerprint=None, colons=False):
@@ -225,7 +235,7 @@ class GkeysGPG(GPG):
             task = 'list-keys'
             target = keydir
         self.set_keydir(keydir, task, fingerprint=True)
-        self.config.options['tasks'][task].extend(['--keyid-format', 'long', '--with-fingerprint'])
+        self.config.options['tasks'][task].extend(['--keyid-format', 'long', '--fingerprint', '--fingerprint'])
         if colons:
             task_value = ['--with-colons']
             self.config.options['tasks'][task].extend(task_value)
@@ -315,7 +325,7 @@ class GkeysGPG(GPG):
         return results
 
 
-    def set_keyseedfile(self, trap_errors):
+    def set_keyseedfile(self, trap_errors=True):
         if not self.keydir:
             logger.debug("GkeysGPG.set_keyseedfile(); self.keydir error")
         self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'), self.config)

@@ -27,7 +27,7 @@ from shutil import rmtree
 
 from gkeys.lib import GkeysGPG
 from gkeys.seedhandler import SeedHandler
-from gkeys.config import GKEY
+from gkeys.gkey import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
 

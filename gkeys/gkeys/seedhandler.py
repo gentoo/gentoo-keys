@@ -14,7 +14,7 @@ import os
 import re
 from json import load
 
-from gkeys.config import GKEY
+from gkeys.gkey import GKEY
 from gkeys.seed import Seeds
 from gkeys.fileops import ensure_dirs
 

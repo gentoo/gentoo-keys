@@ -20,7 +20,7 @@ import json
 import os
 
 from gkeys.log import logger
-from gkeys.config import GKEY
+from gkeys.gkey import GKEY
 from gkeys.fileops import ensure_dirs
 
 

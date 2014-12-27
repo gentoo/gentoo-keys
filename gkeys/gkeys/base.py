@@ -85,6 +85,12 @@ class CliBase(object):
             help='The name of the keyring to use for verification, etc.')
 
     @staticmethod
+    def _option_keys(parser=None):
+        parser.add_argument('-K', '--keys', dest='keys', nargs='*',
+            default=None,
+            help='The name of the keyring to use for verification, etc.')
+
+    @staticmethod
     def _option_nick(parser=None):
         parser.add_argument('-n', '--nick', dest='nick', default=None,
             help='The nick associated with the the key')
@@ -166,6 +172,11 @@ class CliBase(object):
         parser.add_argument('--justdoit', dest='justdoit',
             action='store_true', default=False,
             help='Just Do It')
+
+    @staticmethod
+    def _option_uid(parser=None):
+        parser.add_argument('-u', '--uid', dest='uid', nargs='*', default=None,
+            help='The user ID, gpg key uid')
 
 
     def parse_args(self, args):

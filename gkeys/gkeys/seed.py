@@ -57,6 +57,12 @@ class Seeds(object):
                 self._error(err)
             return False
         for seed in list(seedlines.items()):
+            # GKEY class change auto-update
+            if not 'uid' in list(seed[1]):
+                seed[1]['uid'] = []
+            if not 'keys' in list(seed[1]):
+                seed[1]['keys'] = seed[1]['fingerprint'][:]
+
             #try:
             self.seeds[seed[0]] = GKEY(**seed[1])
             #except Exception as err:

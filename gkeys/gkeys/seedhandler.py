@@ -111,6 +111,11 @@ class SeedHandler(object):
                 if seed:
                     for nick in sorted(seed):
                         key = seed[nick]
+                        # GKEY class change auto-update
+                        if not 'uid' in list(key):
+                            key['uid'] = []
+                        if not 'keys' in list(key):
+                            key['keys'] = key['fingerprint'][:]
                         seeds.add(nick, GKEY(**key))
         except OSError as error:
             self.logger.debug("SeedHandler: load_category; OSError for %s" % catdir)

@@ -56,7 +56,7 @@ Action_Options = {
     'move-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
     'import-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
-    'key-search': ['nick', '1name', 'keydir', 'keys', 'fingerprint', 'keyid', 'category', 'exact', 'all'],
+    'key-search': ['nick', '1name', 'keydir', 'keys', 'fingerprint', 'keyid', 'uid', 'category', 'exact', 'all'],
     'verify': ['dest', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
     'check-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
@@ -881,7 +881,7 @@ class Actions(object):
         handler = SeedHandler(self.logger, self.config)
         results = {}
         search_args = [x for x in
-            ['nick', 'name', 'keydir', 'fingerprint', 'keyid']
+            ['nick', 'name', 'keydir', 'fingerprint', 'keyid', 'uid']
             if getattr(args, x)]
         if args.category:
             handler.load_category(args.category)
@@ -909,6 +909,6 @@ class Actions(object):
         for cat in list(keys):
             msgs.append("Category: %s" % cat)
             msgs.append(keys[cat])
-        del keys, found, cat, result, handler
+        del keys, cat, handler
         return (True, msgs)
 

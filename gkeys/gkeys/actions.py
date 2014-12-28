@@ -35,7 +35,7 @@ Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed', 'list-cats',
     'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
 
 Key_Actions = ['----keys-----', 'check-key', 'import-key', 'installed',
-    'install-key', 'key-search', 'list-key', 'move-key', 'refresh-key', 'remove-key',
+    'install-key', 'search-key', 'list-key', 'move-key', 'refresh-key', 'remove-key',
     'spec-check']
 
 General_Actions = ['---general---', 'sign','verify']
@@ -56,7 +56,7 @@ Action_Options = {
     'move-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'dest'],
     'installed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
     'import-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
-    'key-search': ['nick', '1name', 'keydir', 'keys', 'fingerprint', 'keyid', 'uid', 'category', 'exact', 'all'],
+    'search-key': ['nick', '1name', 'keydir', 'keys', 'fingerprint', 'keyid', 'uid', 'category', 'exact', 'all'],
     'verify': ['dest', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
     'check-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
@@ -81,7 +81,7 @@ Action_Map = {
     'move-key': 'movekey',
     'installed': 'installed',
     'import-key': 'importkey',
-    'key-search': 'key_search',
+    'search-key': 'key_search',
     'verify': 'verify',
     'check-key': 'checkkey',
     'sign': 'sign',

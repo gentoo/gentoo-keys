@@ -14,6 +14,7 @@ import os
 import re
 from json import load
 
+from gkeys.exception import UpdateDbError
 from gkeys.gkey import GKEY
 from gkeys.seed import Seeds
 from gkeys.fileops import ensure_dirs
@@ -58,7 +59,7 @@ class SeedHandler(object):
                 pass
         return keyinfo
 
-    def load_seeds(self, seedfile=None, filepath=None):
+    def load_seeds(self, seedfile=None, filepath=None, refresh=False):
         '''Load seed file
 
         @param seeds: string of the short name seed file
@@ -77,11 +78,11 @@ class SeedHandler(object):
         self.logger.debug("SeedHandler: load_seeds; seeds filepath to load: "
             "%s" % filepath)
         seeds = Seeds(config=self.config)
-        seeds.load(filepath)
+        seeds.load(filepath, refresh=refresh)
         self.seeds = seeds
         return seeds
 
-    def load_category(self, category, nicks=None):
+    def load_category(self, category, nicks=None, refresh=False):
         '''Loads the designated key directories
 
         @param category: string
@@ -113,8 +114,12 @@ class SeedHandler(object):
                         key = seed[nick]
                         # GKEY class change auto-update
                         if not 'uid' in list(key):
+                            if not refresh:
+                                raise UpdateDbError(category)
                             key['uid'] = []
                         if not 'keys' in list(key):
+                            if not refresh:
+                                raise UpdateDbError(category)
                             key['keys'] = key['fingerprint'][:]
                         seeds.add(nick, GKEY(**key))
         except OSError as error:

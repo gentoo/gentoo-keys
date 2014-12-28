@@ -19,6 +19,7 @@ with gentoo-keys specific convienience functions.
 import json
 import os
 
+from gkeys.exception import UpdateDbError
 from gkeys.log import logger
 from gkeys.gkey import GKEY
 from gkeys.fileops import ensure_dirs
@@ -38,7 +39,7 @@ class Seeds(object):
         self.seeds = {}
 
 
-    def load(self, filename=None, trap_errors=True):
+    def load(self, filename=None, trap_errors=True, refresh=False):
         '''Load the seed file into memory'''
         if filename:
             self.filename = filename
@@ -59,8 +60,12 @@ class Seeds(object):
         for seed in list(seedlines.items()):
             # GKEY class change auto-update
             if not 'uid' in list(seed[1]):
+                if not refresh:
+                    raise UpdateDbError(filename)
                 seed[1]['uid'] = []
             if not 'keys' in list(seed[1]):
+                if not refresh:
+                    raise UpdateDbError(filename)
                 seed[1]['keys'] = seed[1]['fingerprint'][:]
 
             #try:

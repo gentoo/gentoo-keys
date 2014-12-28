@@ -189,7 +189,7 @@ class GkeysGPG(GPG):
         self.set_keyserver()
         self.set_keydir(gkey.keydir, 'refresh-keys', reset=True)
         self.set_keyring('pubring.gpg', 'refresh-keys', reset=False)
-        self.set_keyseedfile()
+        self.set_keyseedfile(refresh=True)
         logger.debug("LIB: refresh_key, gkey: %s" % str(gkey))
         logger.debug("** Calling runGPG with Running 'gpg %s --refresh-keys' for: %s"
             % (' '.join(self.config.get_key('tasks', 'refresh-keys')), str(gkey)))
@@ -325,11 +325,11 @@ class GkeysGPG(GPG):
         return results
 
 
-    def set_keyseedfile(self, trap_errors=True):
+    def set_keyseedfile(self, trap_errors=True, refresh=False):
         if not self.keydir:
             logger.debug("GkeysGPG.set_keyseedfile(); self.keydir error")
         self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'), self.config)
-        self.seedfile.load(trap_errors=trap_errors)
+        self.seedfile.load(trap_errors=trap_errors, refresh=refresh)
 
 
     def sign_file(self, gkey, mode, fingerprint, filepath):

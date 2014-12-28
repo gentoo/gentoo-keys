@@ -858,7 +858,7 @@ class Actions(object):
             return (False, ["Please specify seeds type."])
         self.logger.debug("ACTIONS: refreshkey; args: %s" % str(args))
         handler = SeedHandler(self.logger, self.config)
-        seeds = handler.load_category(args.category)
+        seeds = handler.load_category(args.category, refresh=True)
         keyring = self.config.get_key('keyring')
         catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: refreshkey; catdir = %s" % catdir)

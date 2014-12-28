@@ -300,7 +300,7 @@ class CliBase(object):
             print(header)
         for msg in results:
             if type(msg) in [str, unicode]:
-                print('    ', msg)
+                print('   ', msg)
             else:
                 try:
                     print("\n".join([x.pretty_print for x in msg]))

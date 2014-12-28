@@ -659,14 +659,15 @@ class Actions(object):
         pass
 
 
-    def verify(self, args):
-        '''File verification action'''
-        connector_output = {
-             'info': self.logger.debug,
-             'error': self.logger.error,
-             'kwargs-info': {},
-             'kwargs-error': {},
-        }
+    def verify(self, args, messages=None):
+        '''File verification action
+
+        @ param args: argparse.parse_args instance
+        @param messages: list, private internal option used for recursion only
+        '''
+        if messages == None:
+            messages = []
+
         if not args.filename:
             return (False, ['Please provide a signed file.'])
         if not args.category:
@@ -677,10 +678,24 @@ class Actions(object):
         keys = handler.load_category(args.category)
         if not keys:
             return (False, ['No installed keys found, try installkey action.'])
+        key = handler.seeds.nick_search(args.nick)
+        if not key:
+            messages.append("Failed to find nick: %s in %s category"
+                % (args.nick, args.category))
+            args.category = self.config.get_key('verify-keyring')
+            args.nick = self.config.get_key('verify-nick')
+            return self.verify(args, messages)
+
         keyrings = self.config.get_key('keyring')
         catdir = os.path.join(keyrings, args.category)
         self.logger.debug("ACTIONS: verify; catdir = %s" % catdir)
         self.gpg = GkeysGPG(self.config, catdir)
+        return self._verify(args, handler, key, messages)
+
+
+    def _verify(self, args, handler, key, messages=None):
+        if messages == None:
+            messages = []
         filepath, signature  = args.filename, args.signature
         timestamp_path = None
         isurl = success = verified = False
@@ -715,7 +730,7 @@ class Actions(object):
             self.logger.debug("ACTIONS: verify; local file %s" % filepath)
             success = os.path.isfile(filepath)
         if not success:
-            messages = ["File %s cannot be retrieved." % filepath]
+            messages.append("File %s cannot be retrieved." % filepath)
         else:
             if not signature:
                 EXTENSIONS = ['.sig', '.asc', 'gpg','.gpgsig']
@@ -735,26 +750,36 @@ class Actions(object):
                         break
             else:
                 sig_path = signature
-            messages = []
             self.logger.info("Verifying file...")
             verified = False
-            key = keys.nick_search(args.nick)
-            if not key:
-                messages.append("Failed to find nick: %s in %s category"
-                    % (args.nick, args.category))
-                return (False, messages)
             results = self.gpg.verify_file(key, sig_path, filepath)
             keyid = key.keyid[0]
             (valid, trust) = results.verified
             if valid:
                 verified = True
-                messages = ["Verification succeeded.: %s" % (filepath),
+                messages.extend(["Verification succeeded.: %s" % (filepath),
                     "Key info...............: %s <%s>, %s"
-                    % ( key.name, key.nick, keyid)]
+                    % ( key.name, key.nick, keyid)])
             else:
-                messages = ["Verification failed..... %s:" % (filepath),
-                    "Key info................: %s <%s>, %s"
-                    % ( key.name, key.nick, keyid)]
+                messages.extend(["Verification failed....: %s" % (filepath),
+                    "Key info...............: %s <%s>, %s"
+                    % ( key.name, key.nick, keyid)])
+                has_no_pubkey, s_keyid = results.no_pubkey
+                if has_no_pubkey:
+                    messages.append("Auto-searching for key.: %s" % s_keyid)
+                    # reset all but keyid and pass thru data
+                    args.keyid = s_keyid
+                    args.keydir = None
+                    args.fingerprint = None
+                    args.exact = False
+                    args.category = None
+                    args.nick = None
+                    args.name = None
+                    args.all = False
+                    keys = self.key_search(args, data_only=True)
+                    args.category = list(keys)[0]
+                    args.nick = keys[args.category][0].nick
+                    return self.verify(args, messages)
         return (verified, messages)
 
 
@@ -847,7 +872,7 @@ class Actions(object):
         return (True, ['Completed'])
 
 
-    def key_search(self, args):
+    def key_search(self, args, data_only=False):
         '''Search for a key's seed field in the installed keys db'''
         handler = SeedHandler(self.logger, self.config)
         results = {}
@@ -866,14 +891,21 @@ class Actions(object):
                         results[cat].extend(found)
                     else:
                         results[cat] = found
-        msgs = []
+        keys = {}
         for cat in results:
-            msgs.append("Category: %s" % cat)
-            seen = []
+            keys[cat] = []
             for result in results[cat]:
-                if result and result.nick not in seen:
+                if result and result.nick not in keys[cat]:
                     if isinstance(result, GKEY):
-                        seen.append(result)
-            msgs.append(seen)
+                        keys[cat].append(result)
+        if data_only:
+            del found, cat, result, handler
+            return keys
+        msgs = []
+        for cat in list(keys):
+            msgs.append("Category: %s" % cat)
+            for result in keys[cat]:
+                msgs.append(result)
+        del keys, found, cat, result, handler
         return (True, msgs)
 

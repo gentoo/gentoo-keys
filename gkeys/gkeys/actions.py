@@ -908,8 +908,7 @@ class Actions(object):
         msgs = []
         for cat in list(keys):
             msgs.append("Category: %s" % cat)
-            for result in keys[cat]:
-                msgs.append(result)
+            msgs.append(keys[cat])
         del keys, found, cat, result, handler
         return (True, msgs)
 

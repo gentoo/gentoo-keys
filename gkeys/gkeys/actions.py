@@ -680,10 +680,13 @@ class Actions(object):
             return (False, ['No installed keys found, try installkey action.'])
         key = handler.seeds.nick_search(args.nick)
         if not key:
-            messages.append("Failed to find nick: %s in %s category"
-                % (args.nick, args.category))
+            if args.nick:
+                messages.append("Failed to find.........: %s in category: %s"
+                    % (args.category, args.nick))
             args.category = self.config.get_key('verify-keyring')
             args.nick = self.config.get_key('verify-nick')
+            messages.append("Using config defaults..: %s %s"
+                % (args.category, args.nick))
             return self.verify(args, messages)
 
         keyrings = self.config.get_key('keyring')
@@ -759,14 +762,15 @@ class Actions(object):
                 verified = True
                 messages.extend(["Verification succeeded.: %s" % (filepath),
                     "Key info...............: %s <%s>, %s"
-                    % ( key.name, key.nick, keyid)])
+                    % ( key.name, key.nick, keyid),
+                    "    category, nick.....: %s %s" % (args.category, args.nick)])
             else:
                 messages.extend(["Verification failed....: %s" % (filepath),
                     "Key info...............: %s <%s>, %s"
                     % ( key.name, key.nick, keyid)])
                 has_no_pubkey, s_keyid = results.no_pubkey
                 if has_no_pubkey:
-                    messages.append("Auto-searching for key.: %s" % s_keyid)
+                    messages.append("Auto-searching for key.: 0x%s" % s_keyid)
                     # reset all but keyid and pass thru data
                     args.keyid = s_keyid
                     args.keydir = None

@@ -18,7 +18,10 @@ GKEY_STRING = '''    ----------
     Name.........: %(name)s
     Nick.........: %(nick)s
     Keydir.......: %(keydir)s
-    UID..........: %(uid)s
+'''
+
+GKEY_UID = \
+'''    UID..........: %(uid)s
 '''
 
 GKEY_FINGERPRINTS = \
@@ -48,9 +51,10 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'keys', 'fingerprint', 
             'name': self.name,
             'nick': self.nick,
             'keydir': self.keydir,
-            'uid': self.uid,
             }
         output = GKEY_STRING % gkey
+        for uid in self.uid:
+            output += GKEY_UID % {'uid': uid}
         for f in self.fingerprint:
             fingerprint = {'fingerprint': f, 'keyid': '0x' + f[-16:]}
             output += GKEY_FINGERPRINTS % fingerprint

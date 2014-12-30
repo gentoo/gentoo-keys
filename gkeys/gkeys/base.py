@@ -46,64 +46,16 @@ class CliBase(object):
 
 
     @staticmethod
+    def _option_status(parser=None):
+        parser.add_argument('-A', '--status', action='store_true',
+            default=False,
+            help='The active status of the member')
+
+    @staticmethod
     def _option_all(parser=None):
         parser.add_argument('-a', '--all', dest='all',
             action='store_true', default=False,
             help='Match all inputs arguments in searches')
-
-    @staticmethod
-    def _option_dest(parser=None):
-        parser.add_argument('-d', '--dest', dest='destination', default=None,
-            help='The destination seed file or keydir for move, copy operations')
-
-    @staticmethod
-    def _option_exact(parser=None):
-        parser.add_argument('-e', '--exact', dest='exact',
-            action='store_true', default=False,
-            help='Use CASE matching in searches')
-
-    @staticmethod
-    def _option_fingerprint(parser=None):
-        parser.add_argument('-f', '--fingerprint', dest='fingerprint',
-            default=None, nargs='+',
-            help='The fingerprint of the the key')
-
-    @staticmethod
-    def _option_gpgsearch(parser=None):
-        parser.add_argument('-g', '--gpgsearch', dest='gpgsearch', default=None,
-            help='Do a gpg search operations, rather than a gkey search')
-
-    @staticmethod
-    def _option_keyid(parser=None):
-        parser.add_argument('-i', '--keyid', dest='keyid', default=None,
-            nargs='+',
-            help='The long keyid of the gpg key to search for')
-
-    @staticmethod
-    def _option_keyring(parser=None):
-        parser.add_argument('-k', '--keyring', dest='keyring', default=None,
-            help='The name of the keyring to use for verification, etc.')
-
-    @staticmethod
-    def _option_keys(parser=None):
-        parser.add_argument('-K', '--keys', dest='keys', nargs='*',
-            default=None,
-            help='The name of the keyring to use for verification, etc.')
-
-    @staticmethod
-    def _option_nick(parser=None):
-        parser.add_argument('-n', '--nick', dest='nick', default=None,
-            help='The nick associated with the the key')
-
-    @staticmethod
-    def _option_name(parser=None):
-        parser.add_argument('-N', '--name', dest='name', nargs='*',
-            default=None, help='The name of the the key')
-
-    @staticmethod
-    def _option_1name(parser=None):
-        parser.add_argument('-N', '--name', dest='name',
-            default=None, help='The name of the the key')
 
     @staticmethod
     def _option_category(parser=None):
@@ -125,14 +77,15 @@ class CliBase(object):
                 'Used during binary keyring release creation.')
 
     @staticmethod
-    def _option_keydir(parser=None):
-        parser.add_argument('-r', '--keydir', dest='keydir', default=None,
-            help='The keydir to use, update or search for/in')
+    def _option_dest(parser=None):
+        parser.add_argument('-d', '--dest', dest='destination', default=None,
+            help='The destination for move, copy, create operations')
 
     @staticmethod
-    def _option_seedfile(parser=None):
-        parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
-            help='The seedfile to use from the gkeys.conf file')
+    def _option_exact(parser=None):
+        parser.add_argument('-e', '--exact', dest='exact',
+            action='store_true', default=False,
+            help='Use CASE matching in searches')
 
     @staticmethod
     def _option_file(parser=None):
@@ -146,6 +99,75 @@ class CliBase(object):
             help='The path/URL to use for the (signed) file')
 
     @staticmethod
+    def _option_fingerprint(parser=None):
+        parser.add_argument('-f', '--fingerprint', dest='fingerprint',
+            default=None, nargs='+',
+            help='The fingerprint of the the key')
+
+    @staticmethod
+    def _option_gpgsearch(parser=None):
+        parser.add_argument('-g', '--gpgsearch', dest='gpgsearch', default=None,
+            help='Do a gpg search operations, rather than a gkey search')
+
+    @staticmethod
+    def _option_homedir(parser=None):
+        parser.add_argument('-H', '--homedir', dest='homedir', default=None,
+                            help='The destination for the generated key')
+
+    @staticmethod
+    def _option_keyid(parser=None):
+        parser.add_argument('-i', '--keyid', dest='keyid', default=None,
+            nargs='+',
+            help='The long keyid of the gpg key to search for')
+
+    @staticmethod
+    def _option_justdoit(parser=None):
+        parser.add_argument('--justdoit', dest='justdoit',
+            action='store_true', default=False,
+            help='Just Do It')
+
+    @staticmethod
+    def _option_keyring(parser=None):
+        parser.add_argument('-k', '--keyring', dest='keyring', default=None,
+            help='The name of the keyring to use for verification, etc.')
+
+    @staticmethod
+    def _option_keys(parser=None):
+        parser.add_argument('-K', '--keys', dest='keys', nargs='*',
+            default=None,
+            help='The name of the keyring to use for verification, etc.')
+
+    @staticmethod
+    def _option_mail(parser=None):
+        parser.add_argument('-m', '--mail', dest='mail', default=None,
+            help='The email address to search for')
+
+    @staticmethod
+    def _option_nick(parser=None):
+        parser.add_argument('-n', '--nick', dest='nick', default=None,
+            help='The nick associated with the the key')
+
+    @staticmethod
+    def _option_name(parser=None):
+        parser.add_argument('-N', '--name', dest='name', nargs='*',
+            default=None, help='The name of the the key')
+
+    @staticmethod
+    def _option_1name(parser=None):
+        parser.add_argument('-N', '--name', dest='name',
+            default=None, help='The name of the the key')
+
+    @staticmethod
+    def _option_keydir(parser=None):
+        parser.add_argument('-r', '--keydir', dest='keydir', default=None,
+            help='The keydir to use, update or search for/in')
+
+    @staticmethod
+    def _option_seedfile(parser=None):
+        parser.add_argument('-S', '--seedfile', dest='seedfile', default=None,
+            help='The seedfile to use from the gkeys.conf file')
+
+    @staticmethod
     def _option_signature(parser=None):
         parser.add_argument('-s','--signature', dest='signature', default=None,
            help='The path/URL to use for the signature')
@@ -155,23 +177,6 @@ class CliBase(object):
         parser.add_argument('-t', '--timestamp', dest='timestamp',
             action='store_true', default=False,
             help='Turn on timestamp use')
-
-    @staticmethod
-    def _option_mail(parser=None):
-        parser.add_argument('-m', '--mail', dest='mail', default=None,
-            help='The email address to search for')
-
-    @staticmethod
-    def _option_status(parser=None):
-        parser.add_argument('-A', '--status', action='store_true',
-            default=False,
-            help='The active status of the member')
-
-    @staticmethod
-    def _option_justdoit(parser=None):
-        parser.add_argument('--justdoit', dest='justdoit',
-            action='store_true', default=False,
-            help='Just Do It')
 
     @staticmethod
     def _option_uid(parser=None):

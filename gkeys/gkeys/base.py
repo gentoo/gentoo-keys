@@ -185,10 +185,10 @@ class CliBase(object):
             help='The user ID, gpg key uid')
 
 
-    def parse_args(self, args):
+    def parse_args(self, argv):
         '''Parse a list of aruments
 
-        @param args: list
+        @param argv: list
         @returns argparse.Namespace object
         '''
         #self.logger.debug('CliBase: parse_args; args: %s' % args)
@@ -225,7 +225,7 @@ class CliBase(object):
             action_parser.set_defaults(action=name)
             self._add_options(action_parser, self.cli_config['Action_Options'][name])
 
-        parsed_args = parser.parse_args(args)
+        parsed_args = parser.parse_args(argv)
         action = getattr(parsed_args, 'action', None)
         if not action:
             parser.print_usage()
@@ -241,10 +241,11 @@ class CliBase(object):
             getattr(self, '_option_%s' % opt)(parser)
 
 
-    def run(self, args):
-        '''Run the args passed in
+    def setup(self, args, configs):
+        '''Set up the args and configs passed in
 
         @param args: list or argparse.Namespace object
+        @param configs: list
         '''
         message = None
         if not args:
@@ -253,8 +254,9 @@ class CliBase(object):
             args = self.parse_args(args)
         if args.config:
             self.config.defaults['config'] = args.config
-        # now make it load the config file
-        self.config.read_config()
+            self.config.read_config()
+        else:
+            self.config.read_config(configs)
 
         # establish our logger and update it in the imported files
         self.logger = set_logger(self.cli_config['prog'], self.config['logdir'], args.debug,
@@ -278,7 +280,10 @@ class CliBase(object):
             cat = args.category
         if not self._check_category(cat):
             return False
+        return True
 
+
+    def run(self, args):
         # establish our actions instance
         self.actions = self.cli_config['Actions'](self.config, self.output_results, self.logger)
 

@@ -13,6 +13,7 @@
 from __future__ import print_function
 
 
+import os
 import sys
 
 from gkeys.base import CliBase
@@ -52,7 +53,12 @@ class Main(CliBase):
                      Defaults to sys.argv[1:]
         """
         if args:
-            return self.run(self.parse_args(args))
+            ok = self.setup(args)
+            if ok:
+                return self.run(self.parse_args(args))
         else:
-            return self.run(self.parse_args(sys.argv[1:]))
-
+            args = self.parse_args(sys.argv[1:])
+            ok = self.setup(args, os.path.join(self.config['configdir'],'gkeys.conf'))
+            if ok:
+                return self.run(args)
+        return False

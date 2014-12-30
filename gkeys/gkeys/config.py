@@ -48,9 +48,9 @@ class GKeysConfig(GPGConfig):
             self.defaults['config'] = config
             self.defaults['configdir'] = os.path.dirname(config)
         else:
-            homedir = os.path.expanduser('~')
-            self.defaults['configdir'] = homedir
-            self.defaults['config']= os.path.join(homedir, '.gkeys.conf')
+            self.homedir = os.path.expanduser('~')
+            self.defaults['configdir'] = self.homedir
+            self.defaults['config']= os.path.join(self.homedir, '.gkeys.conf')
             if not os.path.exists(self.defaults['config']):
                 self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gkeys'])
                 self.defaults['config'] = '%(configdir)s/gkeys.conf'
@@ -83,7 +83,7 @@ class GKeysConfig(GPGConfig):
         self.defaults['verify-seeds'] = {}
 
 
-    def read_config(self):
+    def read_config(self, filename=None):
         '''Reads the config file into memory
         '''
         if "%(configdir)s" in self.defaults['config']:
@@ -97,18 +97,23 @@ class GKeysConfig(GPGConfig):
         for key in ['gkeysdir', 'keyring', 'sign-keydir', 'logdir', 'seedsdir',
             'keyserver']:
             defaults[key] = self.defaults[key]
+        if filename == None:
+            filename = self.defaults['config']
         self.configparser = SaneConfigParser(defaults)
-        self.configparser.read(self.defaults['config'])
-        # I consider this hacky, but due to shortcomings of ConfigParser
-        # we need to reset the defaults redefined in the 'base' section
-        for key in self.configparser.options('base'):
-            self.defaults[key] = self.configparser.get('base', key)
-            defaults[key] = self.defaults[key]
+        self.configparser.read(filename)
+        if self.configparser.has_section('base'):
+            # I consider this hacky, but due to shortcomings of ConfigParser
+            # we need to reset the defaults redefined in the 'base' section
+            for key in self.configparser.options('base'):
+                self.defaults[key] = self.configparser.get('base', key)
+                defaults[key] = self.defaults[key]
         self.configparser._defaults = defaults
         for section in self.configparser.sections():
             if section == 'base':
                 continue
             for key in self.configparser.options(section):
+                if section not in self.defaults:
+                    self.defaults[section] = {}
                 self.defaults[section][key] = self.configparser.get(section, key)
 
     def get_key(self, key, subkey=None):

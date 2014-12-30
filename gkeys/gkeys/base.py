@@ -302,7 +302,7 @@ class CliBase(object):
 
 
     @staticmethod
-    def output_results(results, header):
+    def output_results(results, header=None):
         # super simple output for the time being
         if header:
             print(header)

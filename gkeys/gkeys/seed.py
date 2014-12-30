@@ -29,13 +29,14 @@ class Seeds(object):
     '''Handles all seed key file operations'''
 
 
-    def __init__(self, filepath=None, config=None):
+    def __init__(self, filepath=None, config=None, _logger=None):
         '''Seeds class init function
 
         @param filepath: string of the file to load
         '''
         self.filename = filepath
         self.config = config
+        self.logger = _logger or logger
         self.seeds = {}
 
 
@@ -44,16 +45,16 @@ class Seeds(object):
         if filename:
             self.filename = filename
         if not self.filename:
-            logger.debug("Seed: load; Not a valid filename: '%s'" % str(self.filename))
+            self.logger.debug("Seed: load; Not a valid filename: '%s'" % str(self.filename))
             return False
-        logger.debug("Seeds: load; Begin loading seed file %s" % self.filename)
+        self.logger.debug("Seeds: load; Begin loading seed file %s" % self.filename)
         seedlines = None
         self.seeds = {}
         try:
             with open(self.filename, "r+") as seedfile:
                 seedlines = json.load(seedfile)
         except IOError as err:
-            logger.debug("Seed: load; IOError occurred while loading file")
+            self.logger.debug("Seed: load; IOError occurred while loading file")
             if trap_errors:
                 self._error(err)
             return False
@@ -71,10 +72,10 @@ class Seeds(object):
             #try:
             self.seeds[seed[0]] = GKEY(**seed[1])
             #except Exception as err:
-                #logger.debug("Seed: load; Error splitting seed: %s" % seed)
-                #logger.debug("Seed: load; ...............parts: %s" % str(parts))
+                #self.logger.debug("Seed: load; Error splitting seed: %s" % seed)
+                #self.logger.debug("Seed: load; ...............parts: %s" % str(parts))
                 #self._error(err)
-        logger.debug("Seed: load; Completed loading seed file %s" % self.filename)
+        self.logger.debug("Seed: load; Completed loading seed file %s" % self.filename)
         return True
 
 
@@ -83,9 +84,9 @@ class Seeds(object):
         if filename:
             self.filename = filename
         if not self.filename:
-            logger.debug("Seed: save; Not a valid filename: '%s'" % str(self.filename))
+            self.logger.debug("Seed: save; Not a valid filename: '%s'" % str(self.filename))
             return False
-        logger.debug("Seed: save; Begin saving seed file %s" % self.filename)
+        self.logger.debug("Seed: save; Begin saving seed file %s" % self.filename)
         ensure_dirs(os.path.split(self.filename)[0],
             mode=int(self.config.get_key('permissions', "directories"),0),
             fatal=True)
@@ -217,8 +218,8 @@ class Seeds(object):
 
     def _error(self, err):
         '''Class error logging function'''
-        logger.error("Seed: Error processing seed file %s" % self.filename)
-        logger.error("Seed: Error was: %s" % str(err))
+        self.logger.error("Seed: Error processing seed file %s" % self.filename)
+        self.logger.error("Seed: Error was: %s" % str(err))
 
 
     def _seeds2json(self, seeds):

@@ -243,7 +243,7 @@ class Actions(object):
         keyring = self.config.get_key('keyring')
         catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: listkey; catdir = %s" % catdir)
-        self.gpg = GkeysGPG(self.config, catdir)
+        self.gpg = GkeysGPG(self.config, catdir, self.logger)
         handler = SeedHandler(self.logger, self.config)
         if args.keydir:
             self.gpg.set_keydir(args.keydir, "list-keys")
@@ -338,7 +338,7 @@ class Actions(object):
             keyring = self.config.get_key('keyring')
             catdir = os.path.join(keyring, args.category)
             self.logger.debug("ACTIONS: installkey; catdir = %s" % catdir)
-            self.gpg = GkeysGPG(self.config, catdir)
+            self.gpg = GkeysGPG(self.config, catdir, self.logger)
             results = {}
             failed = []
             for key in gkey:
@@ -374,7 +374,7 @@ class Actions(object):
         keyring = self.config.get_key('keyring')
         catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: checkkey; catdir = %s" % catdir)
-        self.gpg = GkeysGPG(self.config, catdir)
+        self.gpg = GkeysGPG(self.config, catdir, self.logger)
         results = {}
         failed = defaultdict(list)
         kwargs = handler.build_gkeydict(args)
@@ -422,7 +422,7 @@ class Actions(object):
         keyring = self.config.get_key('keyring')
         catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: speccheck; catdir = %s" % catdir)
-        self.gpg = GkeysGPG(self.config, catdir)
+        self.gpg = GkeysGPG(self.config, catdir, self.logger)
         results = {}
         failed = defaultdict(list)
         kwargs = handler.build_gkeydict(args)
@@ -588,7 +588,7 @@ class Actions(object):
             catdir = os.path.join(keyring, args.category)
             keyring_dir = self.config.get_key("keyring")
             self.logger.debug("ACTIONS: importkey; catdir = %s" % catdir)
-            self.gpg = GkeysGPG(self.config, catdir)
+            self.gpg = GkeysGPG(self.config, catdir, self.logger)
             success, gkeys = self.listseed(args)[1]
             results = {}
             failed = []
@@ -692,7 +692,7 @@ class Actions(object):
         keyrings = self.config.get_key('keyring')
         catdir = os.path.join(keyrings, args.category)
         self.logger.debug("ACTIONS: verify; catdir = %s" % catdir)
-        self.gpg = GkeysGPG(self.config, catdir)
+        self.gpg = GkeysGPG(self.config, catdir, self.logger)
         return self._verify(args, handler, key, messages)
 
 
@@ -827,7 +827,7 @@ class Actions(object):
 
         self.logger.debug("ACTIONS: sign; keydir = %s" % keydir)
 
-        self.gpg = GkeysGPG(self.config, basedir)
+        self.gpg = GkeysGPG(self.config, basedir, self.logger)
         self.gpg.set_keydir(keydir, task)
         if keyring not in ['', None]:
             self.gpg.set_keyring(keyring, task)
@@ -862,7 +862,7 @@ class Actions(object):
         keyring = self.config.get_key('keyring')
         catdir = os.path.join(keyring, args.category)
         self.logger.debug("ACTIONS: refreshkey; catdir = %s" % catdir)
-        self.gpg = GkeysGPG(self.config, catdir)
+        self.gpg = GkeysGPG(self.config, catdir, self.logger)
         results = {}
         kwargs = handler.build_gkeydict(args)
         keyresults = seeds.list(**kwargs)

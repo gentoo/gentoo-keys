@@ -17,7 +17,7 @@ from __future__ import print_function
 import argparse
 import sys
 
-from gkeys import fileops, seed, lib
+from gkeys import fileops
 from gkeys.log import log_levels, set_logger
 
 
@@ -43,6 +43,7 @@ class CliBase(object):
         self.args = None
         self.seeds = None
         self.actions = None
+        self.logger = None
 
 
     @staticmethod
@@ -190,7 +191,7 @@ class CliBase(object):
         @param args: list
         @returns argparse.Namespace object
         '''
-        #logger.debug('CliBase: parse_args; args: %s' % args)
+        #self.logger.debug('CliBase: parse_args; args: %s' % args)
         parser = argparse.ArgumentParser(
             prog=self.cli_config['prog'],
             description=self.cli_config['description'],
@@ -245,7 +246,6 @@ class CliBase(object):
 
         @param args: list or argparse.Namespace object
         '''
-        global logger
         message = None
         if not args:
             message = "Main: run; invalid args argument passed in"
@@ -257,20 +257,18 @@ class CliBase(object):
         self.config.read_config()
 
         # establish our logger and update it in the imported files
-        logger = set_logger(self.cli_config['prog'], self.config['logdir'], args.debug,
+        self.logger = set_logger(self.cli_config['prog'], self.config['logdir'], args.debug,
             dirmode=int(self.config.get_key('permissions', 'directories'),0),
             filemask=int(self.config.get_key('permissions', 'files'),0))
-        self.config.logger = logger
-        fileops.logger = logger
-        seed.logger = logger
-        lib.logger = logger
+        self.config.logger = self.logger
+        fileops.logger = self.logger
 
         if message:
-            logger.error(message)
+            self.logger.error(message)
 
         # now that we have a logger, record the alternate config setting
         if args.config:
-            logger.debug("Main: run; Found alternate config request: %s"
+            self.logger.debug("Main: run; Found alternate config request: %s"
                 % args.config)
 
         # check if a -C, --category was input
@@ -282,12 +280,12 @@ class CliBase(object):
             return False
 
         # establish our actions instance
-        self.actions = self.cli_config['Actions'](self.config, self.output_results, logger)
+        self.actions = self.cli_config['Actions'](self.config, self.output_results, self.logger)
 
         # run the action
         func = getattr(self.actions, '%s'
             % self.cli_config['Action_Map'][args.action])
-        logger.debug('Main: run; Found action: %s' % args.action)
+        self.logger.debug('Main: run; Found action: %s' % args.action)
         success, results = func(args)
         if not results:
             print("No results found.  Check your configuration and that the",
@@ -328,7 +326,7 @@ class CliBase(object):
         '''
         available_cats = list(self.config.defaults['seeds'])
         if category and category not in available_cats:
-            self.config.logger.error("Invalid category or seedfile entered: %s" % category)
-            self.config.logger.error("Available categories or seedfiles: %s" % ', '.join(sorted(available_cats)))
+            self.logger.error("Invalid category or seedfile entered: %s" % category)
+            self.logger.error("Available categories or seedfiles: %s" % ', '.join(sorted(available_cats)))
             return False
         return True

@@ -77,7 +77,7 @@ class SeedHandler(object):
             self.logger.error("SeedHandler: load_seeds; No filepath to load")
         self.logger.debug("SeedHandler: load_seeds; seeds filepath to load: "
             "%s" % filepath)
-        seeds = Seeds(config=self.config)
+        seeds = Seeds(config=self.config, _logger=self.logger)
         seeds.load(filepath, refresh=refresh)
         self.seeds = seeds
         return seeds
@@ -89,7 +89,7 @@ class SeedHandler(object):
         @param nicks: list of string nick ids to load
         @return Seeds class object
         '''
-        seeds = Seeds(config=self.config)
+        seeds = Seeds(config=self.config, _logger=self.logger)
         if category == 'sign':
             catdir = self.config.get_key('sign-keydir')
         else:

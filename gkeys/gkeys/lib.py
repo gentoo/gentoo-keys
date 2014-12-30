@@ -26,14 +26,13 @@ from os.path import join as pjoin
 from pyGPG.gpg import GPG
 from gkeys.checks import KeyChecks
 from gkeys.fileops import ensure_dirs
-from gkeys.log import logger
 from gkeys.seed import Seeds
 
 class GkeysGPG(GPG):
     '''Gentoo-keys primary gpg class'''
 
 
-    def __init__(self, config, basedir):
+    def __init__(self, config, basedir, logger):
         '''class init function
 
         @param config: GKeysConfig config instance to use
@@ -43,6 +42,7 @@ class GkeysGPG(GPG):
         GPG.__init__(self, config, logger)
         self.config = config
         self.basedir = basedir
+        self.logger = logger
         self.keydir = None
         self.server = None
 
@@ -54,10 +54,10 @@ class GkeysGPG(GPG):
             return
         self.server = server or self.config['keyserver']
         self.config.options['gpg_defaults'] = self.config.defaults['gpg_defaults'][:]
-        logger.debug("keyserver: %s" % (self.server))
+        self.logger.debug("keyserver: %s" % (self.server))
         server_value = ['--keyserver', self.server]
         self.config.options['gpg_defaults'].extend(server_value)
-        logger.debug("self.config.options['gpg_defaults']: %s"
+        self.logger.debug("self.config.options['gpg_defaults']: %s"
             % (self.config.options['gpg_defaults']))
         return
 
@@ -65,7 +65,7 @@ class GkeysGPG(GPG):
     def set_keyring(self, keyring, task, importkey=False, reset=True):
         '''Sets the keyring to use as well as related task options
         '''
-        logger.debug("keydir: %s, keyring: %s" % (self.keydir, keyring))
+        self.logger.debug("keydir: %s, keyring: %s" % (self.keydir, keyring))
         if reset:
             self.config.options['tasks'][task] =  self.config.defaults['tasks'][task][:]
         # --keyring file |  Note that this adds a keyring to the current list.
@@ -79,12 +79,12 @@ class GkeysGPG(GPG):
                 mode=int(self.config.get_key('permissions', 'directories'),0))
         task_value = ['--no-default-keyring', '--keyring', keyring]
         self.config.options['tasks'][task].extend(task_value)
-        logger.debug("set_keyring: New task options: %s" %str(self.config.options['tasks'][task]))
+        self.logger.debug("set_keyring: New task options: %s" %str(self.config.options['tasks'][task]))
         return
 
 
     def set_keydir(self, keydir, task, fingerprint=True, reset=True):
-        logger.debug("basedir: %s, keydir: %s" % (self.basedir, keydir))
+        self.logger.debug("basedir: %s, keydir: %s" % (self.basedir, keydir))
         self.keydir = pjoin(self.basedir, keydir)
         self.task = task
         if reset:
@@ -94,7 +94,7 @@ class GkeysGPG(GPG):
             task_value.append('--fingerprint')
         task_value.extend(['--homedir', self.keydir])
         self.config.options['tasks'][task].extend(task_value)
-        logger.debug("set_keydir: New task options: %s" %str(self.config.options['tasks'][task]))
+        self.logger.debug("set_keydir: New task options: %s" %str(self.config.options['tasks'][task]))
         return
 
 
@@ -109,13 +109,13 @@ class GkeysGPG(GPG):
         self.set_keydir(keydir, 'import', reset=True)
         self.set_keyring(keyring, 'import', importkey=True, reset=False)
         results = []
-        logger.debug("LIB: import_to_keyring; name: " + gkey.name)
-        logger.debug("** Calling runGPG with Running: gpg %s --import' for: %s"
+        self.logger.debug("LIB: import_to_keyring; name: " + gkey.name)
+        self.logger.debug("** Calling runGPG with Running: gpg %s --import' for: %s"
                      % (' '.join(self.config.get_key('tasks', 'import')),
                         gkey.name))
         pubring_path = pjoin(self.keydir, gkey.keydir, 'pubring.gpg')
         result = self.runGPG(task='import', inputfile=pubring_path)
-        logger.info('GPG return code: ' + str(result.returncode))
+        self.logger.info('GPG return code: ' + str(result.returncode))
         results.append(result)
         print(result.stderr_out)
         return results
@@ -131,32 +131,32 @@ class GkeysGPG(GPG):
         self.set_keyserver()
         self.set_keydir(gkey.keydir, 'recv-keys', reset=True)
         self.set_keyring('pubring.gpg', 'recv-keys', reset=False)
-        logger.debug("LIB: add_key; ensure dirs: " + self.keydir)
+        self.logger.debug("LIB: add_key; ensure dirs: " + self.keydir)
         mode = int(self.config.get_key('permissions', 'directories'),0)
         ensure_dirs(str(self.keydir), mode=mode)
         self.set_keyseedfile(trap_errors=False)
         results = []
         for fingerprint in gkey.fingerprint:
-            logger.debug("LIB: add_key; adding fingerprint " + fingerprint)
-            logger.debug("** Calling runGPG with Running 'gpg %s --recv-keys %s' for: %s"
+            self.logger.debug("LIB: add_key; adding fingerprint " + fingerprint)
+            self.logger.debug("** Calling runGPG with Running 'gpg %s --recv-keys %s' for: %s"
                 % (' '.join(self.config.get_key('tasks', 'recv-keys')),
                     fingerprint, gkey.name))
             result = self.runGPG(task='recv-keys', inputfile=fingerprint)
-            logger.info('GPG return code: ' + str(result.returncode))
+            self.logger.info('GPG return code: ' + str(result.returncode))
             if result.fingerprint in gkey.fingerprint:
                 result.failed = False
                 message = "Fingerprints match... Import successful: "
                 message += "%s, fingerprint: %s" % (gkey.nick, fingerprint)
                 message += "\n result len: %s, %s" % (len(result.fingerprint), result.fingerprint)
                 message += "\n gkey len: %s, %s" % (len(gkey.fingerprint[0]), gkey.fingerprint[0])
-                logger.info(message)
+                self.logger.info(message)
             else:
                 result.failed = True
                 message = "Fingerprints do not match... Import failed for "
                 message += "%s, fingerprint: %s" % (gkey.nick, fingerprint)
                 message += "\n result: %s" % (result.fingerprint)
                 message += "\n gkey..: %s" % (str(gkey.fingerprint))
-                logger.error(message)
+                self.logger.error(message)
             # Save the gkey seed to the installed db
             success = self.update_gkey(gkey, save=True)
             if not success:
@@ -190,11 +190,11 @@ class GkeysGPG(GPG):
         self.set_keydir(gkey.keydir, 'refresh-keys', reset=True)
         self.set_keyring('pubring.gpg', 'refresh-keys', reset=False)
         self.set_keyseedfile(refresh=True)
-        logger.debug("LIB: refresh_key, gkey: %s" % str(gkey))
-        logger.debug("** Calling runGPG with Running 'gpg %s --refresh-keys' for: %s"
+        self.logger.debug("LIB: refresh_key, gkey: %s" % str(gkey))
+        self.logger.debug("** Calling runGPG with Running 'gpg %s --refresh-keys' for: %s"
             % (' '.join(self.config.get_key('tasks', 'refresh-keys')), str(gkey)))
         result = self.runGPG(task='refresh-keys', inputfile='')
-        logger.info('GPG return code: ' + str(result.returncode))
+        self.logger.info('GPG return code: ' + str(result.returncode))
         self.update_gkey(gkey, save=True)
         return result
 
@@ -211,7 +211,7 @@ class GkeysGPG(GPG):
             lresults.append(self.list_keys(gkey.keydir, fpr, colons=True))
         self.seedfile.update(gkey.update(lresults))
         if save and not self.seedfile.save():
-            logger.error("GkeysGPG.refresh_key(); failed to save seed: " + gkey.nick)
+            self.logger.error("GkeysGPG.refresh_key(); failed to save seed: " + gkey.nick)
             return False
         return True
 
@@ -225,7 +225,7 @@ class GkeysGPG(GPG):
         @param colons: bool to enable colon listing
         '''
         if not keydir:
-            logger.debug("LIB: list_keys(), invalid keydir parameter: %s"
+            self.logger.debug("LIB: list_keys(), invalid keydir parameter: %s"
                 % str(keydir))
             return []
         if fingerprint:
@@ -239,11 +239,11 @@ class GkeysGPG(GPG):
         if colons:
             task_value = ['--with-colons']
             self.config.options['tasks'][task].extend(task_value)
-        logger.debug("** Calling runGPG with Running 'gpg %s --%s %s'"
+        self.logger.debug("** Calling runGPG with Running 'gpg %s --%s %s'"
             % (' '.join(self.config['tasks'][task]), task, keydir)
             )
         result = self.runGPG(task=task, inputfile=target)
-        logger.info('GPG return code: ' + str(result.returncode))
+        self.logger.info('GPG return code: ' + str(result.returncode))
         return result
 
 
@@ -257,7 +257,7 @@ class GkeysGPG(GPG):
         '''
         if not result:
             result = self.list_keys(keydir, fingerprint=keyid, colons=True)
-        checker = KeyChecks(logger, qualified_id_check=True)
+        checker = KeyChecks(self.logger, qualified_id_check=True)
         return checker.validity_checks(keydir, keyid, result)
 
 
@@ -272,7 +272,7 @@ class GkeysGPG(GPG):
         '''
         if not result:
             result = self.list_keys(keydir, fingerprint=keyid, colons=True)
-        checker = KeyChecks(logger, qualified_id_check=True)
+        checker = KeyChecks(self.logger, qualified_id_check=True)
         specchecks = checker.spec_check(keydir, keyid, result)
         return specchecks
 
@@ -306,29 +306,29 @@ class GkeysGPG(GPG):
         '''
         if signature:
             self.set_keydir(gkey.keydir, 'verify', reset=True)
-            logger.debug("** Calling runGPG with Running 'gpg %s --verify %s and %s'"
+            self.logger.debug("** Calling runGPG with Running 'gpg %s --verify %s and %s'"
                     % (' '.join(self.config['tasks']['verify']), signature, filepath))
             results = self.runGPG(task='verify', inputfile=[signature,filepath])
         else:
             self.set_keydir(gkey.keydir, 'decrypt', reset=True)
-            logger.debug("** Calling runGPG with Running 'gpg %s --decrypt %s and %s'"
+            self.logger.debug("** Calling runGPG with Running 'gpg %s --decrypt %s and %s'"
                     % (' '.join(self.config['tasks']['decrypt']), filepath))
             results = self.runGPG(task='decrypt', inputfile=filepath)
         keyid = gkey.keyid[0]
         if results.verified[0]:
-            logger.info("GPG verification succeeded. Name: %s / Key: %s" % (gkey.name, keyid))
-            logger.info("\tSignature result:" + str(results.verified))
+            self.logger.info("GPG verification succeeded. Name: %s / Key: %s" % (gkey.name, keyid))
+            self.logger.info("\tSignature result:" + str(results.verified))
         else:
-            logger.debug("GPG verification failed. Name: %s / Key: %s" % (gkey.name, keyid))
-            logger.debug("\t Signature result:"+ str(results.verified))
-            logger.debug("LIB: verify; stderr_out:" + str(results.stderr_out))
+            self.logger.debug("GPG verification failed. Name: %s / Key: %s" % (gkey.name, keyid))
+            self.logger.debug("\t Signature result:"+ str(results.verified))
+            self.logger.debug("LIB: verify; stderr_out:" + str(results.stderr_out))
         return results
 
 
     def set_keyseedfile(self, trap_errors=True, refresh=False):
         if not self.keydir:
-            logger.debug("GkeysGPG.set_keyseedfile(); self.keydir error")
-        self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'), self.config)
+            self.logger.debug("GkeysGPG.set_keyseedfile(); self.keydir error")
+        self.seedfile = Seeds(pjoin(self.keydir, 'gkey.seeds'), self.config, self.logger)
         self.seedfile.load(trap_errors=trap_errors, refresh=refresh)
 
 
@@ -342,15 +342,15 @@ class GkeysGPG(GPG):
         '''
         keyid = gkey.keyid[0]
         self.set_keydir(gkey.keydir, mode, reset=True)
-        logger.debug("** Calling runGPG with Running 'gpg %s --%s %s %s'"
+        self.logger.debug("** Calling runGPG with Running 'gpg %s --%s %s %s'"
                 % (' '.join(self.config['tasks'][mode]), mode, fingerprint, filepath))
         results = self.runGPG(task=mode, inputfile=filepath)
 
         if results.verified[0]:
-            logger.info("GPG signing succeeded. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
-            logger.info("\tSignature result:" + str(results.verified))
+            self.logger.info("GPG signing succeeded. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            self.logger.info("\tSignature result:" + str(results.verified))
         else:
-            logger.debug("GPG signing failed. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
-            logger.debug("\t Signature result:"+ str(results.verified))
-            logger.debug("LIB: sign; stderr_out:" + str(results.stderr_out))
+            self.logger.debug("GPG signing failed. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            self.logger.debug("\t Signature result:"+ str(results.verified))
+            self.logger.debug("LIB: sign; stderr_out:" + str(results.stderr_out))
         return results

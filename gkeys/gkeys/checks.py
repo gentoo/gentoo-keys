@@ -15,8 +15,7 @@ from collections import namedtuple, OrderedDict
 from gkeys.config import GKEY_CHECK
 
 from pyGPG.mappings import (ALGORITHM_CODES, CAPABILITY_MAP,
-    KEY_VERSION_FPR_LEN, VALIDITY_MAP, INVALID_LIST,
-    VALID_LIST)
+    KEY_VERSION_FPR_LEN, VALIDITY_MAP, VALID_LIST)
 
 
 SPEC_INDEX = {

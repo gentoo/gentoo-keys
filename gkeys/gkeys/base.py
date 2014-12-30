@@ -17,7 +17,7 @@ from __future__ import print_function
 import argparse
 import sys
 
-from gkeys import config, fileops, seed, lib
+from gkeys import fileops, seed, lib
 from gkeys.log import log_levels, set_logger
 
 

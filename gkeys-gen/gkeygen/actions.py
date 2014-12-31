@@ -30,7 +30,7 @@ from gkeys.fileops import ensure_dirs
 Available_Actions = ["gen-key"]
 
 Action_Options = {
-    'gen-key': ['dest'],
+    'gen-key': ['dest', 'spec'],
 }
 
 Action_Map = {
@@ -77,7 +77,9 @@ class Actions(object):
                 return (False, messages)
         self.logger.debug("MAIN: _action_genkey; setting gpghome destination: %s" % gpghome)
         self.logger.debug("MAIN: _action_genkey; args= %s" % str(args))
-        key_params = self.get_input()
+        if not args.spec:
+            args.spec = self.config.get_key('spec', 'default-spec')
+        key_params = self.get_input(args)
         ack = None
         while ack not in ["y", "yes", "n", "no"]:
             ack = py_input("Continue?[y/n]: ").lower()
@@ -96,7 +98,7 @@ class Actions(object):
             newgpgconfpath = os.path.join(gpghome, 'gpg.conf')
             shutil.copy('/usr/share/gnupg/gpg-conf.skel', newgpgconfpath)
             with open(newgpgconfpath, 'a') as conf:
-                for line in urlopen(self.config.defaults['gpg.conf-url']):
+                for line in urlopen(self.config.get_key('gpg-urls', args.spec)):
                     conf.write(_unicode(line))
             # Key generation
             ctx = gpgme.Context()
@@ -125,7 +127,7 @@ class Actions(object):
             return (True, messages)
 
 
-    def get_input(self):
+    def get_input(self, args):
         '''Interactive user input'''
         self.output(["\nGPG key creator based on GLEP 63\n"
                     "(https://wiki.gentoo.org/wiki/GLEP:63)\n"])
@@ -135,6 +137,7 @@ class Actions(object):
             self.output(["\nBad email input. Try again."])
             email = py_input("Give your Email: ")
         print("\nReview:\n Full Name: %s\n Email: %s\n" % (name, email))
-        key_properties = urlopen(self.config.defaults['key-spec-url']).read()
+        url = self.config.get_key('spec-urls', args.spec)
+        key_properties = urlopen(url).read()
         return _unicode(key_properties).format(name, email)
 

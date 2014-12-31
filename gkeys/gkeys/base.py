@@ -174,6 +174,11 @@ class CliBase(object):
            help='The path/URL to use for the signature')
 
     @staticmethod
+    def _option_spec(parser=None):
+        parser.add_argument('-S', '--spec', dest='spec', default=None,
+            help='The spec file to use from the gkeys-gen.conf file')
+
+    @staticmethod
     def _option_timestamp(parser=None):
         parser.add_argument('-t', '--timestamp', dest='timestamp',
             action='store_true', default=False,

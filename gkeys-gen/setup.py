@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 
 from distutils.core import setup
@@ -29,6 +30,9 @@ setup(
     download_url='',
     packages=['gkeygen'],
     scripts=['bin/gkey-gen'],
+    data_files=(
+        (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys-gen.conf']),
+        ),
     license=__license__,
     long_description=open('README.md').read(),
     keywords='gpg',

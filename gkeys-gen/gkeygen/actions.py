@@ -99,7 +99,7 @@ class Actions(object):
             shutil.copy('/usr/share/gnupg/gpg-conf.skel', newgpgconfpath)
             with open(newgpgconfpath, 'a') as conf:
                 for line in urlopen(self.config.get_key('gpg-urls', args.spec)):
-                    conf.write(_unicode(line))
+                    conf.write(_unicode(line.decode('utf-8')))
             # Key generation
             ctx = gpgme.Context()
             self.logger.info("MAIN: _action_genkey: Generating GPG key...")
@@ -109,9 +109,10 @@ class Actions(object):
                 "    This helps the random number generator work effectively"])
             try:
                 result = ctx.genkey(key_params)
-            except gpgme.GpgmeError:
-                self.logger.debug("MAIN: _action_genkey: Aborting... No given password.")
-                messages.extend(['', "Aborting... No given password."])
+            except gpgme.GpgmeError as e:
+                self.logger.error("MAIN: _action_genkey: GpgmeError: %s" % str(e))
+                self.logger.debug("MAIN: _action_genkey: Aborting... Failed to get a password.")
+                messages.extend(['', "Aborting... Failed to get a password."])
                 return (False, messages)
             key = ctx.get_key(result.fpr, True)
             self.logger.debug("MAIN: _action_genkey: Generated key: %s - %s"
@@ -139,5 +140,5 @@ class Actions(object):
         print("\nReview:\n Full Name: %s\n Email: %s\n" % (name, email))
         url = self.config.get_key('spec-urls', args.spec)
         key_properties = urlopen(url).read()
-        return _unicode(key_properties).format(name, email)
+        return _unicode(key_properties.decode('utf-8')).format(name, email)
 

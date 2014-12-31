@@ -48,7 +48,7 @@ Action_Options = {
     'add-seed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'uid'],
     'remove-seed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category'],
     'move-seed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'dest'],
-    'fetch-seed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
+    'fetch-seed': ['nick', '1file', 'category', 'dest', 'signature', 'timestamp'],
     'list-seedfiles': [],
     'list-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'gpgsearch', 'keyid'],
     'install-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', '1file'],
@@ -59,7 +59,7 @@ Action_Options = {
     'search-key': ['nick', '1name', 'keydir', 'keys', 'fingerprint', 'keyid', 'uid', 'category', 'exact', 'all'],
     'verify': ['dest', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
     'check-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
-    'sign': ['nick', 'name', 'keydir', 'fingerprint', 'file', 'keyring'],
+    'sign': ['nick', 'name', 'fingerprint', 'file', ],
     'spec-check': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
     'refresh-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
     '---general---': [],
@@ -176,7 +176,7 @@ class Actions(object):
 
 
     def removeseed(self, args):
-        '''Remove a key from the selected seed file(s)'''
+        '''Remove a seed from the selected seed file'''
         gkeys = self.listseed(args)[1]
         if not gkeys:
             return (False, ["Failed to remove seed: No gkeys returned from listseed()",
@@ -365,7 +365,9 @@ class Actions(object):
 
 
     def checkkey(self, args):
-        '''Check keys actions'''
+        '''Check keys actions
+        Performs basic validity checks on the key(s), checks expiry,
+        and presence of a signing sub-key'''
         if not args.category:
             return (False, ["Please specify seeds category."])
         self.logger.debug("ACTIONS: checkkey; args: %s" % str(args))
@@ -413,7 +415,7 @@ class Actions(object):
 
 
     def speccheck(self, args):
-        '''Check keys actions'''
+        '''Check if keys meet specifications requirements'''
         if not args.category:
             return (False, ["Please specify seeds category."])
         self.logger.debug("ACTIONS: speccheck; args: %s" % str(args))
@@ -660,9 +662,13 @@ class Actions(object):
 
 
     def verify(self, args, messages=None):
-        '''File verification action
+        '''File verification action.
+        Note: If the specified key/keyring to verify against does not contain
+        the key used to sign the file.  It will Auto-search for the correct key
+        in the installed keys db. And verify against the matching key.'''
 
-        @ param args: argparse.parse_args instance
+        '''
+        @param args: argparse.parse_args instance
         @param messages: list, private internal option used for recursion only
         '''
         if messages == None:
@@ -877,7 +883,7 @@ class Actions(object):
 
 
     def key_search(self, args, data_only=False):
-        '''Search for a key's seed field in the installed keys db'''
+        '''Search for a key's seed in the installed keys db'''
         handler = SeedHandler(self.logger, self.config)
         results = {}
         search_args = [x for x in

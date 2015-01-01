@@ -140,10 +140,6 @@ class Actions(object):
     def fetchseed(self, args):
         '''Download the selected seed file(s)'''
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
-        if not args.keyring:
-            verify_info = self.config.get_key('verify-seeds', args.category).split()
-            args.keyring = verify_info[0]
-            args.nick = verify_info[1]
         handler = SeedHandler(self.logger, self.config)
         success, messages = handler.fetch_seeds(args.category, args, self.verify)
 

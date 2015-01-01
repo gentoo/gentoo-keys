@@ -110,7 +110,7 @@ class Actions(object):
             try:
                 result = ctx.genkey(key_params)
             except gpgme.GpgmeError as e:
-                self.logger.error("MAIN: _action_genkey: GpgmeError: %s" % str(e))
+                self.logger.debug("MAIN: _action_genkey: GpgmeError: %s" % str(e))
                 self.logger.debug("MAIN: _action_genkey: Aborting... Failed to get a password.")
                 messages.extend(['', "Aborting... Failed to get a password."])
                 return (False, messages)
@@ -120,18 +120,21 @@ class Actions(object):
             self.output(["Your new GLEP 63 based OpenPGP key has been created in %s" % gpghome_full_path])
             self.output([GPG_INFO_STRING % (key.uids[0].name, key.uids[0].email,
                                key.subkeys[0].fpr)])
-            self.output(["In order to use your new key, place the new gpghome to your ~/.gnupg folder by running the following command:\n"
-                        "    mv %s ~/.gnupg\n"
-                        "Important: If you have another old key in ~/.gnupg please make sure you backup it up first.\n\n"
-                        "Please read the FAQ for post-generation steps that are available in: \n"
-                        "https://wiki.gentoo.org/wiki/Project:Gentoo-keys/Generating_GLEP_63_based_OpenPGP_keys\n" % gpghome_full_path])
+            self.output(["In order to use your new key, place the new gpghome to your ~/.gnupg folder by running the following command:",
+                        "    mv %s ~/.gnupg" % gpghome_full_path,
+                        "Important: If you have another old key in ~/.gnupg please make sure you backup it up first.\n",
+                        "Please read the FAQ for post-generation steps that are available in:",
+                        "https://wiki.gentoo.org/wiki/Project:Gentoo-keys/Generating_GLEP_63_based_OpenPGP_keys"])
             return (True, messages)
 
 
     def get_input(self, args):
         '''Interactive user input'''
-        self.output(["\nGPG key creator based on GLEP 63\n"
-                    "(https://wiki.gentoo.org/wiki/GLEP:63)\n"])
+        self.output(['', "GPG key creator",
+            "    Spec file..: %s" % args.spec,
+            "    Homepage...: %s"
+            % self.config.get_key('spec-homepage', args.spec),
+            ])
         name = py_input("Give your Full Name: ")
         email = py_input("Give your Email: ")
         while not re.match(r'[\w.-]+@[\w.-]+', email):

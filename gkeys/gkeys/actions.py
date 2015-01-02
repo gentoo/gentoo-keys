@@ -911,6 +911,6 @@ class Actions(object):
         for cat in list(keys):
             msgs.append("Category.....: %s" % cat)
             msgs.append(keys[cat])
-        del keys, cat, handler
+        del keys, cat
         return (True, msgs)
 

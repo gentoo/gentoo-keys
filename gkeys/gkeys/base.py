@@ -103,12 +103,13 @@ class CliBase(object):
     def _option_fingerprint(parser=None):
         parser.add_argument('-f', '--fingerprint', dest='fingerprint',
             default=None, nargs='+',
-            help='The fingerprint of the the key')
+            help='The fingerprint(s) of the the key or subkey')
 
     @staticmethod
     def _option_gpgsearch(parser=None):
-        parser.add_argument('-g', '--gpgsearch', dest='gpgsearch', default=None,
-            help='Do a gpg search operations, rather than a gkey search')
+        parser.add_argument('-g', '--gpgsearch', dest='gpgsearch',
+            action='store_true', default=False,
+            help='Do a gpg search operation, rather than a gkey search')
 
     @staticmethod
     def _option_homedir(parser=None):
@@ -136,12 +137,12 @@ class CliBase(object):
     def _option_keys(parser=None):
         parser.add_argument('-K', '--keys', dest='keys', nargs='*',
             default=None,
-            help='The name of the keyring to use for verification, etc.')
+            help='The fingerprint(s) of the primary keys in the keyring.')
 
     @staticmethod
     def _option_mail(parser=None):
         parser.add_argument('-m', '--mail', dest='mail', default=None,
-            help='The email address to search for')
+            help='The email address to search for or use.')
 
     @staticmethod
     def _option_nick(parser=None):

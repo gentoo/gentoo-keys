@@ -12,23 +12,31 @@
 
 import re
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from gkeys.seed import Seeds
 from gkeyldap.config import UID, gkey2ldap, gkey2SEARCH
 from gkeyldap.search import LdapSearch
 from gkeys.fileops import updatefiles
 
-Available_Actions = ['ldapsearch', 'updateseeds']
 
-Action_Options = {
-    'ldapsearch': ['fingerprint', 'mail', 'name', 'nick', 'status'],
-    'updateseeds': ['fingerprint', 'mail', 'name', 'nick', 'category', 'status'],
-}
+Action_Map = OrderedDict({
+    'ldap-search':  {
+        'func': 'ldapsearch',
+        'options': ['fingerprint', 'mail', 'name', 'nick', 'status'],
+        'desc': '''Performs a search in LDAP for the input arguments''',
+        'long_desc': '''Performs a search in LDAP for the input arguments''',
+        'example': '''''',
+        },
+    'update-seeds':  {
+        'func': 'updateseeds',
+        'options': ['fingerprint', 'mail', 'name', 'nick', 'category', 'status'],
+        'desc': '''Performs a search for all active developers and generates a new seeds file''',
+        'long_desc': '''Performs a search for all active developers and generates a new seeds file''',
+        'example': '''''',
+        },
+})
 
-Action_Map = {
-    'ldap-search': 'ldapsearch',
-    'update-seeds': 'updateseeds',
-}
+Available_Actions = list(Action_Map)
 
 
 def get_key_ids(key_len, keyids):
@@ -61,6 +69,7 @@ class Actions(object):
 
 
     def ldapsearch(self, args):
+        '''Performs a search in LDAP for the input arguments'''
         l = LdapSearch(logger=self.logger)
         self.logger.debug("MAIN: _action_ldapsearch; args = %s" % str(args))
         self.output('', "Search... Establishing connection\n")
@@ -80,6 +89,8 @@ class Actions(object):
 
 
     def updateseeds(self, args):
+        '''Performs a search for all active developers and
+        generates a new seeds file'''
         l = LdapSearch(logger=self.logger)
         self.logger.debug("MAIN: _action_updateseeds; args = %s" % str(args))
         self.output('', "Search... Establishing connection")

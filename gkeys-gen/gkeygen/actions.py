@@ -15,6 +15,8 @@ import re
 import shutil
 import sys
 
+from collections import OrderedDict
+
 if sys.version_info[0] >= 3:
     from urllib.request import urlopen
     py_input = input
@@ -27,15 +29,17 @@ else:
 from gkeys.fileops import ensure_dirs
 
 
-Available_Actions = ["gen-key"]
+Action_Map = OrderedDict({
+    'gen-key':  {
+        'func': 'genkey',
+        'options': ['spec', 'dest'],
+        'desc': '''Generate a gpg key using a spec file''',
+        'long_desc': '''Generate a gpg key using a spec file''',
+        'example': '''''',
+        },
+})
 
-Action_Options = {
-    'gen-key': ['dest', 'spec'],
-}
-
-Action_Map = {
-    'gen-key': 'genkey',
-}
+Available_Actions = list(Action_Map)
 
 
 LARRY = """
@@ -65,7 +69,7 @@ class Actions(object):
 
 
     def genkey(self, args):
-        '''Key generation action'''
+        '''Generate a gpg key using a spec file'''
         messages = []
         if not args.destination:
             gpghome = self.config.get_key('gkeys-gen', 'gpg-home')

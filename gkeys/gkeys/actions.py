@@ -21,7 +21,7 @@ else:
     py_input = raw_input
 
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from json import load
 from shutil import rmtree
 
@@ -42,55 +42,175 @@ General_Actions = ['---general---', 'sign','verify']
 
 Available_Actions = General_Actions + Key_Actions + Seed_Actions
 
-Action_Options = {
-    '---general---': [],
-    'list-cats': [],
-    'verify': ['dest', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
-    '----keys-----': [],
-    'list-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'gpgsearch', 'keyid'],
-    'install-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', '1file'],
-    'remove-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
-    'move-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'dest'],
-    'installed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
-    'import-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
-    'search-key': ['nick', '1name', 'keydir', 'keys', 'fingerprint', 'keyid', 'uid', 'category', 'exact', 'all'],
-    'check-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
-    'sign': ['nick', 'name', 'fingerprint', 'file', ],
-    'spec-check': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
-    'refresh-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
-    '----seeds----': [],
-    'add-seed': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', 'uid'],
-    'fetch-seed': ['category', 'nick', '1file', 'dest', 'signature', 'timestamp'],
-    'move-seed': ['category', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'dest'],
-    'list-seed': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', '1file'],
-    'list-seedfiles': [],
-    'remove-seed': ['category', 'nick', 'name', 'keys', 'fingerprint', 'keydir'],
-}
+Action_Map = OrderedDict({
+    '---general---': {
+        'func': 'GENERAL_COMMANDS',
+        'options': [],
+        'desc': '''-----< general actions >------''',
+        'long_desc': '''''',
+        'example': '''''',
+        },
+    'sign': {
+        'func': 'sign',
+        'options': ['nick', 'name', 'fingerprint', 'file', ],
+        'desc': '''Sign a file''',
+        'long_desc': '''Sign a file''',
+        'example': '''''',
+        },
+    'verify': {
+        'func': 'verify',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keydir', 'keys', '1file', 'signature', 'timestamp', 'dest'],
+        'desc': '''File automatic download and/or verification action.''',
+        'long_desc': '''File automatic download and/or verification action.
+    Note: If the specified key/keyring to verify against does not contain
+    the key used to sign the file.  It will Auto-search for the correct key
+    in the installed keys db. And verify against the matching key.
+    It will report the success/failure along with the key information used for
+    the verification''',
+        'example': '''''',
+        },
+    'list-cats': {
+        'func': 'listcats',
+        'options': [],
+        'desc': '''List seed file definitions (category names) found in the config''',
+        'long_desc': '''List seed file definitions (category names) found in the config.
+    These category names are used throughout the seed and key action operations.''',
+        'example': '''''',
+        },
+    '----keys-----': {
+        'func': 'KEY_COMMANDS',
+        'options': [],
+        'desc': '''-------< key actions >--------''',
+        'long_desc': '',
+        'example': '',
+        },
+    'check-key': {
+        'func': 'checkkey',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys', 'keydir', 'keyring'],
+        'desc': '''Check keys actions
+    Performs basic validity checks on the key(s), checks expiry,
+    and presence of a signing sub-key''',
+        'long_desc': '''Check keys actions
+    Performs basic validity checks on the key(s), checks expiry,
+    and presence of a signing sub-key''',
+        'example': '''''',
+        },
+    'import-key': {
+        'func': 'importkey',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', 'keyring'],
+        'desc': '''Add a specified key to a specified keyring''',
+        'long_desc': '''Add a specified key to a specified keyring''',
+        'example': '''''',
+        },
+    'install-key': {
+        'func': 'installkey',
+        'options':  ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', 'keyring', '1file'],
+        'desc': '''Install a key from the seed(s)''',
+        'long_desc': '''Install a key from the seed(s)''',
+        'example': '''''',
+        },
+    'installed': {
+        'func': 'installed',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', 'keyring'],
+        'desc': '''Lists the installed key directories''',
+        'long_desc': '''Lists the installed key directories''',
+        'example': '''''',
+        },
+    'list-key': {
+        'func': 'listkey',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys', 'keydir', 'keyring', 'gpgsearch'],
+        'desc': '''Pretty-print the selected gpg key''',
+        'long_desc': '''Pretty-print the selected gpg key''',
+        'example': '''''',
+        },
+    'move-key': {
+        'func': 'movekey',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', 'keyring', 'dest'],
+        'desc': '''Rename an installed keydir''',
+        'long_desc': '''Rename an installed keydir''',
+        'example': '''''',
+        },
+    'refresh-key': {
+        'func': 'refreshkey',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys', 'keydir', 'keyring'],
+        'desc': '''Calls gpg with the --refresh-keys option
+        for in place updates of the installed keys''',
+        'long_desc': '''Calls gpg with the --refresh-keys option
+        for in place updates of the installed keys''',
+        'example': '''''',
+        },
+    'remove-key': {
+        'func': 'removekey',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', 'keyring'],
+        'desc': '''Remove (uninstall) an installed key''',
+        'long_desc': '''Remove (uninstall) an installed key''',
+        'example': '''''',
+        },
+    'search-key': {
+        'func': 'key_search',
+        'options': ['category', 'nick', '1name', 'fingerprint', 'keyid', 'uid', 'keys', 'keydir', 'exact', 'all'],
+        'desc': '''Search for a key's seed in the installed keys db''',
+        'long_desc': '''Search for a key's seed in the installed keys db''',
+        'example': '''''',
+        },
+    'spec-check': {
+        'func': 'speccheck',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys', 'keydir', 'keyring'],
+        'desc': '''Check if keys meet specifications requirements''',
+        'long_desc': '''Check if keys meet specifications requirements''',
+        'example': '''''',
+        },
+    '----seeds----': {
+        'func': 'SEED_COMMANDS',
+        'options': [],
+        'desc': '''------< seed actions >-------''',
+        'long_desc': '',
+        'example': '',
+        },
+    'add-seed': {
+        'func': 'addseed',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', 'uid'],
+        'desc': '''Add or replace a key in the selected seed file''',
+        'long_desc': '''Add or replace a key in the selected seed file''',
+        'example': '''''',
+        },
+    'fetch-seed': {
+        'func': 'fetchseed',
+        'options': ['category', 'nick', '1file', 'dest', 'signature', 'timestamp'],
+        'desc': '''Download the selected seed file(s)''',
+        'long_desc': '''Download the selected seed file(s)''',
+        'example': '''''',
+        },
+    'list-seed': {
+        'func': 'listseed',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', '1file'],
+        'desc': '''Pretty-print the selected seed file''',
+        'long_desc': '''Pretty-print the selected seed file''',
+        'example': '''''',
+        },
+    'list-seedfiles': {
+        'func': 'listseedfiles',
+        'options': [],
+        'desc': '''List seed files found in the configured seed directory''',
+        'long_desc': '''List seed files found in the configured seed directory''',
+        'example': '''''',
+        },
+    'move-seed': {
+        'func': 'moveseed',
+        'options': ['category', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'dest'],
+        'desc': '''Move keys between seed files''',
+        'long_desc': '''Move keys between seed files''',
+        'example': '''''',
+        },
+    'remove-seed': {
+        'func': 'removeseed',
+        'options': ['category', 'nick', 'name', 'keys', 'fingerprint', 'keydir'],
+        'desc': '''Remove a seed from the selected seed file''',
+        'long_desc': '''Remove a seed from the selected seed file''',
+        'example': '''''',
+        },
+})
 
-Action_Map = {
-    'list-cats': 'listcats',
-    'list-seed': 'listseed',
-    'add-seed': 'addseed',
-    'remove-seed': 'removeseed',
-    'move-seed': 'moveseed',
-    'fetch-seed': 'fetchseed',
-    'list-seedfiles': 'listseedfiles',
-    'list-key': 'listkey',
-    'install-key': 'installkey',
-    'remove-key': 'removekey',
-    'move-key': 'movekey',
-    'installed': 'installed',
-    'import-key': 'importkey',
-    'search-key': 'key_search',
-    'verify': 'verify',
-    'check-key': 'checkkey',
-    'sign': 'sign',
-    'spec-check': 'speccheck',
-    'refresh-key': 'refreshkey',
-    '---general---': 'GENERAL_COMMANDS',
-    '----seeds----': 'SEED_COMMANDS',
-    '----keys-----': 'KEY_COMMANDS',
-}
 
 class Actions(object):
     '''Primary API actions'''
@@ -121,7 +241,7 @@ class Actions(object):
 
 
     def listseed(self, args):
-        '''Pretty-print the selected seed file(s)'''
+        '''Pretty-print the selected seed file'''
         handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: listseed; kwargs: %s" % str(kwargs))
@@ -149,7 +269,7 @@ class Actions(object):
 
 
     def addseed(self, args):
-        '''Add or replace a key in the selected seed file(s)'''
+        '''Add or replace a key in the selected seed file'''
         handler = SeedHandler(self.logger, self.config)
         gkeys = self.listseed(args)[1]
         if not args.nick or not args.name or not args.fingerprint:
@@ -231,7 +351,7 @@ class Actions(object):
 
 
     def listkey(self, args):
-        '''Pretty-print the selected seed file or nick'''
+        '''Pretty-print the selected gpg key'''
         # get confirmation
         # fill in code here
         if not args.category:
@@ -575,7 +695,7 @@ class Actions(object):
 
 
     def movekey(self, args):
-        '''Rename an installed key'''
+        '''Rename an installed keydir'''
         return (False, [])
 
 

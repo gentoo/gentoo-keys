@@ -11,7 +11,7 @@ import sys
 from gkeys.config import GKeysConfig
 from gkeys.log import log_levels, set_logger
 from gkeys.base import CliBase
-from gkeygen.actions import Actions, Available_Actions, Action_Options, Action_Map
+from gkeygen.actions import Actions, Available_Actions, Action_Map
 
 
 class Main(CliBase):
@@ -32,7 +32,6 @@ class Main(CliBase):
         self.cli_config = {
             'Actions': Actions,
             'Available_Actions': Available_Actions,
-            'Action_Options': Action_Options,
             'Action_Map': Action_Map,
             'prog': 'gkeys-gen',
             'description': 'Gentoo Keys GPG key generator program',

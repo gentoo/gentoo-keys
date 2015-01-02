@@ -33,7 +33,6 @@ class CliBase(object):
         self.cli_config = {
             'Actions': None,
             'Available_Actions': [],
-            'Action_Options': {},
             'Action_Map': {},
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',
@@ -217,8 +216,8 @@ class CliBase(object):
             help='Additional help')
         for name in self.cli_config['Available_Actions']:
             action_method = getattr(self.cli_config['Actions'],
-                self.cli_config['Action_Map'][name])
-            actiondoc = action_method.__doc__
+                self.cli_config['Action_Map'][name]['func'])
+            actiondoc = self.cli_config['Action_Map'][name]['desc']
             try:
                 text = actiondoc.splitlines()[0]
             except AttributeError:
@@ -229,7 +228,8 @@ class CliBase(object):
                 description=actiondoc,
                 formatter_class=argparse.RawDescriptionHelpFormatter)
             action_parser.set_defaults(action=name)
-            self._add_options(action_parser, self.cli_config['Action_Options'][name])
+            options = self.cli_config['Action_Map'][name]['options']
+            self._add_options(action_parser, options)
 
         parsed_args = parser.parse_args(argv)
         action = getattr(parsed_args, 'action', None)
@@ -295,7 +295,7 @@ class CliBase(object):
 
         # run the action
         func = getattr(self.actions, '%s'
-            % self.cli_config['Action_Map'][args.action])
+            % self.cli_config['Action_Map'][args.action]['func'])
         self.logger.debug('Main: run; Found action: %s' % args.action)
         success, results = func(args)
         if not results:

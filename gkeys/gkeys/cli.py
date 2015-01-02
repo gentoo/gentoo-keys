@@ -17,7 +17,7 @@ import os
 import sys
 
 from gkeys.base import CliBase
-from gkeys.actions import Actions, Available_Actions, Action_Options, Action_Map
+from gkeys.actions import Actions, Available_Actions, Action_Map
 from gkeys.config import GKeysConfig
 
 
@@ -38,7 +38,6 @@ class Main(CliBase):
         self.cli_config = {
             'Actions': Actions,
             'Available_Actions': Available_Actions,
-            'Action_Options': Action_Options,
             'Action_Map': Action_Map,
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',

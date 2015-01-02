@@ -43,13 +43,10 @@ General_Actions = ['---general---', 'sign','verify']
 Available_Actions = General_Actions + Key_Actions + Seed_Actions
 
 Action_Options = {
+    '---general---': [],
     'list-cats': [],
-    'list-seed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', '1file'],
-    'add-seed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'uid'],
-    'remove-seed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category'],
-    'move-seed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'dest'],
-    'fetch-seed': ['nick', '1file', 'category', 'dest', 'signature', 'timestamp'],
-    'list-seedfiles': [],
+    'verify': ['dest', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
+    '----keys-----': [],
     'list-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'gpgsearch', 'keyid'],
     'install-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', '1file'],
     'remove-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
@@ -57,14 +54,17 @@ Action_Options = {
     'installed': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
     'import-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring'],
     'search-key': ['nick', '1name', 'keydir', 'keys', 'fingerprint', 'keyid', 'uid', 'category', 'exact', 'all'],
-    'verify': ['dest', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', '1file', 'signature', 'timestamp'],
     'check-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
     'sign': ['nick', 'name', 'fingerprint', 'file', ],
     'spec-check': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
     'refresh-key': ['nick', 'name', 'keydir', 'keys', 'fingerprint', 'category', 'keyring', 'keyid'],
-    '---general---': [],
     '----seeds----': [],
-    '----keys-----': [],
+    'add-seed': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', 'uid'],
+    'fetch-seed': ['category', 'nick', '1file', 'dest', 'signature', 'timestamp'],
+    'move-seed': ['category', 'nick', 'name', 'keydir', 'keys', 'fingerprint', 'dest'],
+    'list-seed': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir', '1file'],
+    'list-seedfiles': [],
+    'remove-seed': ['category', 'nick', 'name', 'keys', 'fingerprint', 'keydir'],
 }
 
 Action_Map = {

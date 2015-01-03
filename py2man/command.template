@@ -1,0 +1,34 @@
+.TH "%(prog)s" "1" "version %(version)s, %(date)s" "GKEYS" ""
+.SH NAME
+%(prog)s \- %(desc)s
+.SH SYNOPSIS
+.B %(prog)s
+[\fB\-h\fR] [\fB\-c\fR \fICONFIG\fR] [\fB\-D\fR \fI{WARNING,INFO,FATAL,NOTSET,WARN,DEBUG,ERROR,CRITICAL}\fR] [\fBSUBCOMMAND] [\fBSUBCOMMAND-OPTION] ...
+.SH DESCRIPTION
+.PP
+
+.SH OPTIONAL ARGUMENTS
+%(options)s
+
+.SH SUBCOMMANDS
+%(sub-cmds)s
+
+.SH REPORTING BUGS
+Submit bug reports to http://bugs.gentoo.org.
+.br
+Please assign bug to <gkeys@gentoo.org> email alias.
+
+.SH COPYRIGHTS
+Gentoo Keys project is under GPL-2 License.
+
+.SH AUTHORS
+.br
+Brian Dolbec <dolsen@gentoo.org>
+.br
+Pavlos Ratis <dastergon@gentoo.org>
+
+.SH "SEE ALSO"
+.BR gkeys.conf (1),
+%(actions)s
+
+(This man page was auto-generated from source)

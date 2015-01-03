@@ -4,12 +4,10 @@
 from __future__ import print_function
 
 
-import argparse
 import os
 import sys
 
 from gkeys.config import GKeysConfig
-from gkeys.log import log_levels, set_logger
 from gkeys.base import CliBase
 from gkeygen.actions import Actions, Available_Actions, Action_Map
 
@@ -46,14 +44,14 @@ class Main(CliBase):
                      Defaults to sys.argv[1:]
         """
         if args:
-            ok = self.setup(args, configs)
-            if ok:
-                return self.run(self.parse_args(args))
+            ok = self.setup(args, [])
         else:
             args = self.parse_args(sys.argv[1:])
-            configs = [os.path.join(self.config['configdir'],'gkeys.conf'),
-            os.path.join(self.config['configdir'],'gkeys-gen.conf')]
+            configs = [
+                os.path.join(self.config['configdir'],'gkeys.conf'),
+                os.path.join(self.config['configdir'],'gkeys-gen.conf'),
+                ]
             ok = self.setup(args, configs)
-            if ok:
-                return self.run(args)
+        if ok:
+            return self.run(args)
         return False

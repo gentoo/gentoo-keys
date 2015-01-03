@@ -31,14 +31,14 @@ from gkeys.gkey import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
 
-Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed', 'list-cats',
+Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed',
     'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
 
 Key_Actions = ['----keys-----', 'check-key', 'import-key', 'installed',
     'install-key', 'search-key', 'list-key', 'move-key', 'refresh-key', 'remove-key',
     'spec-check']
 
-General_Actions = ['---general---', 'sign','verify']
+General_Actions = ['---general---', 'list-cats', 'sign','verify']
 
 Available_Actions = General_Actions + Key_Actions + Seed_Actions
 
@@ -48,6 +48,14 @@ Action_Map = OrderedDict({
         'options': [],
         'desc': '''-----< general actions >------''',
         'long_desc': '''''',
+        'example': '''''',
+        },
+    'list-cats': {
+        'func': 'listcats',
+        'options': [],
+        'desc': '''List seed file definitions (category names) found in the config''',
+        'long_desc': '''List seed file definitions (category names) found in the config.
+    These category names are used throughout the seed and key action operations.''',
         'example': '''''',
         },
     'sign': {
@@ -67,14 +75,6 @@ Action_Map = OrderedDict({
     in the installed keys db. And verify against the matching key.
     It will report the success/failure along with the key information used for
     the verification''',
-        'example': '''''',
-        },
-    'list-cats': {
-        'func': 'listcats',
-        'options': [],
-        'desc': '''List seed file definitions (category names) found in the config''',
-        'long_desc': '''List seed file definitions (category names) found in the config.
-    These category names are used throughout the seed and key action operations.''',
         'example': '''''',
         },
     '----keys-----': {

@@ -34,7 +34,7 @@ from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed',
     'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
 
-Key_Actions = ['----keys-----', 'check-key', 'import-key', 'installed',
+Key_Actions = ['----keys-----', 'check-key', 'installed',
     'install-key', 'list-key', 'move-key', 'refresh-key', 'remove-key',
     'search-key', 'spec-check']
 

@@ -9,8 +9,7 @@ import sys
 
 from gkeys.base import CliBase
 from gkeys.config import GKeysConfig
-from gkeyldap.actions import (Actions, Available_Actions, Action_Options,
-    Action_Map)
+from gkeyldap.actions import (Actions, Available_Actions, Action_Map)
 
 
 class Main(CliBase):
@@ -32,7 +31,6 @@ class Main(CliBase):
         self.cli_config = {
             'Actions': Actions,
             'Available_Actions': Available_Actions,
-            'Action_Options': Action_Options,
             'Action_Map': Action_Map,
             'prog': 'gkey-ldap',
             'description': 'Gentoo-keys LDAP interface and seed file generator program',

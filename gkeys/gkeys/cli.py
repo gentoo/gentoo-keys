@@ -17,7 +17,8 @@ import os
 import sys
 
 from gkeys.base import CliBase
-from gkeys.actions import Actions, Available_Actions, Action_Map
+from gkeys.actions import Actions
+from gkeys.action_map import Available_Actions, Action_Map
 from gkeys.config import GKeysConfig
 
 

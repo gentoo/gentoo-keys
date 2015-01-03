@@ -35,8 +35,8 @@ Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed',
     'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
 
 Key_Actions = ['----keys-----', 'check-key', 'import-key', 'installed',
-    'install-key', 'search-key', 'list-key', 'move-key', 'refresh-key', 'remove-key',
-    'spec-check']
+    'install-key', 'list-key', 'move-key', 'refresh-key', 'remove-key',
+    'search-key', 'spec-check']
 
 General_Actions = ['---general---', 'list-cats', 'sign','verify']
 

@@ -45,6 +45,12 @@ class GKEY(namedtuple('GKEY', ['nick', 'name', 'keydir', 'keys', 'fingerprint', 
 
 
     @property
+    def pub_keyid(self):
+        '''Keyid is a substring value of the keys fingerprints'''
+        return ['0x' + x[-16:] for x in self.keys]
+
+
+    @property
     def pretty_print(self):
         '''Pretty printing a GKEY'''
         gkey = {

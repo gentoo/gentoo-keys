@@ -136,14 +136,14 @@ class GkeysGPG(GPG):
         ensure_dirs(str(self.keydir), mode=mode)
         self.set_keyseedfile(trap_errors=False)
         results = []
-        for fingerprint in gkey.fingerprint:
+        for fingerprint in gkey.keys:
             self.logger.debug("LIB: add_key; adding fingerprint " + fingerprint)
             self.logger.debug("** Calling runGPG with Running 'gpg %s --recv-keys %s' for: %s"
                 % (' '.join(self.config.get_key('tasks', 'recv-keys')),
                     fingerprint, gkey.name))
             result = self.runGPG(task='recv-keys', inputfile=fingerprint)
             self.logger.info('GPG return code: ' + str(result.returncode))
-            if result.fingerprint in gkey.fingerprint:
+            if result.fingerprint in gkey.keys:
                 result.failed = False
                 message = "Fingerprints match... Import successful: "
                 message += "%s, fingerprint: %s" % (gkey.nick, fingerprint)

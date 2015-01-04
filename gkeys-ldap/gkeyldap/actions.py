@@ -181,6 +181,7 @@ class Actions(object):
                 # drop keyid and longkeyid
                 keyinfo.pop('keyid', None)
                 keyinfo.pop('longkeyid', None)
+                keyinfo['keys'] = keyinfo['fingerprint']
                 return keyinfo
         return None
 

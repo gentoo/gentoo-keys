@@ -272,13 +272,17 @@ class Actions(object):
         '''Add or replace a key in the selected seed file'''
         handler = SeedHandler(self.logger, self.config)
         gkeys = self.listseed(args)[1]
-        if not args.nick or not args.name or not args.fingerprint:
-            return (False, ["Provide a nickname, a name and a fingerprint."])
+        if not args.nick or not args.name or not args.keys or not args.keydir:
+            return (False, ["Provide a nickname, a name and a public key fingerprint (-K, --keys)."])
+        if not args.fingerprint:
+            args.fingerprint = args.keys
+        if args.uid is None:
+            args.uid = []
         gkey = handler.new(args, checkgkey=True)
         if not gkey:
             return (False, ["Failed to create a valid GKEY instance.",
                 "Check for invalid data entries"])
-        if len(gkeys) == 0:
+        if len(gkeys[1]) == 0:
             self.logger.debug("ACTIONS: installkey; now adding gkey: %s" % str(gkey))
             success = self.seeds.add(getattr(gkey, 'nick'), gkey)
             if success:
@@ -499,12 +503,12 @@ class Actions(object):
         keyresults = seeds.list(**kwargs)
         self.output('', '\n Checking keys...')
         for gkey in sorted(keyresults):
-            self.logger.info("Checking key %s, %s" % (gkey.nick, gkey.keyid))
+            self.logger.info("Checking key %s, %s" % (gkey.nick, gkey.pub_keyid))
             self.output('',
-                "\n  %s, %s: %s" % (gkey.nick, gkey.name, ', '.join(gkey.keyid)) +
+                "\n  %s, %s: %s" % (gkey.nick, gkey.name, ', '.join(gkey.pub_keyid)) +
                 "\n  ==============================================")
             self.logger.debug("ACTIONS: checkkey; gkey = %s" % str(gkey))
-            for key in gkey.keyid:
+            for key in gkey.pub_keyid:
                 results[gkey.name] = self.gpg.check_keys(gkey.keydir, key)
                 if results[gkey.name].expired:
                     failed['expired'].append("%s <%s>: %s" % (gkey.name, gkey.nick, key))
@@ -547,12 +551,12 @@ class Actions(object):
         keyresults = seeds.list(**kwargs)
         self.output('', '\n Checking keys...')
         for gkey in sorted(keyresults):
-            self.logger.info("Checking key %s, %s" % (gkey.nick, gkey.keyid))
+            self.logger.info("Checking key %s, %s" % (gkey.nick, gkey.keys))
             self.output('',
-                "\n  %s, %s: %s" % (gkey.nick, gkey.name, ', '.join(gkey.keyid)) +
+                "\n  %s, %s: %s" % (gkey.nick, gkey.name, ', '.join(gkey.pub_keyid)) +
                 "\n  ==============================================")
             self.logger.debug("ACTIONS: speccheck; gkey = %s" % str(gkey))
-            for key in gkey.keyid:
+            for key in gkey.keys:
                 results = self.gpg.speccheck(gkey.keydir, key)
                 for g in results:
                     pub_pass = {}
@@ -990,8 +994,8 @@ class Actions(object):
         keyresults = seeds.list(**kwargs)
         self.output('', '\n Refreshig keys...')
         for gkey in sorted(keyresults):
-            self.logger.info("Refreshig key %s, %s" % (gkey.nick, gkey.keyid))
-            self.output('', "  %s: %s" % (gkey.name, ', '.join(gkey.keyid)))
+            self.logger.info("Refreshig key %s, %s" % (gkey.nick, gkey.pub_keyid))
+            self.output('', "  %s: %s" % (gkey.name, ', '.join(gkey.pub_keyid)))
             #self.output('', "  ===============")
             self.logger.debug("ACTIONS: refreshkey; gkey = %s" % str(gkey))
             results[gkey.keydir] = self.gpg.refresh_key(gkey)

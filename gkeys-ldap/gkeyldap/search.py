@@ -64,5 +64,7 @@ class LdapSearch(object):
         for entry in results:
             info = entry[1]
             key_value = info[key][0]
+            if key_value in ['fingerprint']:
+                _dict['keys'] = info
             _dict[key_value] = info
         return _dict

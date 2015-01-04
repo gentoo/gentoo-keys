@@ -139,9 +139,9 @@ class Seeds(object):
         keys = kwargs
         result = self.seeds
         for key in keys:
-            if key in ['fingerprint', 'keyid']:
+            if key in ['fingerprint', 'keys', 'keyid']:
                 kwargs[key] = [x.replace(' ', '').upper() for x in kwargs[key]]
-            if key in ['fingerprint']:
+            if key in ['fingerprint', 'keys', 'uid']:
                 result = {dev: gkey for dev, gkey in list(result.items()) if kwargs[key][0] in getattr(gkey, key)}
             elif key in ['keyid']:
                 searchids = [x.lstrip('0X') for x in kwargs[key]]

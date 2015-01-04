@@ -186,7 +186,7 @@ class CliBase(object):
 
     @staticmethod
     def _option_uid(parser=None):
-        parser.add_argument('-u', '--uid', dest='uid', nargs='*', default=None,
+        parser.add_argument('-u', '--uid', dest='uid', nargs='+', default=None,
             help='The user ID, gpg key uid')
 
 

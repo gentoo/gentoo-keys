@@ -48,12 +48,12 @@ class SeedHandler(object):
     @staticmethod
     def build_gkeydict(args):
         keyinfo = {}
-        for attr in GKEY._fields + ('keyid',):
+        for attr in GKEY._fields:
             try:
                 value = getattr(args, attr)
                 if attr == 'name' and value:
                     value = " ".join(value)
-                if value:
+                if value is not None:
                     keyinfo[attr] = value
             except AttributeError:
                 pass
@@ -171,21 +171,30 @@ class SeedHandler(object):
         try:
             args['keydir'] = args.get('keydir', args['nick'])
             fprs = []
-            if args['fingerprint']:
-                for fpr in args['fingerprint']:
+            keys = []
+            if args['keys'] or args['fingerprint']:
+                for fpr in args['keys']:
                     is_good, fingerprint = self._check_fingerprint_integrity(fpr)
                     if is_good:
-                        fprs.append(fingerprint)
+                        keys.append(fingerprint)
                     else:
-                        self.logger.error('Bad fingerprint from command line args: %s' % fpr)
+                        self.logger.error('Bad key from command line args: %s' % fpr)
                 if is_good:
-                    args['fingerprint'] = fprs
+                    args['keys'] = keys
+                    for fpr in args['fingerprint']:
+                        is_good, fingerprint = self._check_fingerprint_integrity(fpr)
+                        if is_good:
+                            fprs.append(fingerprint)
+                        else:
+                            self.logger.error('Bad fingerprint from command line args: %s' % fpr)
+                    if is_good:
+                        args['fingerprint'] = fprs
         except KeyError:
             self.logger.error('GPG fingerprint not found.')
             is_good = False
         if not is_good:
-            self.logger.error('A valid fingerprint '
-                  'was not found for %s' % args['name'])
+            self.logger.error('An invalid key or fingerprint '
+                  'was found for %s' % args['name'])
         return args, is_good
 
     def _check_fingerprint_integrity(self, fpr):

@@ -32,4 +32,5 @@ Gentoo Keys project is under GPL-2 License.
 .BR gkeys.conf (1),
 %(actions)s
 
-(This man page was auto-generated from source)
+.SH NOTE
+This is an auto-generated man page from source

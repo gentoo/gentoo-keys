@@ -5,12 +5,12 @@
 import os
 from datetime import datetime
 
-from .options import LONG_OPTIONS, SHORT_OPTS
+from options import LONG_OPTIONS, SHORT_OPTS
 
 
 ActionStr = '.BR gkeys-%s (1),'
 
-ExampleHeader = '''.SH Example'''
+EXAMPLEHEADER = '''.SH Example'''
 
 BreakStr = '''.br
 %s'''
@@ -45,12 +45,12 @@ class ManPage(object):
         wrapl = 72 + escapes
         output = []
         line = firstline.rstrip('%(opts)s') % data
-        ll = len(line)
+        line_len = len(line)
         l1 = True
         for opt in opts:
-            if (ll + len(SHORT_OPTS[opt])) < wrapl:
+            if (line_len + len(SHORT_OPTS[opt])) < wrapl:
                 line = line + '%s ' % SHORT_OPTS[opt]
-                ll = len(line)
+                line_len = len(line)
             else:
                 if l1:
                     output.append(line)
@@ -58,7 +58,7 @@ class ManPage(object):
                 else:
                     output.append(BreakStr % line)
                 line = indent + '%s ' % SHORT_OPTS[opt]
-                ll = len(line)
+                line_len = len(line)
         return '\n'.join(output)
 
 
@@ -101,10 +101,8 @@ class ManPage(object):
 
     @staticmethod
     def gen_subcmd(cmds):
-        #print(cmds.values())
         output = []
         for cmd in list(cmds):
-            print(cmd)
             if cmd.startswith('--'):
                 output.append(SubCmdHdr % cmd.strip('-').upper())
             else:
@@ -130,7 +128,7 @@ class ManPage(object):
         data['long_desc'] = Action_Map[action]['long_desc']
         if Action_Map[action]['example']:
             data['example'] = self.gen_example(Action_Map[action]['example'])
-            data['exampleheader'] = ExampleHeader
+            data['exampleheader'] = EXAMPLEHEADER
         else:
             data['example'] = ''
             data['exampleheader'] = ''

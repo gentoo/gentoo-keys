@@ -25,10 +25,7 @@ Please assign bug to <gkeys@gentoo.org> email alias.
 Gentoo Keys project is under GPL-2 License.
 
 .SH AUTHORS
-.br
-Brian Dolbec <dolsen@gentoo.org>
-.br
-Pavlos Ratis <dastergon@gentoo.org>
+%(authors)
 
 .SH "SEE ALSO"
 .BR gkeys (1),

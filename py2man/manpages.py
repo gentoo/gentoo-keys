@@ -22,11 +22,12 @@ SubCmdHdr = '.SH \\  %s'
 
 class ManPage(object):
 
-    def __init__(self, prog, version, template, path):
+    def __init__(self, prog, version, template, docpath, authors):
         self.prog = prog
         self.version = version
         self.template = template
-        self.path = path
+        self.path = docpath
+        self.authors = authors
 
 
     @staticmethod
@@ -58,6 +59,14 @@ class ManPage(object):
                     output.append(BreakStr % line)
                 line = indent + '%s ' % SHORT_OPTS[opt]
                 ll = len(line)
+        return '\n'.join(output)
+
+
+    @staticmethod
+    def gen_brlist(_list):
+        output = []
+        for member in _list:
+            output.append(BreakStr % member)
         return '\n'.join(output)
 
 
@@ -113,6 +122,7 @@ class ManPage(object):
         data['prog'] = self.prog
         data['version'] = self.version
         data['date'] = datetime.strftime(datetime.today(),'%B %d, %Y')
+        data['authors'] = self.gen_brlist(self.authors)
         data['action'] = action
         data['actions'] = self.gen_actions(actions)
         data['options'] = self.gen_options(Action_Map[action]['options'])
@@ -154,6 +164,7 @@ class ManPage(object):
         data['prog'] = self.prog
         data['version'] = self.version
         data['date'] = datetime.strftime(datetime.today(),'%B %d, %Y')
+        data['authors'] = self.gen_brlist(self.authors)
         data['actions'] = self.gen_actions(list(prog_map['sub-cmds']))
         data['options'] = self.gen_options(prog_map['options'])
         data['desc'] = prog_map['desc']

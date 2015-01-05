@@ -8,6 +8,7 @@
 
 .SH DESCRIPTION
 .PP
+%(long_desc)s
 
 .SH OPTIONAL ARGUMENTS
 %(options)s

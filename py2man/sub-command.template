@@ -1,6 +1,7 @@
 .TH "%(prog)s-%(action)s" "1" "version %(version)s, %(date)s" "GKEYS" ""
 .SH NAME
 %(prog)s %(action)s \- %(desc)s
+
 .SH SYNOPSIS
 .B %(prog)s
 [\\fBGLOBAL-OPTIONS\\fR] \\fB%(action)s \\f[-h] %(opts)s
@@ -8,6 +9,7 @@
 .SH DESCRIPTION
 .PP
 %(long_desc)s
+
 .SH OPTIONAL ARGUMENTS
 .IP "-h, --help"
 show this help message and exit
@@ -17,7 +19,7 @@ show this help message and exit
 %(example)s
 
 .SH REPORTING BUGS
-Submit bug reports to http://bugs.gentoo.org.
+Submit bug reports to https://bugs.gentoo.org.
 .br
 Please assign bug to <gkeys@gentoo.org> email alias.
 

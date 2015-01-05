@@ -5,7 +5,7 @@
 import os
 from datetime import datetime
 
-from options import LONG_OPTIONS, SHORT_OPTS
+from options import LONG_OPTS, SHORT_OPTS
 
 
 ActionStr = '.BR gkeys-%s (1),'
@@ -83,7 +83,7 @@ class ManPage(object):
     def gen_options(options):
         _opts = []
         for opt in options:
-            _opts.append(LONG_OPTIONS[opt])
+            _opts.append(LONG_OPTS[opt])
         return '\n'.join(_opts)
 
 

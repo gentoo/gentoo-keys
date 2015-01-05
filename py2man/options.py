@@ -4,7 +4,7 @@
 from collections import OrderedDict
 
 
-LONG_OPTIONS = OrderedDict({
+LONG_OPTS = OrderedDict({
     'help': '''.IP "-h, --help"
 show this help message and exit''',
     'status': '''.IP "-A, --status"

@@ -56,6 +56,8 @@ class Seeds(object):
         except IOError as err:
             self.logger.debug("Seed: load; IOError occurred while loading file")
             if trap_errors:
+                self.logger.debug("Seed: load; %s" % str(err))
+            else:
                 self._error(err)
             return False
         for seed in list(seedlines.items()):
@@ -216,10 +218,14 @@ class Seeds(object):
         return False
 
 
-    def _error(self, err):
+    def _error(self, err, debug=False):
         '''Class error logging function'''
-        self.logger.error("Seed: Error processing seed file %s" % self.filename)
-        self.logger.error("Seed: Error was: %s" % str(err))
+        if debug:
+            self.logger.debug("Seed: Error processing seed file %s" % self.filename)
+            self.logger.debug("Seed: Error was: %s" % str(err))
+        else:
+            self.logger.error("Seed: Error processing seed file %s" % self.filename)
+            self.logger.error("Seed: Error was: %s" % str(err))
 
 
     def _seeds2json(self, seeds):

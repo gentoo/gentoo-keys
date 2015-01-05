@@ -134,7 +134,7 @@ class GkeysGPG(GPG):
         self.logger.debug("LIB: add_key; ensure dirs: " + self.keydir)
         mode = int(self.config.get_key('permissions', 'directories'),0)
         ensure_dirs(str(self.keydir), mode=mode)
-        self.set_keyseedfile(trap_errors=False)
+        self.set_keyseedfile(trap_errors=True)
         results = []
         for fingerprint in gkey.keys:
             self.logger.debug("LIB: add_key; adding fingerprint " + fingerprint)

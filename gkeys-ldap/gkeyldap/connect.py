@@ -20,7 +20,7 @@ class LdapConnect(object):
     '''Class to connect on the configured LDAP server'''
 
     def __init__(self, server=None, logger=None):
-        self.server = server or default_server
+        self.server = server or default_server[0]
         self.logger = logger
         self.logger.debug('LdapConnect: __init__; server...: %s' % self.server)
         self.ldap_connection = None
@@ -34,16 +34,21 @@ class LdapConnect(object):
         if server:
             self.server = server
             self.logger.debug('LdapConnect: connect; new server: %s' % self.server)
-        try:
-            self.ldap_connection = ldap.initialize(self.server)
-            self.ldap_connection.set_option(ldap.OPT_X_TLS_DEMAND, True)
-            self.ldap_connection.start_tls_s()
-            self.ldap_connection.simple_bind_s()
-        except Exception as e:
-            self.logger.error(
-                'LdapConnect: connect; failed to connect to server: %s' % self.server)
-            self.logger.error("Exception was: %s" % str(e))
-            self.logger.error("Aborting %s... Connection failed" % action)
+        connection = True
+        for ldap_slave in self.server:
+            try:
+                self.ldap_connection = ldap.initialize(self.server)
+                self.ldap_connection.set_option(ldap.OPT_X_TLS_DEMAND, True)
+                self.ldap_connection.start_tls_s()
+                self.ldap_connection.simple_bind_s()
+            except Exception as e:
+                self.logger.error(
+                    'LdapConnect: connect; failed to connect to server: %s' % self.server)
+                self.logger.error("Exception was: %s" % str(e))
+                self.logger.error("Connecting to the next LDAP slave...")
+                connection = False
+                continue
+        if not connection:
             return False
         self.logger.debug(
             'LdapConnect: connect; connection: %s' % self.ldap_connection)

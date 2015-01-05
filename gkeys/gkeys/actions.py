@@ -135,8 +135,8 @@ class Actions(object):
 
     def moveseed(self, args):
         '''Move keys between seed files'''
-        handler = SeedHandler(self.logger)
-        searchkey = handler.new(args, needkeyid=False, checkintegrity=False)
+        handler = SeedHandler(self.logger, self.config)
+        searchkey = handler.new(args, checkgkey=False)
         self.logger.debug("ACTIONS: moveseed; gkey: %s" % str(searchkey))
         if not self.seeds:
             self.seeds = self.load_seeds(args.category)

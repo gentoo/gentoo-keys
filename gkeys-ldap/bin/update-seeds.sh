@@ -6,8 +6,8 @@ cwd=$(pwd)
 source ${cwd}/update-seeds.conf
 source ${cwd}/testpath
 
-die(){ echo "$@" 1>&2; echo ""; exit 1; }
-success(){ echo "$@"; echo ""; exit 0; }
+die(){ echo "$@" 1>&2; exit 1; }
+success(){ echo "$@"; exit 0; }
 
 clone_api(){
     local target=dirname ${API_DIR}
@@ -28,7 +28,7 @@ fi
 
 echo " *** Fetching new seeds from LDAP"
 cd ${GKEYS_DIR}
-gkeys-ldap -c ${GKEYS_CONF} update-seeds -C gentoo-devs || die "Seed file generation failed... aborting"
+gkeys-ldap update-seeds -C gentoo-devs || die "Seed file generation failed... aborting"
 
 echo " *** Checking if seed files are up-to-date"
 if ! diff -q ${GKEYS_DIR}/${GKEYS_SEEDS} ${API_DIR}/${API_SEEDS} > /dev/null ;then
@@ -42,7 +42,7 @@ else
 fi
 
 echo "Signing new developers.seeds file"
-gkeys -c ${GKEYS_CONF} sign -n ${GKEYS_SIGN} -F ${API_DIR}/${API_SEEDS} || die " *** Signing failed... exiting"
+gkeys sign -n ${GKEYS_SIGN} -F ${API_DIR}/${API_SEEDS} || die " *** Signing failed... exiting"
 
 echo "Committing changes to api repo..."
 cd ${API_DIR}

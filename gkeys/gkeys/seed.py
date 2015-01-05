@@ -229,13 +229,10 @@ class Seeds(object):
 
 
     def _seeds2json(self, seeds):
-        is_gkey = False
         if not seeds:
             seeds = {}
-        elif isinstance(list(seeds.values())[0], GKEY):
-            is_gkey = True
         for dev, value in list(seeds.items()):
-            if is_gkey:
+            if isinstance(value, GKEY):
                 seeds[dev] = dict(value._asdict())
         return json.dumps(seeds, sort_keys=True, indent=4)
 

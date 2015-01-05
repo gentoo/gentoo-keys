@@ -182,6 +182,7 @@ class Actions(object):
                 keyinfo.pop('keyid', None)
                 keyinfo.pop('longkeyid', None)
                 keyinfo['keys'] = keyinfo['fingerprint']
+                keyinfo['uid'] = ["%s <%s@gentoo.org>" % (info['cn'][0], info['uid'][0])]
                 return keyinfo
         return None
 

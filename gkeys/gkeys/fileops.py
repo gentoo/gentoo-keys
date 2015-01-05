@@ -30,27 +30,34 @@ def ensure_dirs(path, gid=-1, uid=-1, mode=0o700, minimal=True, failback=None, f
     return succeeded
 
 
-def updatefiles(config, logger):
-        filename = config['dev-seedfile']
-        old = filename + '.old'
-        try:
-            logger.info("Backing up existing file...")
-            if os.path.exists(old):
-                logger.debug(
-                    "MAIN: _action_updatefile; Removing 'old' seed file: %s"
-                    % old)
-                os.unlink(old)
-            if os.path.exists(filename):
-                logger.debug(
-                    "MAIN: _action_updatefile; Renaming current seed file to: "
-                    "%s" % old)
-                os.rename(filename, old)
-            if os.path.exists(filename + '.new'):
-                logger.debug(
-                    "MAIN: _action_updatefile; Renaming '.new' seed file to: %s"
-                    % filename)
-                os.rename(filename + '.new', filename)
-        except IOError:
-            raise
-            return False
-        return True
+def updatefiles(config, logger, category=None, filename = None):
+    if category and not filename:
+        filename = config.get_key('seeds', category)
+    elif not filename:
+        logger.error("MAIN: updatefiles();  category or filename not supplied")
+        return False
+    old = filename + '.old'
+    try:
+        logger.info("Backing up existing file...")
+        if os.path.exists(old):
+            logger.debug(
+                "MAIN: updatefiles(); Removing 'old' seed file: %s"
+                % old)
+            os.unlink(old)
+        if os.path.exists(filename):
+            logger.debug(
+                "MAIN: updatefiles(); Renaming current seed file to: "
+                "%s" % old)
+            os.rename(filename, old)
+        if os.path.exists(filename + '.new'):
+            logger.debug(
+                "MAIN: updatefiles(); Renaming '.new' seed file to: %s"
+                % filename)
+            os.rename(filename + '.new', filename)
+        else:
+            logger.error("MAIN: updatefiles(); Renaming "
+                "'%s.new' seed DOES NOT EXIST!" % filename)
+    except IOError:
+        raise
+        return False
+    return True

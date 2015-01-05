@@ -107,7 +107,7 @@ class Actions(object):
             self.logger.error("Developer seed file update failure: "
                 "Original seed file is intact & untouched.")
         self.output('', "Backing up existing file...")
-        status = updatefiles(self.config, self.logger)
+        status = updatefiles(self.config, self.logger, args.category)
         if not status:
             self.output('', "Develope seed failed to update!")
             return False

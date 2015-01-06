@@ -35,7 +35,55 @@ Action_Map = OrderedDict({
         'options': ['spec', 'dest'],
         'desc': '''Generate a gpg key using a spec file''',
         'long_desc': '''Generate a gpg key using a spec file''',
-        'example': '''''',
+        'example': '''$ gkey-gen gen-key
+
+    GPG key creator
+        Spec file..: glep-63-recommended
+        Homepage...: https://wiki.gentoo.org/wiki/GLEP:63
+
+Give your Full Name: Foo Barr
+Give your Email: foo@barr.net
+
+Review:
+ Full Name: Foo Barr
+ Email: foo@barr.net
+
+Continue?[y/n]: y
+
+* Creating gpg folder at /home/brian/gkeys-user/gpghome
+
+    * Creating gpg.conf file at /home/brian/gkeys-user/gpghome
+
+
+    ____________________
+    < Generating GPG key >
+     --------------------
+            \   ^__^
+             \  (oo)\_______
+                (__)\       )\/
+                    ||----w |
+                    ||     ||
+
+    * Give the password for the key. (Pick a strong one)
+        Please surf the internet, type on your keyboard, etc.
+        This helps the random number generator work effectively
+
+    Your new GLEP 63 based OpenPGP key has been created in /home/brian/gkeys-user/gpghome
+
+
+        GPG key info:
+            Full Name: Foo Barr,
+            Email: foo@barr.net,
+            Fingerprint: CF8F369903999538F79287497AD8F5FEF19A7A69
+
+
+    In order to use your new key, place the new gpghome to your ~/.gnupg folder by running the following command:
+        mv /home/brian/gkeys-user/gpghome ~/.gnupg
+    Important: If you have another old key in ~/.gnupg please make sure you backup it up first.
+
+    Please read the FAQ for post-generation steps that are available in:
+    https://wiki.gentoo.org/wiki/Project:Gentoo-keys/Generating_GLEP_63_based_OpenPGP_keys
+''',
         },
     'list-specs': {
         'func': 'list_specs',

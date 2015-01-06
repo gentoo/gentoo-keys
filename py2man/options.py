@@ -52,6 +52,8 @@ The email address to search for or use.''',
 The nick of the user whose gkey seed is being added''',
     'name': '''.IP "-N \\fINAME\\fR, --name \\fINAME"
 The name of the user whose gkey seed is being added''',
+    '1name': '''.IP "-N \\fINAME\\fR, --name \\fINAME"
+The name of the user whose gkey seed is being added''',
     'keydir': '''.IP "-r \\fIKEYDIR\\fR, --keydir \\fIKEYDIR"
 The key directory the key is to be installed to''',
     'signature': '''.IP "-s \\fISIGNATURE\\fR, --signature \\fISIGNATURE"

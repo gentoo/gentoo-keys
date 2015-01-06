@@ -6,7 +6,7 @@ import codecs
 import os
 from datetime import datetime
 
-from options import LONG_OPTS, SHORT_OPTS
+from py2man.options import LONG_OPTS, SHORT_OPTS
 
 
 ActionStr = '.BR gkeys-%s (1),'

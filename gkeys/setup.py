@@ -13,12 +13,7 @@ from gkeys import __version__, __license__
 from gkeys import Gkeys_Map
 from gkeys.action_map import Action_Map, Available_Actions
 
-try:
-    from py2man import manpages
-except ImportError:
-    print('creating py2man symlink')
-    os.symlink('../py2man', 'py2man')
-    from py2man import manpages
+from py2man import manpages
 
 
 # this affects the names of all the directories we do stuff with

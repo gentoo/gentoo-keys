@@ -2,6 +2,7 @@
 #-*- coding:utf-8 -*-
 
 
+import codecs
 import os
 from datetime import datetime
 
@@ -28,6 +29,7 @@ class ManPage(object):
         self.template = template
         self.path = docpath
         self.authors = authors
+        self.date = datetime.strftime(datetime.today(),'%B %d, %Y')
 
 
     @staticmethod
@@ -110,16 +112,15 @@ class ManPage(object):
         return '\n'.join(output)
 
 
-    def make_subpage(self, action, Action_Map, actions):
+    def make_subpage(self, action, Action_Map, _actions):
         '''Create and saves one sub-command man page using the
         classes template definition setting'''
+        actions = _actions[:]
         actions.remove(action)
-        # remove the help group separators
-        actions = [x for x in actions if not x.startswith("---")]
         data = {}
         data['prog'] = self.prog
         data['version'] = self.version
-        data['date'] = datetime.strftime(datetime.today(),'%B %d, %Y')
+        data['date'] = self.date
         data['authors'] = self.gen_brlist(self.authors)
         data['action'] = action
         data['actions'] = self.gen_actions(actions)
@@ -140,7 +141,7 @@ class ManPage(object):
             else:
                 doc.append(line % data)
         filepath = os.path.join(self.path, "%s-%s.1" % (self.prog, action))
-        with open(filepath, 'w', encoding='utf-8') as man:
+        with codecs.open(filepath, 'w', 'utf-8') as man:
             man.write('\n'.join(doc))
 
 
@@ -153,15 +154,16 @@ class ManPage(object):
         @param actions: list of keys in Action_Map to generate pages for
         @param location: string, path to save the newly created man pages
         '''
-        for action in actions:
-            self.make_subpage(action, Action_Map, actions)
+        _actions = [x for x in actions if not x.startswith('--')]
+        for action in _actions[:]:
+            self.make_subpage(action, Action_Map, _actions)
 
 
     def make_prog(self, prog_map):
         data = {}
         data['prog'] = self.prog
         data['version'] = self.version
-        data['date'] = datetime.strftime(datetime.today(),'%B %d, %Y')
+        data['date'] = self.date
         data['authors'] = self.gen_brlist(self.authors)
         data['actions'] = self.gen_actions(list(prog_map['sub-cmds']))
         data['options'] = self.gen_options(prog_map['options'])
@@ -170,12 +172,15 @@ class ManPage(object):
         data['sub-cmds'] = self.gen_subcmd(prog_map['sub-cmds'])
         doc = []
         for line in self.template.split('\n'):
+            try:
                 doc.append(line % data)
+            except:
+                print(line, data)
         filepath = os.path.join(self.path, "%s.1" % (self.prog))
-        with open(filepath, 'w', encoding='utf-8') as man:
+        with codecs.open(filepath, 'w', 'utf-8') as man:
             man.write('\n'.join(doc))
 
     def read_template(self, path, filename):
         filepath = os.path.join(path, filename)
-        with open(filepath, 'r', encoding='utf-8') as template:
+        with codecs.open(filepath, 'r', 'utf-8') as template:
             self.template = template.read()

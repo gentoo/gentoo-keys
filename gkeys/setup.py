@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 
-import collections
 import os
 import sys
 
 from distutils.core import setup, Command
 from distutils.command.build import build
+from glob import glob
 
 from gkeys import __version__, __license__
 
@@ -67,23 +67,6 @@ class build_man(Command):
         man.make_subpages(Action_Map, Available_Actions)
 
 
-def get_manpages():
-    linguas = os.environ.get('LINGUAS')
-    if linguas is not None:
-        linguas = linguas.split()
-
-    for dirpath, dirnames, filenames in os.walk('doc'):
-        groups = collections.defaultdict(list)
-        for f in filenames:
-            fn, suffix = f.rsplit('.', 1)
-            groups[suffix].append(os.path.join(dirpath, f))
-
-        topdir = dirpath[len('doc/'):]
-        if not topdir or linguas is None or topdir in linguas:
-            for g, mans in groups.items():
-                yield [os.path.join('$mandir', topdir, 'man%s' % g), mans]
-
-
 setup(
     name='gkeys',
     version=__version__,
@@ -96,9 +79,10 @@ setup(
     download_url='',
     packages=['gkeys'],
     scripts=['bin/gkeys'],
-    data_files=list(get_manpages()) + [
+    data_files=[
         (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys.conf']),
         (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys.conf.sample']),
+        (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'usr/share/man/man1'), glob('doc/*')),
         ],
     license=__license__,
     long_description=open('README.md').read(),

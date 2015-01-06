@@ -30,17 +30,28 @@ from gkeys.fileops import ensure_dirs
 
 
 Action_Map = OrderedDict({
-    'gen-key':  {
+    'gen-key': {
         'func': 'genkey',
         'options': ['spec', 'dest'],
         'desc': '''Generate a gpg key using a spec file''',
         'long_desc': '''Generate a gpg key using a spec file''',
         'example': '''''',
         },
+    'list-specs': {
+        'func': 'list_specs',
+        'options': [],
+        'desc': '''List spec file definitions (spec names) found in the config''',
+        'long_desc': '''List spec file definitions (spec names) found in the config.
+    The default-spec setting when the pkg was installed is set to glep-63-recommended.''',
+        'example': '''$ gkey-gen list-specs
+
+ Gkey task results:
+    Specs defined: glep-63,  default-spec,  glep-63-recommended
+''',
+        },
 })
 
-Available_Actions = list(Action_Map)
-
+Available_Actions = ['gen-key', 'list-specs']
 
 LARRY = """
     ____________________
@@ -148,4 +159,12 @@ class Actions(object):
         url = self.config.get_key('spec-urls', args.spec)
         key_properties = urlopen(url).read()
         return _unicode(key_properties.decode('utf-8')).format(name, email)
+
+
+    def list_specs(self, args):
+        '''List seed file definitions found in the config'''
+        specs = list(self.config.get_key('spec'))
+        return (True, {"Specs defined: %s\n"
+            % (",  ".join(specs)): True})
+
 

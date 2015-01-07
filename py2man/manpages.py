@@ -6,6 +6,8 @@ import codecs
 import os
 from datetime import datetime
 
+from gkeys.fileops import ensure_dirs
+
 from py2man.options import LONG_OPTS, SHORT_OPTS
 
 
@@ -30,6 +32,11 @@ class ManPage(object):
         self.path = docpath
         self.authors = authors
         self.date = datetime.strftime(datetime.today(),'%B %d, %Y')
+        self.ensure_docdir()
+
+
+    def ensure_docdir(self):
+        ensure_dirs(self.path)
 
 
     @staticmethod

@@ -30,3 +30,8 @@ ln LICENSE gkeys-ldap/LICENSE
 ln README.md gkeys/README.md
 ln README.md gkeys-gen/README.md
 ln README.md gkeys-ldap/README.md
+
+# Create the py2man symlinks for generating our man pages.
+ln -s py2man gkeys/py2man
+ln -s py2man gkeys-gen/py2man
+ln -s py2man gkeys-ldap/py2man

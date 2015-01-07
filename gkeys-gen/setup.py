@@ -6,6 +6,7 @@ import sys
 
 from distutils.core import setup, Command
 from distutils.command.build import build
+from distutils.command.sdist import sdist
 from glob import glob
 
 from gkeygen import __version__, __license__
@@ -62,6 +63,16 @@ class build_man(Command):
         man.make_subpages(Action_Map, Available_Actions)
 
 
+class x_sdist(sdist):
+    """ sdist defaulting to .tar.bz2 format """
+
+    def finalize_options(self):
+        if self.formats is None:
+            self.formats = ['bztar']
+
+        sdist.finalize_options(self)
+
+
 setup(
     name='gkeys-gen',
     version=__version__,
@@ -84,6 +95,7 @@ setup(
     cmdclass = {
         'build': x_build,
         'build_man': build_man,
+        'sdist': x_sdist,
         },
     classifiers=[
         'Development Status :: 3 - Alpha',

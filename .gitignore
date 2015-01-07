@@ -11,3 +11,10 @@
 /gkeys/doc
 /gkeys-gen/doc
 /gkeys-ldap/doc
+/gkeys/dist
+/gkeys-gen/dist
+/gkeys-ldap/dist
+/gkeys/MANIFEST
+/gkeys-gen/MANIFEST
+/gkeys-ldap/MANIFEST
+

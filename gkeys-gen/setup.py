@@ -55,7 +55,7 @@ class build_man(Command):
         basepath = os.path.dirname(__file__)
         docpath = os.path.join(basepath, 'doc')
         templatepath = os.path.dirname(manpages.__file__)
-        man = manpages.ManPage('gkey-gen', __version__, None,
+        man = manpages.ManPage('gkeys-gen', __version__, None,
             docpath, Gkeys_Map['authors'])
         man.read_template(templatepath, 'command.template')
         man.make_prog(Gkeys_Map)
@@ -84,7 +84,7 @@ setup(
     url="https://wiki.gentoo.org/wiki/Project:Gentoo-keys",
     download_url='',
     packages=['gkeygen'],
-    scripts=['bin/gkey-gen'],
+    scripts=['bin/gkeys-gen'],
     data_files=[
         (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys-gen.conf']),
         (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'usr/share/man/man1'), glob('doc/*')),

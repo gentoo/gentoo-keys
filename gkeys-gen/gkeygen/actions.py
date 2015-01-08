@@ -35,7 +35,7 @@ Action_Map = OrderedDict({
         'options': ['spec', 'dest'],
         'desc': '''Generate a gpg key using a spec file''',
         'long_desc': '''Generate a gpg key using a spec file''',
-        'example': '''$ gkey-gen gen-key
+        'example': '''$ gkeys-gen gen-key
 
     GPG key creator
         Spec file..: glep-63-recommended
@@ -91,7 +91,7 @@ Continue?[y/n]: y
         'desc': '''List spec file definitions (spec names) found in the config''',
         'long_desc': '''List spec file definitions (spec names) found in the config.
     The default-spec setting when the pkg was installed is set to glep-63-recommended.''',
-        'example': '''$ gkey-gen list-specs
+        'example': '''$ gkeys-gen list-specs
 
  Gkey task results:
     Specs defined: glep-63,  default-spec,  glep-63-recommended

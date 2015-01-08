@@ -44,6 +44,7 @@ class CliBase(object):
         self.seeds = None
         self.actions = None
         self.logger = None
+        self.version = None
 
 
     @staticmethod
@@ -209,6 +210,8 @@ class CliBase(object):
         parser.add_argument('-D', '--debug', default='DEBUG',
             choices=list(log_levels),
             help='The logging level to set for the logfile')
+        parser.add_argument('-V', '--version', action = 'version',
+                          version = self.version)
 
 
         subparsers = parser.add_subparsers(

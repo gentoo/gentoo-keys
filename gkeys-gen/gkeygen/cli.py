@@ -7,6 +7,7 @@ from __future__ import print_function
 import os
 import sys
 
+from gkeys import __version__
 from gkeys.config import GKeysConfig
 from gkeys.base import CliBase
 from gkeygen.actions import Actions, Available_Actions, Action_Map
@@ -35,6 +36,7 @@ class Main(CliBase):
             'description': 'Gentoo Keys GPG key generator program',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
         }
+        self.version = __version__
 
 
     def __call__(self, args=None):

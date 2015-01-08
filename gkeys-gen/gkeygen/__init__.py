@@ -15,7 +15,7 @@ for cmd in Available_Actions:
     subdata[cmd] = Action_Map[cmd]['desc']
 
 Gkeys_Map = {
-    'options': ['help', 'config', 'debug'],
+    'options': ['help', 'config', 'debug', 'version'],
     'desc': 'OpenPGP/GPG key generator tool',
     'long_desc': '''Gentoo Keys (gkeys) is a Python based project that aims to manage
 the GPG keys used for validation on users and Gentoo's infrastracutre servers.

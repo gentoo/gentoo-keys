@@ -64,6 +64,8 @@ The spec file to use from the gkeys-gen.conf file.''',
 Turn on timestamp use.''',
     'uid': '''.IP "-u \\fIUID\\fR, --uid \\fIUID"
 The user id(s) (and email) of the key(s) being added (optional)''',
+    'version': '''.IP "-V, --version"
+The program version''',
 })
 
 SHORT_OPTS = OrderedDict({

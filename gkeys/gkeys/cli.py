@@ -16,6 +16,7 @@ from __future__ import print_function
 import os
 import sys
 
+from gkeys import __version__
 from gkeys.base import CliBase
 from gkeys.actions import Actions
 from gkeys.action_map import Available_Actions, Action_Map
@@ -44,6 +45,7 @@ class Main(CliBase):
             'description': 'Gentoo-keys manager program',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
         }
+        self.version = __version__
 
 
     def __call__(self, args=None):

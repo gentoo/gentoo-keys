@@ -16,7 +16,7 @@ from json import load
 
 from gkeys.exception import UpdateDbError
 from gkeys.gkey import GKEY
-from gkeys.seed import Seeds
+from gkeys.seed import Seeds, decoder
 from gkeys.fileops import ensure_dirs
 
 
@@ -51,10 +51,10 @@ class SeedHandler(object):
         for attr in GKEY._fields:
             try:
                 value = getattr(args, attr)
-                if attr == 'name' and value:
+                if attr == 'name' and isinstance(value, list):
                     value = " ".join(value)
                 if value is not None:
-                    keyinfo[attr] = value
+                    keyinfo[attr] = decoder(value)
             except AttributeError:
                 pass
         return keyinfo

@@ -241,15 +241,15 @@ class Actions(object):
         if self.config.options['print_results']:
             if print_key:
                 print()
-                print("Nick.....:", key.nick)
-                print("Name.....:", key.name)
-                print("Keydir...:", key.keydir)
+                print("Nick.....: %s" % key.nick)
+                print("Name.....: %s" % key.name)
+                print("Keydir...: %s" % key.keydir)
             c = 0
             for line in result.split('\n'):
                 if c == 0:
-                    print("Gpg info.:", line)
+                    print("Gpg info.: %s" % line)
                 else:
-                    print("          ", line)
+                    print("           %s" % line)
                 c += 1
             self.logger.debug("data output:\n" + str(result))
         return (True, result)
@@ -289,10 +289,12 @@ class Actions(object):
                     self.logger.debug("ACTIONS: installkey; result.failed = " +
                                       str(result.failed))
                 if self.config.options['print_results']:
+                    msg = "key desired: %(name)s, key added: %(key)s, succeeded:" +\
+                        " %(success)s, fingerprint: %(fpr)s"
                     for result in results[key.name]:
-                        print("key desired:", key.name, ", key added:",
-                            result.username, ", succeeded:",
-                            not result.failed, ", fingerprint:", result.fingerprint)
+                        print(msg % ({'name': key.name, 'key': result.username,
+                            'success': not result.failed,
+                            'fpr': result.fingerprint}))
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
                         if result.failed:
                             failed.append(key)
@@ -488,7 +490,7 @@ class Actions(object):
             return (False, ["Please provide a nickname or -n *"])
         handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
-        self.logger.debug("ACTIONS: addkey; kwargs: %s" % str(kwargs))
+        self.logger.debug("ACTIONS: removekey; kwargs: %s" % str(kwargs))
         success, installed_keys = self.installed(args)[1]
         for gkey in installed_keys:
             if kwargs['nick'] not in gkey.nick:
@@ -539,17 +541,21 @@ class Actions(object):
                 self.logger.debug("ACTIONS: importkey; adding key: %s", gkey.name)
                 results[gkey.name] = self.gpg.add_key(gkey)
                 if self.config.options['print_results']:
+                    msg = "key desired: %(name)s, key added: %(key)s, " + \
+                        "succeeded: %(success)s, fingerprint: %(fpr)s"
                     for result in results[gkey.name]:
-                        print("key desired:", gkey.name, ", key added:",
-                            result.username, ", succeeded:",
-                            not result.failed, ", fingerprint:", result.fingerprint)
+                        print(msg % ({'name': gkey.name, 'key': result.username,
+                            'success': not result.failed,
+                            'fpr': result.fingerprint}))
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
                         if result.failed:
-                            self.logger.debug("ACTIONS: importkey; result.failed = " + str(result.failed))
+                            self.logger.debug("ACTIONS: importkey; result.failed = "
+                                + str(result.failed))
                             failed.append(gkey)
                 if not results[gkey.name][0].failed:
-                    print("Importing: ", gkey.name)
-                    self.logger.debug("ACTIONS: importkey; importing key: %s", gkey.name)
+                    print("Importing: %s" % gkey.name)
+                    self.logger.debug("ACTIONS: importkey; importing key: %s"
+                        % gkey.name)
                     _keyring = os.path.join(catdir, args.keyring + '.gpg')
                     self.gpg.add_to_keyring(gkey, catdir, _keyring)
             if failed and self.output:

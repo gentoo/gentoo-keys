@@ -16,13 +16,23 @@ with gentoo-keys specific convienience functions.
 
 '''
 
+import codecs
 import json
 import os
+import sys
 
 from gkeys.exception import UpdateDbError
 from gkeys.log import logger
 from gkeys.gkey import GKEY
 from gkeys.fileops import ensure_dirs
+
+
+if sys.version_info[0] >= 3:
+    def decoder(text, enc='utf_8'):
+        return text
+else:
+    def decoder(text, enc='utf_8'):
+        return codecs.decode(text, enc)
 
 
 class Seeds(object):
@@ -51,7 +61,7 @@ class Seeds(object):
         seedlines = None
         self.seeds = {}
         try:
-            with open(self.filename, "r+") as seedfile:
+            with codecs.open(self.filename, "r+", encoding='utf_8') as seedfile:
                 seedlines = json.load(seedfile)
         except IOError as err:
             self.logger.debug("Seed: load; IOError occurred while loading file")
@@ -94,7 +104,7 @@ class Seeds(object):
             fatal=True)
         os.umask(int(self.config.get_key("permissions", "files"),0))
         try:
-            with open(self.filename, 'w') as seedfile:
+            with codecs.open(self.filename, 'w', encoding='utf_8') as seedfile:
                 seedfile.write(self._seeds2json(self.seeds))
                 seedfile.write("\n")
         except IOError as err:
@@ -156,7 +166,10 @@ class Seeds(object):
                             break
                 result = res
             else:
-                result = {dev: gkey for dev, gkey in list(result.items()) if kwargs[key].lower() in getattr(gkey, key).lower()}
+                result = {dev: gkey for dev, gkey in list(result.items())
+                    if kwargs[key].lower()
+                    in getattr(gkey, key).lower()
+                    }
         return sorted(result.values())
 
 
@@ -193,10 +206,10 @@ class Seeds(object):
                 if  self._list_search(value, val, exact):
                     results.append(seed)
             elif exact:
-                if value in val:
+                if decoder(value) in val:
                     results.append(seed)
             else:
-                if value.lower() in val.lower():
+                if decoder(value).lower() in val.lower():
                     results.append(seed)
 
         return results
@@ -209,11 +222,12 @@ class Seeds(object):
                 found.append(self._list_search(f, values, exact))
             return True in found
         for val in values:
+            val = val
             if exact:
-                if find in val:
+                if decoder(find) in val:
                     return True
             else:
-                if find.lower() in val.lower():
+                if decoder(find).lower() in val.lower():
                     return True
         return False
 

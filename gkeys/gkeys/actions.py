@@ -25,6 +25,8 @@ from collections import defaultdict
 from json import load
 from shutil import rmtree
 
+from pyGPG.status import _unicode_encode
+
 from gkeys.lib import GkeysGPG
 from gkeys.seedhandler import SeedHandler
 from gkeys.gkey import GKEY
@@ -240,15 +242,15 @@ class Actions(object):
         if self.config.options['print_results']:
             if print_key:
                 print()
-                print("Nick.....:", key.nick)
-                print("Name.....:", key.name)
-                print("Keydir...:", key.keydir)
+                print("Nick.....:", _unicode_encode(key.nick))
+                print("Name.....:", _unicode_encode(key.name))
+                print("Keydir...:", _unicode_encode(key.keydir))
             c = 0
             for line in result.split('\n'):
                 if c == 0:
-                    print("Gpg info.:", line)
+                    print("Gpg info.:", _unicode_encode(line))
                 else:
-                    print("          ", line)
+                    print("          ", _unicode_encode(line))
                 c += 1
             self.logger.debug("data output:\n" + str(result))
         return (True, result)
@@ -289,7 +291,7 @@ class Actions(object):
                                       str(result.failed))
                 if self.config.options['print_results']:
                     for result in results[key.name]:
-                        print("key desired:", key.name, ", key added:",
+                        print("key desired:", _unicode_encode(key.name), ", key added:",
                             result.username, ", succeeded:",
                             not result.failed, ", fingerprint:", result.fingerprint)
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
@@ -380,7 +382,7 @@ class Actions(object):
                 for g in results:
                     pub_pass = {}
                     for key in results[g]:
-                        self.output('', key.pretty_print())
+                        self.output('', _unicode_encode(key.pretty_print()))
 
                         if key.key is "PUB":
                             pub_pass = {
@@ -539,7 +541,7 @@ class Actions(object):
                 results[gkey.name] = self.gpg.add_key(gkey)
                 if self.config.options['print_results']:
                     for result in results[gkey.name]:
-                        print("key desired:", gkey.name, ", key added:",
+                        print("key desired:", _unicode_encode(gkey.name), ", key added:",
                             result.username, ", succeeded:",
                             not result.failed, ", fingerprint:", result.fingerprint)
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
@@ -547,7 +549,7 @@ class Actions(object):
                             self.logger.debug("ACTIONS: importkey; result.failed = " + str(result.failed))
                             failed.append(gkey)
                 if not results[gkey.name][0].failed:
-                    print("Importing: ", gkey.name)
+                    print("Importing: ", _unicode_encode(gkey.name))
                     self.logger.debug("ACTIONS: importkey; importing key: %s", gkey.name)
                     _keyring = os.path.join(catdir, args.keyring + '.gpg')
                     self.gpg.add_to_keyring(gkey, catdir, _keyring)

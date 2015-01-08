@@ -17,7 +17,7 @@ from __future__ import print_function
 import argparse
 import sys
 
-from pyGPG.status import _unicode_decode
+from pyGPG.status import _unicode_encode
 from gkeys import fileops
 from gkeys.log import log_levels, set_logger
 
@@ -315,16 +315,16 @@ class CliBase(object):
     def output_results(results, header=None):
         # super simple output for the time being
         if header:
-            print(_unicode_decode(header))
+            print(_unicode_encode(header))
         for msg in results:
             if type(msg) in [str, unicode]:
-                print('   ', _unicode_decode(msg))
+                print('   ', _unicode_encode(msg))
             else:
                 try:
-                    print("\n".join([_unicode_decode(x.pretty_print) for x in msg]))
+                    print("\n".join([_unicode_encode(x.pretty_print) for x in msg]))
                 except AttributeError:
                     for x in msg:
-                        print('    ', _unicode_decode(x))
+                        print('    ', _unicode_encode(x))
         print()
 
 

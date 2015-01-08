@@ -142,10 +142,10 @@ class SeedHandler(object):
             for seed in [seeds]:
                 seedurl = self.config.get_key('seedurls', seed)
                 seedpath = self.config.get_key('seeds', seed)
-                if http_check.match(seedurl):
+                if seedurl and seedpath and http_check.match(seedurl):
                     urls.extend([(seed, seedurl, seedpath)])
                 else:
-                    self.logger.info("Wrong seed file URLs... Skipping: %s" % seed)
+                    self.logger.info("Wrong seed file URLs/seed path... Skipping: %s" % seed)
         except KeyError:
             pass
         succeeded = []

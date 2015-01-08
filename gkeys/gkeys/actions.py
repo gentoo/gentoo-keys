@@ -81,9 +81,10 @@ class Actions(object):
     def fetchseed(self, args):
         '''Download the selected seed file(s)'''
         self.logger.debug("ACTIONS: fetchseed; args: %s" % str(args))
+        if not args.category:
+            return (False, ["Please specify seeds category."])
         handler = SeedHandler(self.logger, self.config)
         success, messages = handler.fetch_seeds(args.category, args, self.verify)
-
         messages.append("")
         messages.append("Fetch operation completed")
         return (False not in success, messages)

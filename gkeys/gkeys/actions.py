@@ -491,21 +491,40 @@ class Actions(object):
         handler = SeedHandler(self.logger, self.config)
         kwargs = handler.build_gkeydict(args)
         self.logger.debug("ACTIONS: removekey; kwargs: %s" % str(kwargs))
-        success, installed_keys = self.installed(args)[1]
-        for gkey in installed_keys:
-            if kwargs['nick'] not in gkey.nick:
-                messages = ["%s does not seem to be a valid key." % kwargs['nick']]
+        seeds = handler.load_category(args.category)
+        messages = []
+        if args.nick == '*':
+            self.output([''],'Remove All keys in category: %s' % args.category)
+            ans = py_input ("Do you really want to remove ALL of keys?[y/n]: ")
+            while ans not in ["yes", "y", "no", "n"]:
+                ans = py_input ("Do you really want to remove ALL keys?[y/n]: ")
+            if ans in ["no", "n"]:
+                messages.append("Key removal aborted... Nothing to be done.")
+                return (True, messages)
+            keyresults = seeds.seeds
+        else:
+            keyresults = seeds.list(**kwargs)
+        self.output('', '\n Removing keys...')
+        success = True
+        print(keyresults)
+        for gkey in sorted(keyresults):
+            if kwargs['nick'] != '*' and  kwargs['nick'] not in gkey.nick:
+                messages.append("%s does not seem to be a valid key." % kwargs['nick'])
                 success = False
             else:
                 self.output(['', [gkey]], '\n Found GKEY seed:')
                 ans = py_input ("Do you really want to remove %s?[y/n]: "
-                                % kwargs['nick']).lower()
+                                % kwargs['nick'].lower())
                 while ans not in ["yes", "y", "no", "n"]:
                     ans = py_input ("Do you really want to remove %s?[y/n]: "
-                                    % kwargs['nick']).lower()
+                                    % kwargs['nick'].lower())
                 if ans in ["no", "n"]:
-                    messages = ["Key removal aborted... Nothing to be done."]
+                    messages.append("Key removal aborted... Nothing to be done.")
                 else:
+                    ## This next code is total crap  now
+                    ## re-write it from scratch
+                    ## there could be multiple keys installed in one keyring
+                    ## this code just rm's everything.
                     keyring = self.config.get_key('keyring')
                     catdir = os.path.join(keyring, args.category)
                     rm_candidate = os.path.join(catdir, gkey.nick)
@@ -513,9 +532,9 @@ class Actions(object):
                     if args.category:
                         try:
                             rmtree(rm_candidate)
-                            messages = ["Done removing %s key." % kwargs['nick']]
+                            messages.append("Done removing %s key." % kwargs['nick'])
                         except OSError:
-                            messages = ["%s directory does not exist." % rm_candidate]
+                            messages.append("%s directory does not exist." % rm_candidate)
                             success = False
         return (success, messages)
 

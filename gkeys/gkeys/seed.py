@@ -173,7 +173,7 @@ class Seeds(object):
         return sorted(result.values())
 
 
-    def search(self, pattern):
+    def regex_search(self, pattern):
         '''Search for the keys matching the regular expression pattern'''
         pass
 

@@ -191,9 +191,11 @@ class Seeds(object):
 
 
     def field_search(self, field, value, exact=False):
-        '''Searches the seeds for a matching nick
+        '''Searches the seeds for a matching value
 
-        @param keyid: string
+        @param field: string
+        @param value: string
+        @param exact: Boolean
         @returns GKEY instance or None
         '''
         results = []

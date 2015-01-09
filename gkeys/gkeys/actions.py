@@ -25,7 +25,6 @@ else:
 
 from collections import defaultdict
 from json import load
-from shutil import rmtree
 
 from gkeys.lib import GkeysGPG
 from gkeys.seedhandler import SeedHandler
@@ -551,7 +550,7 @@ class Actions(object):
             keyresults = seeds.list(**kwargs)
         self.output('', '\n Removing keys...')
         success = True
-        print(keyresults)
+        #print(keyresults)
         for gkey in sorted(keyresults):
             if kwargs['nick'] != '*' and  kwargs['nick'] not in gkey.nick:
                 messages.append(_unicode("%s does not seem to be a valid key.")
@@ -569,22 +568,22 @@ class Actions(object):
                 if ans in ["no", "n"]:
                     messages.append("Key removal aborted... Nothing to be done.")
                 else:
-                    ## This next code is total crap  now
-                    ## re-write it from scratch
-                    ## there could be multiple keys installed in one keyring
-                    ## this code just rm's everything.
                     keyring = self.config.get_key('keyring')
                     catdir = os.path.join(keyring, args.category)
-                    rm_candidate = os.path.join(catdir, gkey.nick)
                     self.logger.debug(_unicode("ACTIONS: removekey; catdir = %s")
                         % catdir)
-                    if args.category:
-                        try:
-                            rmtree(rm_candidate)
-                            messages.append(_unicode("Done removing %s key.") % kwargs['nick'])
-                        except OSError:
-                            messages.append(_unicode("%s directory does not exist.") % rm_candidate)
-                            success = False
+                    self.gpg = GkeysGPG(self.config, catdir, self.logger)
+                    if len(gkey.keys) == 1 or args.keys == gkey.keys:
+                        success, msgs = self.gpg.del_keydir(gkey)
+                        messages.extend(msgs)
+                    elif args.keys:
+                        for key in args.keys:
+                            success, msgs = self.gpg.del_key(gkey, key)
+                            msgs.extend(msgs)
+                    else:
+                        for key in gkey.keys:
+                            success, msgs = self.gpg.del_key(gkey, key)
+                            msgs.extend(msgs)
         return (success, messages)
 
 

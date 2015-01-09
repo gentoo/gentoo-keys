@@ -19,9 +19,10 @@ with gentoo-keys specific convienience functions.
 # for py 2.6 compatibility
 from __future__ import print_function
 
-
+import os
 from os.path import abspath, pardir
 from os.path import join as pjoin
+from shutil import rmtree
 
 from pyGPG.gpg import GPG
 from gkeys.checks import KeyChecks
@@ -165,18 +166,40 @@ class GkeysGPG(GPG):
         return results
 
 
-    def del_key(self, gkey, keydir):
-        '''Delete the specified key in the specified keydir
+    def del_key(self, gkey, key):
+        '''Delete the specified key
+
+        @param gkey: GKEY namedtuple with (name, nick, keydir, fingerprint)
+        @param key: Fingerprint of the primary key to delete
+        '''
+        self.set_keydir(gkey.keydir, 'del-key', reset=True)
+        self.set_keyring('pubring.gpg', 'del-key', reset=False)
+        self.set_keyseedfile(refresh=True)
+        self.logger.debug("LIB: del_key, gkey: %s" % str(gkey))
+        self.logger.debug("LIB: del_key, key: %s" % key)
+        self.logger.debug("** Calling runGPG with: 'gpg %s --delete-keys' for: %s"
+            % (' '.join(self.config.get_key('tasks', 'delete-keys')), str(gkey)))
+        result = self.runGPG(task='delete-keys', inputfile=key)
+        self.logger.info('GPG return code: ' + str(result.returncode))
+        self.update_gkey(gkey, save=True)
+        return (False, [])
+
+
+    def del_keydir(self, gkey):
+        '''Delete the specified keydir
 
         @param gkey: GKEY namedtuple with (name, nick, keydir, fingerprint)
         '''
-        return []
-
-
-    def del_keydir(self, keydir):
-        '''Delete the specified keydir
-        '''
-        return []
+        rm_candidate = os.path.join(self.basedir, gkey.keydir)
+        success = False
+        messages = []
+        try:
+            rmtree(rm_candidate)
+            messages.append("Done removing %s key." % gkey.nick)
+            success = True
+        except OSError:
+            messages.append("%s directory does not exist or is a symbolic link." % rm_candidate)
+        return (success, messages)
 
 
     def refresh_key(self, gkey):

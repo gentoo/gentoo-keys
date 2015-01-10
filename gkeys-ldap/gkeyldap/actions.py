@@ -19,22 +19,22 @@ from gkeyldap.search import LdapSearch
 from gkeys.fileops import updatefiles
 
 
-Action_Map = OrderedDict({
-    'ldap-search':  {
+Action_Map = OrderedDict([
+    ('ldap-search', {
         'func': 'ldapsearch',
         'options': ['fingerprint', 'mail', 'name', 'nick', 'status'],
         'desc': '''Performs a search in LDAP for the input arguments''',
         'long_desc': '''Performs a search in LDAP for the input arguments''',
         'example': '''''',
-        },
-    'update-seeds':  {
+        }),
+    ('update-seeds', {
         'func': 'updateseeds',
         'options': ['fingerprint', 'mail', 'name', 'nick', 'category', 'status'],
         'desc': '''Performs a search for all active developers and generates a new seeds file''',
         'long_desc': '''Performs a search for all active developers and generates a new seeds file''',
         'example': '''''',
-        },
-})
+        }),
+])
 
 Available_Actions = list(Action_Map)
 

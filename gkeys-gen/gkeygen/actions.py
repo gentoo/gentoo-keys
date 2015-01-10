@@ -29,8 +29,8 @@ else:
 from gkeys.fileops import ensure_dirs
 
 
-Action_Map = OrderedDict({
-    'gen-key': {
+Action_Map = OrderedDict([
+    ('gen-key', {
         'func': 'genkey',
         'options': ['spec', 'dest'],
         'desc': '''Generate a gpg key using a spec file''',
@@ -84,8 +84,8 @@ Continue?[y/n]: y
     Please read the FAQ for post-generation steps that are available in:
     https://wiki.gentoo.org/wiki/Project:Gentoo-keys/Generating_GLEP_63_based_OpenPGP_keys
 ''',
-        },
-    'list-specs': {
+        }),
+    ('list-specs', {
         'func': 'list_specs',
         'options': [],
         'desc': '''List spec file definitions (spec names) found in the config''',
@@ -96,8 +96,8 @@ Continue?[y/n]: y
  Gkey task results:
     Specs defined: glep-63,  default-spec,  glep-63-recommended
 ''',
-        },
-})
+        }),
+])
 
 Available_Actions = ['gen-key', 'list-specs']
 

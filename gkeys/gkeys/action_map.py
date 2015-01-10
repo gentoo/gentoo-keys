@@ -25,15 +25,15 @@ General_Actions = ['---general---', 'list-cats', 'sign','verify']
 
 Available_Actions = General_Actions + Key_Actions + Seed_Actions
 
-Action_Map = OrderedDict({
-    '---general---': {
+Action_Map = OrderedDict([
+    ('---general---', {
         'func': 'GENERAL_COMMANDS',
         'options': [],
         'desc': '''-----< general actions >------''',
         'long_desc': '''''',
         'example': '''''',
-        },
-    'list-cats': {
+        }),
+    ('list-cats', {
         'func': 'listcats',
         'options': [],
         'desc': '''List seed file definitions (category names) found in the config''',
@@ -45,8 +45,8 @@ Action_Map = OrderedDict({
     Categories defined: gentoo-devs,  gentoo,  sign
 
 ''',
-        },
-    'sign': {
+        }),
+    ('sign', {
         'func': 'sign',
         'options': ['nick', 'name', 'fingerprint', 'file', ],
         'desc': '''Sign a file''',
@@ -54,8 +54,8 @@ Action_Map = OrderedDict({
     The default sign settings can be set in gpg.conf.  These settings can be
     overridden on the command line using the 'nick', 'name', 'fingerprint' options''',
         'example': '''''',
-        },
-    'verify': {
+        }),
+    ('verify', {
         'func': 'verify',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keydir', 'keys',
             '1file', 'signature', 'timestamp', 'dest'],
@@ -75,15 +75,15 @@ Action_Map = OrderedDict({
         category, nick.....: gentoo gkeys
 
 ''',
-        },
-    '----keys-----': {
+        }),
+    ('----keys-----', {
         'func': 'KEY_COMMANDS',
         'options': [],
         'desc': '''-------< key actions >--------''',
         'long_desc': '',
         'example': '',
-        },
-    'check-key': {
+        }),
+    ('check-key', {
         'func': 'checkkey',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys',
             'keydir', 'keyring'],
@@ -109,16 +109,16 @@ Found:
     Invalid: 0
     No signing capable subkeys: 0
 ''',
-        },
-    'import-key': {
+        }),
+    ('import-key', {
         'func': 'importkey',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keys',
             'keydir', 'keyring'],
         'desc': '''Add a specified key to a specified keyring''',
         'long_desc': '''Add a specified key to a specified keyring''',
         'example': '''''',
-        },
-    'install-key': {
+        }),
+    ('install-key', {
         'func': 'installkey',
         'options':  ['category', 'nick', 'name', 'fingerprint', 'keys',
             'keydir', 'keyring', '1file'],
@@ -126,8 +126,8 @@ Found:
         'long_desc': '''Install a key from the seed(s).  The key will be
     installed to the pre-configured seed's keydir value within the category's directory.''',
         'example': '''''',
-        },
-    'installed': {
+        }),
+    ('installed', {
         'func': 'installed',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keys',
             'keydir', 'keyring'],
@@ -153,8 +153,8 @@ Found:
     Keydir.......: release
 <snip> ...
 ''',
-        },
-    'list-key': {
+         }),
+    ('list-key', {
         'func': 'listkey',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys',
             'keydir', 'keyring', 'gpgsearch'],
@@ -173,16 +173,16 @@ Gpg info.: pub   4096R/825533CBF6CD6C97 2014-10-03 [expires: 2017-09-17]
 
  Gkey task results:
     Done.''',
-        },
-    'move-key': {
+         }),
+    ('move-key', {
         'func': 'movekey',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keys',
             'keydir', 'keyring', 'dest'],
         'desc': '''Rename an installed keydir''',
         'long_desc': '''Rename an installed keydir''',
         'example': '''''',
-        },
-    'refresh-key': {
+         }),
+    ('refresh-key', {
         'func': 'refreshkey',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys',
             'keydir', 'keyring'],
@@ -201,8 +201,8 @@ Gpg info.: pub   4096R/825533CBF6CD6C97 2014-10-03 [expires: 2017-09-17]
  Gkey task results:
     Completed
 ''',
-        },
-    'remove-key': {
+         }),
+    ('remove-key', {
         'func': 'removekey',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keys',
             'keydir', 'keyring'],
@@ -239,8 +239,8 @@ Do you really want to remove dolsen?[y/n]: y
  Gkey task results:
     Done removing dolsen key.
 ''',
-        },
-    'search-key': {
+         }),
+    ('search-key', {
         'func': 'key_search',
         'options': ['category', 'nick', '1name', 'fingerprint', 'keyid', 'uid',
             'keys', 'keydir', 'exact', 'all'],
@@ -271,8 +271,8 @@ Do you really want to remove dolsen?[y/n]: y
     Keyid........: 0xA41DBBD9151C3FC7
       Fingerprint: C287167569B3C1F9E9CED677A41DBBD9151C3FC7
 ''',
-        },
-    'spec-check': {
+         }),
+    ('spec-check', {
         'func': 'speccheck',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys',
             'keydir', 'keyring'],
@@ -335,15 +335,15 @@ Found Failures:
     =============================
     SPEC Approved..........: 1
 ''',
-        },
-    '----seeds----': {
+         }),
+    ('----seeds----', {
         'func': 'SEED_COMMANDS',
         'options': [],
         'desc': '''------< seed actions >-------''',
         'long_desc': '',
         'example': '',
-        },
-    'add-seed': {
+         }),
+    ('add-seed', {
         'func': 'addseed',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keys', 'keydir',
             'uid'],
@@ -354,8 +354,8 @@ Found Failures:
  Gkey task results:
     Successfully added new seed.
 ''',
-        },
-    'fetch-seed': {
+         }),
+    ('fetch-seed', {
         'func': 'fetchseed',
         'options': ['category', 'nick', '1file', 'dest', 'signature',
             'timestamp'],
@@ -370,8 +370,8 @@ Found Failures:
 
     Fetch operation completed
 ''',
-        },
-    'list-seed': {
+         }),
+    ('list-seed', {
         'func': 'listseed',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keys',
             'keydir', '1file'],
@@ -390,8 +390,8 @@ Found Failures:
       Fingerprint: C287167569B3C1F9E9CED677A41DBBD9151C3FC7
     Keyid........: 0x825533CBF6CD6C97
       Fingerprint: D2DE1DBBA0F43EBA341B97D8825533CBF6CD6C97''',
-        },
-    'list-seedfiles': {
+         }),
+    ('list-seedfiles', {
         'func': 'listseedfiles',
         'options': [],
         'desc': '''List seed files found in the configured seed directory''',
@@ -403,16 +403,16 @@ Found Failures:
   gentoo-devs.seeds
   gentoo.seeds
 ''',
-        },
-    'move-seed': {
+         }),
+    ('move-seed', {
         'func': 'moveseed',
         'options': ['category', 'nick', 'name', 'keydir', 'keys',
             'fingerprint', 'dest'],
         'desc': '''Move keys between seed files''',
         'long_desc': '''Move keys between seed files''',
         'example': '''''',
-        },
-    'remove-seed': {
+         }),
+    ('remove-seed', {
         'func': 'removeseed',
         'options': ['category', 'nick', 'name', 'keys', 'fingerprint', 'keydir'],
         'desc': '''Remove a seed from the selected seed file''',
@@ -428,7 +428,7 @@ Found Failures:
     Keyid........: 0xA41DBBD9151C3FC7
       Fingerprint: C287167569B3C1F9E9CED677A41DBBD9151C3FC7
 ''',
-        },
-})
+        }),
+])
 
 

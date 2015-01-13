@@ -219,8 +219,6 @@ class CliBase(object):
             description='Valid subcommands',
             help='Additional help')
         for name in self.cli_config['Available_Actions']:
-            action_method = getattr(self.cli_config['Actions'],
-                self.cli_config['Action_Map'][name]['func'])
             actiondoc = self.cli_config['Action_Map'][name]['desc']
             try:
                 text = actiondoc.splitlines()[0]

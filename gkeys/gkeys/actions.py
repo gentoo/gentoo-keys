@@ -292,9 +292,16 @@ class Actions(object):
                     msg = "key desired: %(name)s, key added: %(key)s, succeeded:" +\
                         " %(success)s, fingerprint: %(fpr)s"
                     for result in results[key.name]:
-                        print(msg % ({'name': key.name, 'key': result.username,
-                            'success': not result.failed,
-                            'fpr': result.fingerprint}))
+                        try:
+                            print(msg % ({'name': key.name, 'key': result.username,
+                                'success': str(not result.failed),
+                                'fpr': result.fingerprint}))
+                        except UnicodeDecodeError:
+                            print("UnicodeDecodeError printing results for:", key.name)
+                            self.logger.debug("installkey(); UnicodeDecodeError for:" + key.name)
+                            self.logger.debug("    result.username...:" + result.username)
+                            self.logger.debug("    result.failed.....:" + result.failed)
+                            self.logger.debug("    result.fingerprint:" + result.fingerprint)
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
                         if result.failed:
                             failed.append(key)
@@ -564,7 +571,7 @@ class Actions(object):
                         "succeeded: %(success)s, fingerprint: %(fpr)s"
                     for result in results[gkey.name]:
                         print(msg % ({'name': gkey.name, 'key': result.username,
-                            'success': not result.failed,
+                            'success': str(not result.failed),
                             'fpr': result.fingerprint}))
                         self.logger.debug("stderr_out: " + str(result.stderr_out))
                         if result.failed:

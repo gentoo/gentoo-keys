@@ -15,9 +15,10 @@ from __future__ import print_function
 
 
 import argparse
+import os
 import sys
 
-from gkeys import fileops
+from gkeys.fileops import ensure_dirs
 from gkeys.log import log_levels, set_logger
 
 
@@ -267,12 +268,17 @@ class CliBase(object):
         else:
             self.config.read_config(configs)
 
+        # check for permissions and adjust configs accordngly
+        if not self.config['homedir']:
+            self.config['homedir'] = os.path.expanduser('~')
+        if not os.access(self.config['logdir'], os.W_OK):
+            self.config['logdir'] = ensure_dirs(
+                os.path.join(self.config['user-dir'], 'logs'))
         # establish our logger and update it in the imported files
         self.logger = set_logger(self.cli_config['prog'], self.config['logdir'], args.debug,
             dirmode=int(self.config.get_key('permissions', 'directories'),0),
             filemask=int(self.config.get_key('permissions', 'files'),0))
         self.config.logger = self.logger
-        fileops.logger = self.logger
 
         if message:
             self.logger.error(message)

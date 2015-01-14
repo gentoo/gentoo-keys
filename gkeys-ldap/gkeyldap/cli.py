@@ -7,6 +7,7 @@ import os
 import sys
 
 
+from gkeys import __version__
 from gkeys.base import CliBase
 from gkeys.config import GKeysConfig
 from gkeyldap.actions import (Actions, Available_Actions, Action_Map)
@@ -36,6 +37,7 @@ class Main(CliBase):
             'description': 'Gentoo-keys LDAP interface and seed file generator program',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
         }
+        self.version = __version__
 
 
     def __call__(self, args=None):

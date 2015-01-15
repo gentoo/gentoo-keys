@@ -20,6 +20,7 @@ from gkeys.fileops import ensure_dirs
 NAMESPACE = 'gentoo-keys'
 logger = None
 Console_handler = None
+logname = None
 
 log_levels = {
     'CRITICAL': logging.CRITICAL,
@@ -35,7 +36,7 @@ log_levels = {
 
 def set_logger(namespace=None, logpath='', level=None,
                dirmode=0o775, filemask=0o002):
-    global logger, NAMESPACE, Console_handler
+    global logger, NAMESPACE, Console_handler, logname
     if not namespace:
         namespace = NAMESPACE
     else:

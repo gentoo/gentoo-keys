@@ -324,7 +324,7 @@ class CliBase(object):
                 print('   ', msg)
             else:
                 try:
-                    print("\n".join([x.pretty_print for x in msg]))
+                    print(unicode("\n").join([x.pretty_print for x in msg]))
                 except AttributeError:
                     for x in msg:
                         print('    ', x)

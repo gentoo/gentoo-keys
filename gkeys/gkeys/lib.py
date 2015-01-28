@@ -311,7 +311,7 @@ class GkeysGPG(GPG):
             results = self.runGPG(task='verify', inputfile=[signature,filepath])
         else:
             self.set_keydir(gkey.keydir, 'decrypt', reset=True)
-            self.logger.debug("** Calling runGPG with Running 'gpg %s --decrypt %s and %s'"
+            self.logger.debug("** Calling runGPG with Running 'gpg %s --decrypt %s'"
                     % (' '.join(self.config['tasks']['decrypt']), filepath))
             results = self.runGPG(task='decrypt', inputfile=filepath)
         keyid = gkey.keyid[0]

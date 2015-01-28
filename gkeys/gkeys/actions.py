@@ -755,71 +755,78 @@ class Actions(object):
                 _unicode("ACTIONS: verify; timestamp path: %s") % timestamp_path)
             success, signedfile, timestamp = fetcher.fetch_file(
                 url, filepath, timestamp_path)
+            if not success:
+                messages.append(_unicode("File %s cannot be retrieved.") % filepath)
+            else:
+                if not signature:
+                    EXTENSIONS = ['.sig', '.asc', 'gpg','.gpgsig']
+                    success_fetch = False
+                    for ext in EXTENSIONS:
+                        sig_path = filepath + ext
+                        if isurl:
+                            signature = url + ext
+                            self.logger.debug(
+                                _unicode("ACTIONS: verify; fetching %s signature ")
+                                % signature)
+                            success_fetch, sig, timestamp = fetcher.fetch_file(signature, sig_path)
+                        if success_fetch:
+                            break
+                        else:
+                            signature = None
         else:
             filepath = os.path.abspath(filepath)
             self.logger.debug(
                 _unicode("ACTIONS: verify; local file %s") % filepath)
             success = os.path.isfile(filepath)
-        if not success:
-            messages.append(_unicode("File %s cannot be retrieved.") % filepath)
-        else:
             if not signature:
                 EXTENSIONS = ['.sig', '.asc', 'gpg','.gpgsig']
                 success_fetch = False
                 for ext in EXTENSIONS:
                     sig_path = filepath + ext
-                    if isurl:
-                        signature = url + ext
-                        self.logger.debug(
-                            _unicode("ACTIONS: verify; fetching %s signature ")
-                            % signature)
-                        success_fetch, sig, timestamp = fetcher.fetch_file(signature, sig_path)
-                    else:
-                        signature = filepath + ext
-                        signature = os.path.abspath(signature)
-                        self.logger.debug(
-                            _unicode("ACTIONS: verify; checking %s signature ")
-                            % signature)
-                        success_fetch = os.path.isfile(signature)
-                    if success_fetch:
+                    sig_path = os.path.abspath(sig_path)
+                    self.logger.debug(
+                        _unicode("ACTIONS: verify; checking %s signature ")
+                        % sig_path)
+                    success_sig = os.path.isfile(sig_path)
+                    if success_sig:
                         break
-            else:
-                sig_path = signature
-            self.logger.info("Verifying file...")
-            verified = False
-            results = self.gpg.verify_file(key, sig_path, filepath)
-            keyid = key.keyid[0]
-            (valid, trust) = results.verified
-            if valid:
-                verified = True
-                messages.extend(
-                    [_unicode("Verification succeeded.: %s") % (filepath),
-                    _unicode("Key info...............: %s <%s>, %s")
-                    % ( key.name, key.nick, keyid),
-                    _unicode("    category, nick.....: %s %s")
-                    % (args.category, args.nick)])
-            else:
-                messages.extend(
-                    [_unicode("Verification failed....: %s") % (filepath),
-                    _unicode("Key info...............: %s <%s>, %s")
-                    % ( key.name, key.nick, keyid)])
-                has_no_pubkey, s_keyid = results.no_pubkey
-                if has_no_pubkey:
-                    messages.append(
-                        _unicode("Auto-searching for key.: 0x%s") % s_keyid)
-                    # reset all but keyid and pass thru data
-                    args.keyid = s_keyid
-                    args.keydir = None
-                    args.fingerprint = None
-                    args.exact = False
-                    args.category = None
-                    args.nick = None
-                    args.name = None
-                    args.all = False
-                    keys = self.key_search(args, data_only=True)
-                    args.category = list(keys)[0]
-                    args.nick = keys[args.category][0].nick
-                    return self.verify(args, messages)
+                    else:
+                        sig_path = None
+        self.logger.info("Verifying file...")
+        verified = False
+        results = self.gpg.verify_file(key, sig_path, filepath)
+        keyid = key.keyid[0]
+        (valid, trust) = results.verified
+        if valid:
+            verified = True
+            messages.extend(
+                [_unicode("Verification succeeded.: %s") % (filepath),
+                _unicode("Key info...............: %s <%s>, %s")
+                % ( key.name, key.nick, keyid),
+                _unicode("    category, nick.....: %s %s")
+                % (args.category, args.nick)])
+        else:
+            messages.extend(
+                [_unicode("Verification failed....: %s") % (filepath),
+                _unicode("Key info...............: %s <%s>, %s")
+                % ( key.name, key.nick, keyid)])
+            has_no_pubkey, s_keyid = results.no_pubkey
+            if has_no_pubkey:
+                messages.append(
+                    _unicode("Auto-searching for key.: 0x%s") % s_keyid)
+                # reset all but keyid and pass thru data
+                args.keyid = s_keyid
+                args.keydir = None
+                args.fingerprint = None
+                args.exact = False
+                args.category = None
+                args.nick = None
+                args.name = None
+                args.all = False
+                keys = self.key_search(args, data_only=True)
+                args.category = list(keys)[0]
+                args.nick = keys[args.category][0].nick
+                return self.verify(args, messages)
         return (verified, messages)
 
 

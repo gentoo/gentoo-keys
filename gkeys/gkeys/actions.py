@@ -308,10 +308,11 @@ class Actions(object):
                     msg = _unicode("key desired: %(name)s, key added: %(key)s, succeeded:" +\
                         " %(success)s, fingerprint: %(fpr)s")
                     for result in results[key.name]:
-                        try:
-                            print(msg % ({'name': key.name, 'key': result.username,
+                        umsg = msg % ({'name': key.name, 'key': result.username,
                                 'success': str(not result.failed),
-                                'fpr': result.fingerprint}))
+                                'fpr': result.fingerprint})
+                        try:
+                            print(umsg)
                         except UnicodeDecodeError:
                             print(_unicode("UnicodeDecodeError printing results for:"), key.name)
                             self.logger.debug(_unicode("installkey(); UnicodeDecodeError for:") + key.name)

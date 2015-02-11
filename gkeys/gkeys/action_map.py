@@ -58,7 +58,7 @@ Action_Map = OrderedDict([
     ('verify', {
         'func': 'verify',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keydir', 'keys',
-            '1file', 'signature', 'timestamp', 'dest'],
+            '1file', 'signature', 'timestamp', 'dest', 'uid'],
         'desc': '''File automatic download and/or verification action.''',
         'long_desc': '''File automatic download and/or verification action.
     Note: If the specified key/keyring to verify against does not contain

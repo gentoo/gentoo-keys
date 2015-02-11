@@ -953,7 +953,7 @@ class Actions(object):
                     if isinstance(result, GKEY):
                         keys[cat].append(result)
         if data_only:
-            del found, cat, result, handler
+            del found, cat, handler
             return keys
         msgs = []
         for cat in list(keys):

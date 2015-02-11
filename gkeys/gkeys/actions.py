@@ -825,9 +825,11 @@ class Actions(object):
                 args.name = None
                 args.all = False
                 keys = self.key_search(args, data_only=True)
-                args.category = list(keys)[0]
-                args.nick = keys[args.category][0].nick
-                return self.verify(args, messages)
+                if keys:
+                    args.category = list(keys)[0]
+                    args.nick = keys[args.category][0].nick
+                    return self.verify(args, messages)
+                messages.append(_unicode("Failed to find gpg key.: 0x%s") % s_keyid)
         return (verified, messages)
 
 

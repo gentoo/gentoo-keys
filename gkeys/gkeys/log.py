@@ -71,3 +71,12 @@ def set_logger(namespace=None, logpath='', level=None,
     logger.debug("Loggers initialized")
 
     return logger
+
+
+def save_logname():
+    global logname, NAMESPACE
+    _dir, name = os.path.split(logname)
+    with open(os.path.join(_dir, '%s-lastlog' % NAMESPACE), 'w') as last:
+        last.write(name)
+
+

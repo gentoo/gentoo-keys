@@ -77,6 +77,7 @@ git commit -m "${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
 git push origin master || die " *** git push failed"
 
 echo "Pushing the log file to ${LOG_UPLOAD_URL}"
+LOG_FILE=$( cat "${LOG_DIR}/gkeys-ldap-lastlog" )
 scp "${LOG_DIR}/${LOG_FILE}" "${LOG_UPLOAD_URL}"  || die "Failed to upload logfile: ${LOG_FILE}"
 
 success "Successfully updated developer.seeds"

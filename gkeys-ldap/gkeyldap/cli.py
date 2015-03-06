@@ -11,6 +11,7 @@ from gkeys import __version__
 from gkeys.base import CliBase
 from gkeys.config import GKeysConfig
 from gkeyldap.actions import (Actions, Available_Actions, Action_Map)
+from gkeys.log import save_logname
 
 
 class Main(CliBase):
@@ -52,6 +53,7 @@ class Main(CliBase):
             args = self.parse_args(sys.argv[1:])
             ok = self.setup(args, os.path.join(self.config['configdir'],'gkeys.conf'))
         if ok:
+            save_logname()
             return self.run(args)
         return False
 

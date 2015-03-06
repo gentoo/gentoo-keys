@@ -61,7 +61,7 @@ class Seeds(object):
         seedlines = None
         self.seeds = {}
         try:
-            with codecs.open(self.filename, "r+", encoding='utf_8') as seedfile:
+            with open(self.filename, "r+") as seedfile:
                 seedlines = json.load(seedfile)
         except IOError as err:
             self.logger.debug("Seed: load; IOError occurred while loading file")
@@ -104,7 +104,7 @@ class Seeds(object):
             fatal=True)
         os.umask(int(self.config.get_key("permissions", "files"),0))
         try:
-            with codecs.open(self.filename, 'w', encoding='utf_8') as seedfile:
+            with open(self.filename, 'w') as seedfile:
                 seedfile.write(self._seeds2json(self.seeds))
                 seedfile.write("\n")
         except IOError as err:

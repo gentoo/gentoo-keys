@@ -267,8 +267,8 @@ class CliBase(object):
             self.config.read_config(configs)
 
         # check for permissions and adjust configs accordngly
-        if not self.config['homedir']:
-            self.config['homedir'] = os.path.expanduser('~')
+        if not self.config.defaults['homedir']:
+            self.config.defaults['homedir'] = os.path.expanduser('~')
         if not os.access(self.config['logdir'], os.W_OK):
             self.config['logdir'] = ensure_dirs(
                 os.path.join(self.config['user-dir'], 'logs'))

@@ -99,8 +99,8 @@ class GKeysConfig(GPGConfig):
             self.defaults[key] = self._sub_(self.defaults[key])
         defaults = OrderedDict()
         # Add only the defaults we want in the configparser
-        for key in ['gkeysdir', 'keyring', 'sign-keydir', 'logdir', 'seedsdir',
-            'keyserver']:
+        for key in ['gkeysdir', 'homedir', 'keyring', 'sign-keydir', 'logdir',
+            'seedsdir', 'keyserver']:
             defaults[key] = self.defaults[key]
         if filename == None:
             filename = self.defaults['config']

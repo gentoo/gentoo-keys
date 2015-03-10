@@ -27,6 +27,7 @@ else:
     _unicode = unicode
 
 from gkeys.fileops import ensure_dirs
+from gkeys import log
 
 
 Action_Map = OrderedDict([
@@ -174,8 +175,10 @@ class Actions(object):
                 result = ctx.genkey(key_params)
             except gpgme.GpgmeError as e:
                 self.logger.debug("MAIN: _action_genkey: GpgmeError: %s" % str(e))
-                self.logger.debug("MAIN: _action_genkey: Aborting... Failed to get a password.")
-                messages.extend(['', "Aborting... Failed to get a password."])
+                self.logger.debug("MAIN: _action_genkey: Aborting... Gpgme errored out.")
+                messages.extend(['', "Aborting... Gpgme reported an error.\n",
+                    "    GpgmeError: %s\n" % str(e),
+                    "    See the log file for details: %s" % log.logname])
                 return (False, messages)
             key = ctx.get_key(result.fpr, True)
             self.logger.debug("MAIN: _action_genkey: Generated key: %s - %s"

@@ -242,12 +242,12 @@ class Actions(object):
         else:
             gpgkey = 'Missing or Bad fingerprint from LDAP info'
             is_good = False
-        if not keyinfo['longkeyid']:
-            self.logger.error('ERROR in ldap info for: %s, %s'
-                % (info['uid'][0], info['cn'][0]))
-            self.logger.error('  A valid keyid, longkeyid or fingerprint '
-                'was not found for %s : gpgkey = %s' % (info['cn'][0], gpgkey))
-            is_good = False
+        #if not keyinfo['longkeyid']:
+            #self.logger.error('ERROR in ldap info for: %s, %s'
+                #% (info['uid'][0], info['cn'][0]))
+            #self.logger.error('  A valid keyid, longkeyid or fingerprint '
+                #'was not found for %s : gpgkey = %s' % (info['cn'][0], gpgkey))
+            #is_good = False
         return (keyinfo, is_good)
 
 

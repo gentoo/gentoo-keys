@@ -459,7 +459,7 @@ class Actions(object):
                             if not key.bits:
                                 failed['bits'].append(_unicode("%s <%s>: %s")
                                     % (gkey.name, gkey.nick, key.fingerprint))
-                        if "Warning" in key.expire_reason:
+                        if "warning" in key.expire_reason.lower():
                             failed['warn'].append(_unicode("%s <%s>: %s ")
                                 % (gkey.name, gkey.nick, key.fingerprint))
                     if True in pub_pass['signs']:

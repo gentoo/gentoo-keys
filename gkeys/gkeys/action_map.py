@@ -157,7 +157,7 @@ Found:
     ('list-key', {
         'func': 'listkey',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys',
-            'keydir', 'keyring', 'gpgsearch'],
+            'keydir', 'keyring'],
         'desc': '''Pretty-print the selected gpg key''',
         'long_desc': '''Pretty-print the selected gpg key''',
         'example': '''gkeys list-key -C gentoo -n gkeys

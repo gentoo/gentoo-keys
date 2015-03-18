@@ -206,45 +206,17 @@ class Actions(object):
         results = {}
         success = []
         messages = []
-        if args.gpgsearch:
-            keyresults = seeds.seeds
-            # pick any key
-            key = keyresults[sorted(keyresults)[0]]
-            result = self.gpg.list_keys(key.keydir, args.gpgsearch)
-            # now split the results and reverse lookup the gkey
-            lines = result.output.split('\n')
-            while lines:
-                # determine the end of the first key listing
-                index = lines.index('')
-                keyinfo = lines[:index]
-                # trim off the first keys info
-                lines = lines[index + 1:]
-                # make sure it is a key listing
-                if len(keyinfo) < 2:
-                    break
-                # get the fingerprint from the line
-                fpr = keyinfo[1].split('= ')[1]
-                # search for the matching gkey
-                kwargs = {'keydir': args.keydir, 'fingerprint': [fpr]}
-                keyresults = seeds.list(**kwargs)
-                # list the results
-                for key in sorted(keyresults):
-                    ls, lr = self._list_it(key, '\n'.join(keyinfo))
-                    success.append(ls)
-                    results[key.name] = lr
+        kwargs = handler.build_gkeydict(args)
+        keyresults = seeds.list(**kwargs)
+        for key in sorted(keyresults):
+            if args.fingerprint:
+                result = self.gpg.list_keys(key.keydir, kwargs['fingerprint'])
+            else:
+                result = self.gpg.list_keys(key.keydir)
+            ls, lr = self._list_it(key, result.output)
+            success.append(ls)
+            results[key.name] = lr
             messages = ["Done."]
-        else:
-            kwargs = handler.build_gkeydict(args)
-            keyresults = seeds.list(**kwargs)
-            for key in sorted(keyresults):
-                if args.fingerprint:
-                    result = self.gpg.list_keys(key.keydir, kwargs['fingerprint'])
-                else:
-                    result = self.gpg.list_keys(key.keydir)
-                ls, lr = self._list_it(key, result.output)
-                success.append(ls)
-                results[key.name] = lr
-                messages = ["Done."]
 
         if not messages:
             messages = ['No results found meeting criteria', "Did you specify -n foo or -n '*'"]

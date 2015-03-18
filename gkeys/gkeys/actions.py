@@ -542,7 +542,7 @@ class Actions(object):
         if args.nick == '*':
             self.output([''],_unicode('Remove All keys in category: %s')
                 % _unicode(args.category))
-            ans = py_input ("Do you really want to remove ALL of keys?[y/n]: ")
+            ans = py_input ("Do you really want to remove ALL of the keys?[y/n]: ")
             while ans not in ["yes", "y", "no", "n"]:
                 ans = py_input ("Do you really want to remove ALL keys?[y/n]: ")
             if ans in ["no", "n"]:

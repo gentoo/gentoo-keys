@@ -234,7 +234,7 @@ class GkeysGPG(GPG):
             lresults.append(self.list_keys(gkey.keydir, fpr, colons=True))
         self.seedfile.update(gkey.update(lresults))
         if save and not self.seedfile.save():
-            self.logger.error("GkeysGPG.refresh_key(); failed to save seed: " + gkey.nick)
+            self.logger.error("GkeysGPG.update_gkey(); failed to save seed: " + gkey.nick)
             return False
         return True
 

@@ -369,10 +369,10 @@ class KeyChecks(object):
             stats[SPEC_INDEX['expire']] = True
         elif days > delta_t and not ('i' in data.validity or 'r' in data.validity):
             stats[SPEC_INDEX['expire_reason']] = '<== Exceeds specification'
-            self.logger.error("ERROR in key %s : gpg key expire date: %s EXCEEDS specification"
+            self.logger.warn("ERROR in key %s : gpg key expire date: %s EXCEEDS specification"
                 % (data.long_keyid, data.expiredate))
         else:
-            self.logger.error("ERROR in key %s : invalid gpg key expire date: %s"
+            self.logger.warn("ERROR in key %s : invalid gpg key expire date: %s"
                 % (data.long_keyid, data.expiredate))
         if 0 < days < 30 and not ('i' in data.validity or 'r' in data.validity):
             stats[SPEC_INDEX['expire_reason']] = '<== WARNING < 30 days'
@@ -398,7 +398,7 @@ class KeyChecks(object):
                     stats[SPEC_INDEX['encrypt_capable']] = True
                 elif cap not in CAPABILITY_MAP:
                     stats[SPEC_INDEX['caps']] = False
-                    self.logger.error("ERROR in key %s : unknown gpg key capability: %s"
+                    self.logger.warn("ERROR in key %s : unknown gpg key capability: %s"
                         % (data.long_keyid, cap))
         stats[SPEC_INDEX['long_caps']] = ', '.join(kcaps)
         return stats

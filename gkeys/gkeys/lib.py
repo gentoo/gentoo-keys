@@ -254,16 +254,17 @@ class GkeysGPG(GPG):
         if fingerprint:
             task = 'list-key'
             target = fingerprint
+            self.set_keydir(keydir, task, fingerprint=True)
         else:
             task = 'list-keys'
-            target = keydir
-        self.set_keydir(keydir, task, fingerprint=True)
-        self.config.options['tasks'][task].extend(['--keyid-format', 'long', '--fingerprint', '--fingerprint'])
+            target = ''
+            self.set_keydir(keydir, task, fingerprint=False)
+        self.config.options['tasks'][task].extend(['--keyid-format', 'long', '--fingerprint'])
         if colons:
             task_value = ['--with-colons']
             self.config.options['tasks'][task].extend(task_value)
         self.logger.debug("** Calling runGPG with Running 'gpg %s --%s %s'"
-            % (' '.join(self.config['tasks'][task]), task, keydir)
+            % (' '.join(self.config['tasks'][task]), task, target)
             )
         result = self.runGPG(task=task, inputfile=target)
         self.logger.info('GPG return code: ' + str(result.returncode))

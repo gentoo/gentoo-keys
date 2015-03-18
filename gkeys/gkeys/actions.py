@@ -237,7 +237,10 @@ class Actions(object):
             kwargs = handler.build_gkeydict(args)
             keyresults = seeds.list(**kwargs)
             for key in sorted(keyresults):
-                result = self.gpg.list_keys(key.keydir, key.fingerprint)
+                if args.fingerprint:
+                    result = self.gpg.list_keys(key.keydir, kwargs['fingerprint'])
+                else:
+                    result = self.gpg.list_keys(key.keydir)
                 ls, lr = self._list_it(key, result.output)
                 success.append(ls)
                 results[key.name] = lr

@@ -53,6 +53,8 @@ class SeedHandler(object):
                 value = getattr(args, attr)
                 if attr == 'name' and isinstance(value, list):
                     value = " ".join(value)
+                if attr == 'fingerprint' and value:
+                    value = [x.replace(" ", "") for x in value]
                 if value is not None:
                     keyinfo[attr] = decoder(value)
             except AttributeError:

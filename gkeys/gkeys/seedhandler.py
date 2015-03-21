@@ -216,17 +216,27 @@ class SeedHandler(object):
     def key_search(self, args, search_args):
         '''Performs a search for all listed args in the seeds'''
         results = []
-        self.logger.debug("_field_search search_args: %s" % str(search_args))
+        self.logger.debug("SeedHandler.key_search() search_args: %s" % str(search_args))
         found = {}
         search_args.sort()
+        if isinstance(args, dict):
+            exact = args.get('exact', False)
+            _all = args.get('all', False)
+        else:
+            exact = getattr(args, 'exact', False)
+            _all = getattr(args, 'all', False)
         for arg in search_args:
-            seeds = self.seeds.field_search(arg, getattr(args, arg), args.exact)
+            if isinstance(args, dict):
+                value = args.get(arg, '')
+            else:
+                value = getattr(args, arg)
+            seeds = self.seeds.field_search(arg, value, exact)
             for seed in seeds:
                 if seed.nick in found:
                     found[seed.nick]['args'].append(arg)
                 else:
                     found[seed.nick] = {'args': [arg], 'seed': seed}
-        if args.all:
+        if _all:
             for possible in sorted(found):
                 if search_args == found[possible]['args']:
                     results.append(found[possible]['seed'])

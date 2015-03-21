@@ -572,7 +572,6 @@ class Actions(object):
         if args.category:
             keyring = self.config.get_key('keyring')
             catdir = os.path.join(keyring, args.category)
-            keyring_dir = self.config.get_key("keyring")
             self.logger.debug(_unicode("ACTIONS: importkey; catdir = %s")
                 % catdir)
             self.gpg = GkeysGPG(self.config, catdir, self.logger)

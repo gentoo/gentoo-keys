@@ -30,9 +30,6 @@ if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
     EPREFIX = ''
 
 
-MAPSEEDS = { 'dev' : 'gentoodevs.seeds', 'rel': 'gentoo.seeds' }
-
-
 class GKeysConfig(GPGConfig):
     """ Configuration superclass which holds our gentoo-keys
     config settings for pygpg """

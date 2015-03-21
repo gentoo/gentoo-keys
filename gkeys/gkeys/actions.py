@@ -245,11 +245,11 @@ class Actions(object):
     def installkey(self, args):
         '''Install a key from the seed(s)'''
         self.logger.debug("ACTIONS: installkey; args: %s" % str(args))
-        success, gkey = self.listseed(args)[1]
-        if gkey:
-            if gkey and not args.nick == '*' and self.output:
-                self.output(['', gkey], "\n Found GKEY seeds:")
-            elif gkey and self.output:
+        success, gkeys = self.listseed(args)[1]
+        if gkeys:
+            if gkeys and not args.nick == '*' and self.output:
+                self.output(['', gkeys], "\n Found GKEY seeds:")
+            elif gkeys and self.output:
                 self.output(['all'], "\n Installing seeds:")
             else:
                 self.logger.info("ACTIONS: installkey; "
@@ -269,33 +269,47 @@ class Actions(object):
             self.logger.debug(_unicode("ACTIONS: installkey; catdir = %s")
                 % catdir)
             self.gpg = GkeysGPG(self.config, catdir, self.logger)
-            results = {}
-            failed = []
-            for key in gkey:
-                self.logger.debug("ACTIONS: installkey; adding key:")
-                self.logger.debug("ACTIONS: " + str(key))
-                results[key.name] = self.gpg.add_key(key)
-                for result in results[key.name]:
-                    self.logger.debug("ACTIONS: installkey; result.failed = " +
-                                      str(result.failed))
-                if self.config.options['print_results']:
-                    msg = _unicode("key desired: %(name)s, key added: %(key)s, succeeded:" +\
-                        " %(success)s, fingerprint: %(fpr)s")
-                    for result in results[key.name]:
-                        umsg = msg % ({'name': key.name, 'key': result.username,
-                                'success': str(not result.failed),
-                                'fpr': result.fingerprint})
-                        try:
-                            print(umsg)
-                        except UnicodeDecodeError:
-                            print(_unicode("UnicodeDecodeError printing results for:"), key.name)
-                            self.logger.debug(_unicode("installkey(); UnicodeDecodeError for:") + key.name)
-                            self.logger.debug(_unicode("    result.username...:") + result.username)
-                            self.logger.debug(_unicode("    result.failed.....:") + result.failed)
-                            self.logger.debug(_unicode("    result.fingerprint:") + result.fingerprint)
-                        self.logger.debug("stderr_out: " + str(result.stderr_out))
-                        if result.failed:
-                            failed.append(key)
+            for gkey in gkeys:
+                self.gpg.set_keydir(gkey.keydir, "recv-keys")
+                self.gpg.set_keyseedfile()
+                seeds = self.gpg.seedfile.seeds
+                #print(seeds)
+                if seeds:
+                    self.logger.debug("ACTIONS: installkey; found installed seeds:"
+                        "\n %s" % seeds)
+                results = {}
+                failed = []
+                if gkey.nick in seeds and gkey.keys == seeds[gkey.nick].keys:
+                    self.logger.debug("ACTIONS: installkey; refreshing key:")
+                    if self.config.options['print_results']:
+                        print(_unicode("Refreshing already installed key: %s, %s"
+                            %(gkey.nick, gkey.keys)))
+                    self.gpg.refresh_key(gkey)
+                else:
+                    self.logger.debug("ACTIONS: installkey; adding key:")
+                    self.logger.debug("ACTIONS: " + str(gkey))
+                    results[gkey.name] = self.gpg.add_key(gkey)
+                    for result in results[gkey.name]:
+                        self.logger.debug("ACTIONS: installkey; result.failed = " +
+                                          str(result.failed))
+                    if self.config.options['print_results']:
+                        msg = _unicode("key desired: %(name)s, key added: %(key)s, succeeded:" +\
+                            " %(success)s, fingerprint: %(fpr)s")
+                        for result in results[gkey.name]:
+                            umsg = msg % ({'name': gkey.name, 'key': result.username,
+                                    'success': str(not result.failed),
+                                    'fpr': result.fingerprint})
+                            try:
+                                print(umsg)
+                            except UnicodeDecodeError:
+                                print(_unicode("UnicodeDecodeError printing results for:"), gkey.name)
+                                self.logger.debug(_unicode("installkey(); UnicodeDecodeError for:") + gkey.name)
+                                self.logger.debug(_unicode("    result.username...:") + result.username)
+                                self.logger.debug(_unicode("    result.failed.....:") + result.failed)
+                                self.logger.debug(_unicode("    result.fingerprint:") + result.fingerprint)
+                            self.logger.debug("stderr_out: " + str(result.stderr_out))
+                            if result.failed:
+                                failed.append(gkey)
             if failed and self.output:
                 self.output([failed], "\n Failed to install:")
             if failed:

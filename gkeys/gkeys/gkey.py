@@ -7,7 +7,7 @@
     Holds GKEY class and related values
 
     @copyright: 2012-2015 by Brian Dolbec <dol-sen@gentoo.org>
-    @license: GNU GNU GPL2, see COPYING for details.
+    @license: GNU GPL2, see COPYING for details.
 """
 
 

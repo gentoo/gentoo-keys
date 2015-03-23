@@ -24,10 +24,15 @@ Utility functions'''
 
 import types
 import re
-import os
-import sys
-import locale
-import codecs
+
+from snakeoil.demandload import demandload
+
+demandload(
+    "os",
+    "sys",
+    "locale",
+    "codecs",
+)
 
 try:
     StringTypes = types.StringTypes

@@ -24,13 +24,17 @@ else:
 
 
 from collections import defaultdict
-from json import load
 
-from gkeys.lib import GkeysGPG
-from gkeys.seedhandler import SeedHandler
+from snakeoil.demandload import demandload
+
 from gkeys.gkey import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
+demandload(
+    "json:load",
+    "gkeys.lib:GkeysGPG",
+    "gkeys.seedhandler:SeedHandler",
+)
 
 class Actions(object):
     '''Primary API actions'''

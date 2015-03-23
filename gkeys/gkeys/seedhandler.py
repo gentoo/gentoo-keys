@@ -12,12 +12,17 @@
 
 import os
 import re
-from json import load
 
-from gkeys.exception import UpdateDbError
+from snakeoil.demandload import demandload
+
 from gkeys.gkey import GKEY
 from gkeys.seed import Seeds, decoder
-from gkeys.fileops import ensure_dirs
+
+demandload(
+    "json:load",
+    "gkeys.exception:UpdateDbError",
+    "gkeys.fileops:ensure_dirs",
+)
 
 
 class SeedHandler(object):

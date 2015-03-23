@@ -21,11 +21,15 @@ import json
 import os
 import sys
 
-from gkeys.exception import UpdateDbError
-from gkeys.log import logger
-from gkeys.gkey import GKEY
-from gkeys.fileops import ensure_dirs
+from snakeoil.demandload import demandload
 
+from gkeys.gkey import GKEY
+
+demandload(
+    "gkeys.log:logger",
+    "gkeys.exception:UpdateDbError",
+    "gkeys.fileops:ensure_dirs",
+)
 
 if sys.version_info[0] >= 3:
     def decoder(text, enc='utf_8'):

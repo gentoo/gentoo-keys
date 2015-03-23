@@ -26,6 +26,33 @@ if sys.version_info[0] >= 3:
     unicode = str
 
 
+class Args(object):
+    '''Basic argsparser replacement for using gkeys Actions via an API
+
+    Holds the full spectrum of possible options supported.
+    Not all options used by all actions.'''
+
+
+    def __init__(self):
+        self.status = False
+        self.all = False
+        self.category = None
+        self.cleankey = False
+        self.destination = None
+        self.exact = False
+        self.filename = None
+        self.fingerprint = None
+        self.keyid = None
+        self.keyring = None
+        self.keys = None
+        self.nick = None
+        self.name = None
+        self.keydir = None
+        self.seedfile = None
+        self.signature = None
+        self.uid = None
+
+
 class CliBase(object):
     '''Common cli and argsparse options class'''
 

@@ -206,7 +206,7 @@ class Actions(object):
                 keyid_found = True
         elif values and attr in ['fingerprint']:
             values = [v.replace(' ', '') for v in values]
-        if 'undefined' in values:
+        if 'undefined' in values and attr not in ['keyid', 'longkeyid']:
             self.logger.error('ERROR in LDAP info for: %s, %s'
                               % (info['uid'][0], info['cn'][0]))
             self.logger.error('  %s = "undefined"' % (field))

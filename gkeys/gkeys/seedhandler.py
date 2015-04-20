@@ -58,10 +58,13 @@ class SeedHandler(object):
                 value = getattr(args, attr)
                 if attr == 'name' and isinstance(value, list):
                     value = " ".join(value)
-                if attr == 'fingerprint' and value:
+                if attr in ['fingerprint', 'keys'] and value:
                     value = [x.replace(" ", "") for x in value]
-                if value is not None:
+                    keyinfo[attr] = value
+                if value is not None and attr in ['keydir', 'name', 'nick']:
                     keyinfo[attr] = decoder(value)
+                else:
+                    keyinfo[attr] = value
             except AttributeError:
                 pass
         return keyinfo

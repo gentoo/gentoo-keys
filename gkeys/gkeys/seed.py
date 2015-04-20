@@ -36,7 +36,7 @@ if sys.version_info[0] >= 3:
         return text
 else:
     def decoder(text, enc='utf_8'):
-        return codecs.decode(text, enc)
+        return unicode(text)
 
 
 class Seeds(object):
@@ -155,6 +155,8 @@ class Seeds(object):
         keys = kwargs
         result = self.seeds
         for key in keys:
+            if not kwargs[key]:
+                continue
             if key in ['fingerprint', 'keys', 'keyid']:
                 kwargs[key] = [x.replace(' ', '').upper() for x in kwargs[key]]
             if key in ['fingerprint', 'keys', 'uid']:

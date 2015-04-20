@@ -98,7 +98,8 @@ class Actions(object):
     def addseed(self, args):
         '''Add or replace a key in the selected seed file'''
         handler = SeedHandler(self.logger, self.config)
-        success, gkeys = self.listseed(args)[1]
+        success, data = self.listseed(args)
+        gkeys = data[1]
         if not args.nick or not args.name or not args.keys or not args.keydir:
             return (False, ["Provide a nickname, a name and a public key fingerprint (-K, --keys)."])
         if not args.fingerprint:
@@ -126,7 +127,8 @@ class Actions(object):
 
     def removeseed(self, args):
         '''Remove a seed from the selected seed file'''
-        success, gkeys = self.listseed(args)[1]
+        success, data = self.listseed(args)
+        gkeys = data[1]
         if not gkeys:
             return (False, ["Failed to remove seed: No gkeys returned from listseed()",
                 []])
@@ -249,7 +251,8 @@ class Actions(object):
     def installkey(self, args):
         '''Install a key from the seed(s)'''
         self.logger.debug("ACTIONS: installkey; args: %s" % str(args))
-        success, gkeys = self.listseed(args)[1]
+        success, data = self.listseed(args)
+        gkeys = data[1]
         if gkeys:
             if gkeys and not args.nick == '*' and self.output:
                 self.output(['', gkeys], "\n Found GKEY seeds:")
@@ -593,7 +596,8 @@ class Actions(object):
             self.logger.debug(_unicode("ACTIONS: importkey; catdir = %s")
                 % catdir)
             self.gpg = GkeysGPG(self.config, catdir, self.logger)
-            success, gkeys = self.listseed(args)[1]
+            success, data = self.listseed(args)
+            gkeys = data[1]
             results = {}
             failed = []
             print("Importing specified keys to keyring.")

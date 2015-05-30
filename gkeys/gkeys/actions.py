@@ -734,6 +734,7 @@ class Actions(object):
                     "not supplied, using current directory ./%s") % filepath)
         if args.timestamp:
             timestamp_path = filepath + ".timestamp"
+        sig_path = None
         if isurl:
             from sslfetch.connections import Connector
             connector_output = {

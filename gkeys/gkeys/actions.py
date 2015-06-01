@@ -36,6 +36,10 @@ demandload(
     "gkeys.seedhandler:SeedHandler",
 )
 
+
+EXTENSIONS = ['.sig', '.asc', '.gpg','.gpgsig']
+
+
 class Actions(object):
     '''Primary API actions'''
 
@@ -754,9 +758,8 @@ class Actions(object):
                 url, filepath, timestamp_path)
             if not success:
                 messages.append(_unicode("File %s cannot be retrieved.") % filepath)
-            else:
+            elif '.' + url.rsplit('.', 1)[1] not in EXTENSIONS:
                 if not signature:
-                    EXTENSIONS = ['.sig', '.asc', 'gpg','.gpgsig']
                     success_fetch = False
                     for ext in EXTENSIONS:
                         sig_path = filepath + ext
@@ -776,7 +779,6 @@ class Actions(object):
                 _unicode("ACTIONS: verify; local file %s") % filepath)
             success = os.path.isfile(filepath)
             if not signature:
-                EXTENSIONS = ['.sig', '.asc', 'gpg','.gpgsig']
                 success_fetch = False
                 for ext in EXTENSIONS:
                     sig_path = filepath + ext

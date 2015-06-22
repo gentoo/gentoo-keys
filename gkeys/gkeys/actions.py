@@ -778,7 +778,8 @@ class Actions(object):
             self.logger.debug(
                 _unicode("ACTIONS: verify; local file %s") % filepath)
             success = os.path.isfile(filepath)
-            if not signature:
+            if (not signature
+                and '.' + filepath.rsplit('.', 1)[1] not in EXTENSIONS):
                 success_fetch = False
                 for ext in EXTENSIONS:
                     sig_path = filepath + ext

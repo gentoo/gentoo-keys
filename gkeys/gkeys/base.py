@@ -64,6 +64,7 @@ class CliBase(object):
             'Actions': None,
             'Available_Actions': [],
             'Action_Map': {},
+            'Base_Options': [],
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',
             'epilog': '''Caution: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
@@ -74,6 +75,7 @@ class CliBase(object):
         self.actions = None
         self.logger = None
         self.version = None
+        self.need_Action = True
 
 
     @staticmethod
@@ -242,29 +244,32 @@ class CliBase(object):
         parser.add_argument('-V', '--version', action = 'version',
                           version = self.version)
 
+        # Add any additional options to the command base
+        self._add_options(parser, self.cli_config['Base_Options'])
 
-        subparsers = parser.add_subparsers(
-            title='Subcommands',
-            description='Valid subcommands',
-            help='Additional help')
-        for name in self.cli_config['Available_Actions']:
-            actiondoc = self.cli_config['Action_Map'][name]['desc']
-            try:
-                text = actiondoc.splitlines()[0]
-            except AttributeError:
-                text = ""
-            action_parser = subparsers.add_parser(
-                name,
-                help=text,
-                description=actiondoc,
-                formatter_class=argparse.RawDescriptionHelpFormatter)
-            action_parser.set_defaults(action=name)
-            options = self.cli_config['Action_Map'][name]['options']
-            self._add_options(action_parser, options)
+        if self.cli_config['Available_Actions']:
+            subparsers = parser.add_subparsers(
+                title='Subcommands',
+                description='Valid subcommands',
+                help='Additional help')
+            for name in self.cli_config['Available_Actions']:
+                actiondoc = self.cli_config['Action_Map'][name]['desc']
+                try:
+                    text = actiondoc.splitlines()[0]
+                except AttributeError:
+                    text = ""
+                action_parser = subparsers.add_parser(
+                    name,
+                    help=text,
+                    description=actiondoc,
+                    formatter_class=argparse.RawDescriptionHelpFormatter)
+                action_parser.set_defaults(action=name)
+                options = self.cli_config['Action_Map'][name]['options']
+                self._add_options(action_parser, options)
 
         parsed_args = parser.parse_args(argv)
         action = getattr(parsed_args, 'action', None)
-        if not action:
+        if self.need_Action and not action:
             parser.print_usage()
             sys.exit(1)
         elif action in ['---general---', '----keys-----', '----seeds----']:
@@ -327,6 +332,10 @@ class CliBase(object):
 
 
     def run(self, args):
+        '''Run the action selected
+
+        @param args: list of argumanets to parse
+        '''
         # establish our actions instance
         self.actions = self.cli_config['Actions'](self.config, self.output_results, self.logger)
 

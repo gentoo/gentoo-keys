@@ -34,6 +34,7 @@ class Main(CliBase):
             'Actions': Actions,
             'Available_Actions': Available_Actions,
             'Action_Map': Action_Map,
+            'Base_Options': [],
             'prog': 'gkeys-ldap',
             'description': 'Gentoo-keys LDAP interface and seed file generator program',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''

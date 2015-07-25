@@ -18,10 +18,9 @@ import sys
 
 from gkeys import __version__
 from gkeys.base import CliBase
-from gkeys.actions import Actions
-from gkeys.action_map import Available_Actions, Action_Map
+from gkeys.actions import Actions as gkeysActions
 from gkeys.config import GKeysConfig
-
+from gkeysgpg.actions import Actions, Available_Actions, Action_Map
 
 
 class Main(CliBase):
@@ -38,15 +37,16 @@ class Main(CliBase):
         self.config = config or GKeysConfig(root=root)
         self.config.options['print_results'] = print_results
         self.cli_config = {
-            'Actions': [],
-            'Available_Actions': [],
-            'Action_Map': [],
-            'Base_Options': ['sign', 'verify'],
+            'Actions':  Actions,
+            'Available_Actions': Available_Actions,
+            'Action_Map': Action_Map,
+            'Base_Options': Available_Actions,
             'prog': 'gkeys-gpg',
             'description': 'Gentoo-keys gpg command wrapper',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
         }
         self.version = __version__
+        self.need_Action = False
 
 
     def __call__(self, args=None):
@@ -58,18 +58,33 @@ class Main(CliBase):
         if args:
             ok = self.setup(args, [])
         else:
+            #print(" *** __call__()")
             args = self.parse_args(sys.argv[1:])
+            #print(" *** __call__(); parsed args")
             ok = self.setup(args, os.path.join(self.config['configdir'],'gkeys.conf'))
         if ok:
             return self.run(args)
         return False
+
 
     def run(self, args):
         '''Run the gpg command option
 
         @param args: list of argumanets to parse
         '''
-        self.logger.debug('Main: run; Found action: %s' % args.action)
+        # establish our actions instance
+        self.actions = self.cli_config['Actions'](self.config, self.output_results, self.logger)
+
+        #print(" *** args:", args)
+        for action in self.cli_config['Available_Actions']:
+            if getattr(args, action):
+                #print(" *** found action", action)
+                break
+
+        # run the action
+        func = getattr(self.actions, '%s'
+            % self.cli_config['Action_Map'][action]['func'])
+        self.logger.debug('Main: run; Found action: %s' % action)
         success, results = func(args)
         if not results:
             print("No results found.  Check your configuration and that the",

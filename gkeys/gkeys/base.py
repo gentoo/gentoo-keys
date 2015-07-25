@@ -34,7 +34,7 @@ class Args(object):
 
 
     def __init__(self):
-        self.status = False
+        self.ation = None
         self.all = False
         self.category = None
         self.cleankey = False
@@ -50,6 +50,8 @@ class Args(object):
         self.keydir = None
         self.seedfile = None
         self.signature = None
+        self.status = False
+        self.timestamp = None
         self.uid = None
 
 

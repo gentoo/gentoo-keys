@@ -20,6 +20,7 @@ with gentoo-keys specific convienience functions.
 from __future__ import print_function
 
 import os
+
 from os.path import abspath, pardir
 from os.path import join as pjoin
 from shutil import rmtree
@@ -28,6 +29,7 @@ from pyGPG.gpg import GPG
 from gkeys.checks import KeyChecks
 from gkeys.fileops import ensure_dirs
 from gkeys.seed import Seeds
+
 
 class GkeysGPG(GPG):
     '''Gentoo-keys primary gpg class'''
@@ -357,7 +359,6 @@ class GkeysGPG(GPG):
         @param fingerprint: string of the fingerprint to sign with
         @param filepath: string with the path of the file to sign
         '''
-        keyid = gkey.keyid[0]
         self.set_keydir(gkey.keydir, mode, reset=True)
         self.logger.debug("** Calling runGPG with Running 'gpg %s --%s %s %s'"
                 % (' '.join(self.config['tasks'][mode]), mode, fingerprint, filepath))

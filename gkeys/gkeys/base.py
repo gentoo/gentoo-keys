@@ -299,8 +299,8 @@ class CliBase(object):
         if not self.config.defaults['homedir']:
             self.config.defaults['homedir'] = os.path.expanduser('~')
         if not os.access(self.config['logdir'], os.W_OK):
-            self.config['logdir'] = ensure_dirs(
-                os.path.join(self.config['user-dir'], 'logs'))
+            self.config.options['logdir'] = os.path.join(self.config['userconfigdir'], 'logs')
+            ensure_dirs(self.config.options['logdir'])
         # establish our logger and update it in the imported files
         self.logger = set_logger(self.cli_config['prog'], self.config['logdir'], args.debug,
             dirmode=int(self.config.get_key('permissions', 'directories'),0),
@@ -314,6 +314,7 @@ class CliBase(object):
         if args.config:
             self.logger.debug("Main: run; Found alternate config request: %s"
                 % args.config)
+        self.logger.debug("Main: run; Using config: %s" % self.config['config'])
 
         # check if a -C, --category was input
         # if it was, check if the category is listed in the [seeds]

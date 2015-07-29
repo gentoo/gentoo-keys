@@ -27,7 +27,7 @@ else:
 from collections import defaultdict
 
 from snakeoil.demandload import demandload
-
+from gkeys.actionbase import ActionBase
 from gkeys.gkey import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
 
@@ -41,14 +41,11 @@ demandload(
 EXTENSIONS = ['.sig', '.asc', '.gpg','.gpgsig']
 
 
-class Actions(object):
+class Actions(ActionBase):
     '''Primary API actions'''
 
     def __init__(self, config, output=None, logger=None):
-        self.config = config
-        self.output = output
-        self.logger = logger
-        self.seeds = None
+        ActionBase.__init__(self, config, output, logger)
 
 
     @staticmethod
@@ -67,7 +64,6 @@ class Actions(object):
     def GENERAL_COMMANDS(args):
         '''-----< general actions >------'''
         pass
-
 
     def listseed(self, args):
         '''Pretty-print the selected seed file'''

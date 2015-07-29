@@ -318,10 +318,19 @@ class GkeysGPG(GPG):
         pass
 
 
-    def verify_text(self, text):
+    def verify_text(self, gkey, text, filepath=None):
         '''Verify a text block in memory
+
+        @param gkey: GKEY instance of the gpg key used to verify it
+        @param text: string of the of the text to verify
+        @param filepath: optional string with the path or url of the signed file
         '''
-        pass
+        self.set_keydir(gkey.keydir, 'verify', fingerprint=False, reset=True)
+        self.logger.debug("** Calling runGPG with Running 'gpg %s --verify %s'"
+                % (' '.join(self.config['tasks']['verify']), filepath))
+        results = self.runGPG(task='verify', inputfile=filepath, inputtxt=text)
+        self._log_result('verification', gkey, results)
+        return results
 
 
     def verify_file(self, gkey, signature, filepath):

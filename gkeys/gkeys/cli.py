@@ -6,7 +6,7 @@
 
     Command line interface module
 
-    @copyright: 2012 by Brian Dolbec <dol-sen@gentoo.org>
+    @copyright: 2012-2015 by Brian Dolbec <dol-sen@gentoo.org>
     @license: GNU GPL2, see COPYING for details.
 """
 

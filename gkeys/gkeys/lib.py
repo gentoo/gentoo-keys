@@ -8,11 +8,12 @@ with gentoo-keys specific convienience functions.
  Distributed under the terms of the GNU General Public License v2
 
  Copyright:
-             (c) 2011 Brian Dolbec
-             Distributed under the terms of the GNU General Public License v2
+    @copyright: 2011-2015 by Brian Dolbec <dol-sen@gentoo.org>
+    @copyright: 2014-2015 by Pavlos Ratis <dastergon@gentoo.org>
+    Distributed under the terms of the GNU General Public License v2
 
  Author(s):
-             Brian Dolbec <dolsen@gentoo.org>
+    Brian Dolbec <dolsen@gentoo.org>
 
 '''
 

@@ -5,7 +5,8 @@
     Gentoo-Keys - gkeygen/checks.py
 
     Primary key checks module
-    @copyright: 2014 by Brian Dolbec <dolsen@gentoo.org>
+    @copyright: 2014-2015 by Brian Dolbec <dolsen@gentoo.org>
+    @copyright: 2014-2015 by Pavlos Ratis <dastergon@gentoo.org>
     @license: GNU GPL2, see COPYING for details
 """
 

@@ -34,7 +34,7 @@ class Args(object):
 
 
     def __init__(self):
-        self.ation = None
+        self.action = None
         self.all = False
         self.category = None
         self.cleankey = False

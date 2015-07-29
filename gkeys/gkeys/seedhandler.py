@@ -223,10 +223,11 @@ class SeedHandler(object):
 
     def key_search(self, args, search_args):
         '''Performs a search for all listed args in the seeds'''
-        results = []
-        self.logger.debug("SeedHandler.key_search() search_args: %s" % str(search_args))
-        found = {}
         search_args.sort()
+        self.logger.debug("SeedHandler.key_search() search_args: %s" % str(search_args))
+        self.logger.debug("SeedHandler.key_search() search_args values: %s" % str(args))
+        results = []
+        found = {}
         if isinstance(args, dict):
             exact = args.get('exact', False)
             _all = args.get('all', False)

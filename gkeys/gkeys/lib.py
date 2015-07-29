@@ -338,14 +338,7 @@ class GkeysGPG(GPG):
             self.logger.debug("** Calling runGPG with Running 'gpg %s --decrypt %s'"
                     % (' '.join(self.config['tasks']['decrypt']), filepath))
             results = self.runGPG(task='decrypt', inputfile=filepath)
-        keyid = gkey.keyid[0]
-        if results.verified[0]:
-            self.logger.info("GPG verification succeeded. Name: %s / Key: %s" % (gkey.name, keyid))
-            self.logger.info("\tSignature result:" + str(results.verified))
-        else:
-            self.logger.debug("GPG verification failed. Name: %s / Key: %s" % (gkey.name, keyid))
-            self.logger.debug("\t Signature result:"+ str(results.verified))
-            self.logger.debug("LIB: verify; stderr_out:" + str(results.stderr_out))
+        self._log_result('verification', gkey, results)
         return results
 
 
@@ -369,12 +362,20 @@ class GkeysGPG(GPG):
         self.logger.debug("** Calling runGPG with Running 'gpg %s --%s %s %s'"
                 % (' '.join(self.config['tasks'][mode]), mode, fingerprint, filepath))
         results = self.runGPG(task=mode, inputfile=filepath)
+        self._log_result('signing', gkey, results)
+        return results
 
+
+    def _log_result(self, mode, gkey, results):
         if results.verified[0]:
-            self.logger.info("GPG signing succeeded. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            self.logger.info("GPG %s succeeded. Name: %s / Key: %s"
+                % (mode, gkey.name, gkey.keyid[0]))
             self.logger.info("\tSignature result:" + str(results.verified))
         else:
-            self.logger.debug("GPG signing failed. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            self.logger.debug("GPG %s failed. Name: %s / Key: %s"
+                % (mode, gkey.name, gkey.keyid[0]))
             self.logger.debug("\t Signature result:"+ str(results.verified))
-            self.logger.debug("LIB: sign; stderr_out:" + str(results.stderr_out))
-        return results
+            self.logger.debug("LIB: verify; stderr_out:" +
+                str(results.stderr_out))
+
+

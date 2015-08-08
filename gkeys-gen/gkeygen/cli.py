@@ -32,6 +32,7 @@ class Main(CliBase):
             'Actions': Actions,
             'Available_Actions': Available_Actions,
             'Action_Map': Action_Map,
+            'Base_Options': [],
             'prog': 'gkeys-gen',
             'description': 'Gentoo Keys GPG key generator program',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''

@@ -6,7 +6,7 @@
 
     Command line interface module
 
-    @copyright: 2012 by Brian Dolbec <dol-sen@gentoo.org>
+    @copyright: 2012-2015 by Brian Dolbec <dol-sen@gentoo.org>
     @license: GNU GPL2, see COPYING for details.
 """
 
@@ -41,6 +41,7 @@ class Main(CliBase):
             'Actions': Actions,
             'Available_Actions': Available_Actions,
             'Action_Map': Action_Map,
+            'Base_Options': [],
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''

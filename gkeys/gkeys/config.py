@@ -54,10 +54,11 @@ class GKeysConfig(GPGConfig):
 
     def _set_default_config(self):
             self.defaults['homedir'] = os.path.expanduser('~')
-            self.defaults['configdir'] = os.path.join(
-                self.defaults['homedir'], '.gkeys')
+            self.defaults['userconfigdir'] = os.path.join(
+                self.defaults['homedir'], '.config', 'gkeys')
+            self.defaults['configdir'] = self.defaults['userconfigdir']
             self.defaults['config']= os.path.join(
-                self.defaults['configdir'], 'gkeys.conf')
+                self.defaults['userconfigdir'], 'gkeys.conf')
             if not os.path.exists(self.defaults['config']):
                 self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gkeys'])
                 self.defaults['config'] = '%(configdir)s/gkeys.conf'
@@ -101,6 +102,9 @@ class GKeysConfig(GPGConfig):
             defaults[key] = self.defaults[key]
         if filename == None:
             filename = self.defaults['config']
+        if "foo-bar'd" in filename:
+            print("Config: read_config(); Configuration ERROR: filename: %s, access: %s"
+                % (filename, os.access(filename, os.R_OK)))
         self.configparser = SaneConfigParser(defaults)
         self.configparser.read(filename)
         if self.configparser.has_section('base'):

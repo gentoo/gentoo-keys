@@ -8,11 +8,12 @@ with gentoo-keys specific convienience functions.
  Distributed under the terms of the GNU General Public License v2
 
  Copyright:
-             (c) 2011 Brian Dolbec
-             Distributed under the terms of the GNU General Public License v2
+    @copyright: 2011-2015 by Brian Dolbec <dol-sen@gentoo.org>
+    @copyright: 2014-2015 by Pavlos Ratis <dastergon@gentoo.org>
+    Distributed under the terms of the GNU General Public License v2
 
  Author(s):
-             Brian Dolbec <dolsen@gentoo.org>
+    Brian Dolbec <dolsen@gentoo.org>
 
 '''
 
@@ -20,6 +21,7 @@ with gentoo-keys specific convienience functions.
 from __future__ import print_function
 
 import os
+
 from os.path import abspath, pardir
 from os.path import join as pjoin
 from shutil import rmtree
@@ -28,6 +30,7 @@ from pyGPG.gpg import GPG
 from gkeys.checks import KeyChecks
 from gkeys.fileops import ensure_dirs
 from gkeys.seed import Seeds
+
 
 class GkeysGPG(GPG):
     '''Gentoo-keys primary gpg class'''
@@ -315,10 +318,19 @@ class GkeysGPG(GPG):
         pass
 
 
-    def verify_text(self, text):
+    def verify_text(self, gkey, text, filepath=None):
         '''Verify a text block in memory
+
+        @param gkey: GKEY instance of the gpg key used to verify it
+        @param text: string of the of the text to verify
+        @param filepath: optional string with the path or url of the signed file
         '''
-        pass
+        self.set_keydir(gkey.keydir, 'verify', fingerprint=False, reset=True)
+        self.logger.debug("** Calling runGPG with Running 'gpg %s --verify %s'"
+                % (' '.join(self.config['tasks']['verify']), filepath))
+        results = self.runGPG(task='verify', inputfile=filepath, inputtxt=text)
+        self._log_result('verification', gkey, results)
+        return results
 
 
     def verify_file(self, gkey, signature, filepath):
@@ -338,14 +350,7 @@ class GkeysGPG(GPG):
             self.logger.debug("** Calling runGPG with Running 'gpg %s --decrypt %s'"
                     % (' '.join(self.config['tasks']['decrypt']), filepath))
             results = self.runGPG(task='decrypt', inputfile=filepath)
-        keyid = gkey.keyid[0]
-        if results.verified[0]:
-            self.logger.info("GPG verification succeeded. Name: %s / Key: %s" % (gkey.name, keyid))
-            self.logger.info("\tSignature result:" + str(results.verified))
-        else:
-            self.logger.debug("GPG verification failed. Name: %s / Key: %s" % (gkey.name, keyid))
-            self.logger.debug("\t Signature result:"+ str(results.verified))
-            self.logger.debug("LIB: verify; stderr_out:" + str(results.stderr_out))
+        self._log_result('verification', gkey, results)
         return results
 
 
@@ -364,17 +369,24 @@ class GkeysGPG(GPG):
         @param fingerprint: string of the fingerprint to sign with
         @param filepath: string with the path of the file to sign
         '''
-        keyid = gkey.keyid[0]
         self.set_keydir(gkey.keydir, mode, reset=True)
         self.logger.debug("** Calling runGPG with Running 'gpg %s --%s %s %s'"
                 % (' '.join(self.config['tasks'][mode]), mode, fingerprint, filepath))
         results = self.runGPG(task=mode, inputfile=filepath)
+        self._log_result('signing', gkey, results)
+        return results
 
+
+    def _log_result(self, mode, gkey, results):
         if results.verified[0]:
-            self.logger.info("GPG signing succeeded. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            self.logger.info("GPG %s succeeded. Name: %s / Key: %s"
+                % (mode, gkey.name, gkey.keyid[0]))
             self.logger.info("\tSignature result:" + str(results.verified))
         else:
-            self.logger.debug("GPG signing failed. Name: %s / Key: %s" % (str(gkey.name), str(keyid)))
+            self.logger.debug("GPG %s failed. Name: %s / Key: %s"
+                % (mode, gkey.name, gkey.keyid[0]))
             self.logger.debug("\t Signature result:"+ str(results.verified))
-            self.logger.debug("LIB: sign; stderr_out:" + str(results.stderr_out))
-        return results
+            self.logger.debug("LIB: verify; stderr_out:" +
+                str(results.stderr_out))
+
+

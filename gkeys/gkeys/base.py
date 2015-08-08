@@ -7,7 +7,7 @@
     Command line interface argsparse options module
     and common functions
 
-    @copyright: 2012 by Brian Dolbec <dol-sen@gentoo.org>
+    @copyright: 2012-2015 by Brian Dolbec <dol-sen@gentoo.org>
     @license: GNU GPL2, see COPYING for details.
 """
 
@@ -34,7 +34,7 @@ class Args(object):
 
 
     def __init__(self):
-        self.status = False
+        self.action = None
         self.all = False
         self.category = None
         self.cleankey = False
@@ -50,6 +50,8 @@ class Args(object):
         self.keydir = None
         self.seedfile = None
         self.signature = None
+        self.status = False
+        self.timestamp = None
         self.uid = None
 
 
@@ -62,6 +64,7 @@ class CliBase(object):
             'Actions': None,
             'Available_Actions': [],
             'Action_Map': {},
+            'Base_Options': [],
             'prog': 'gkeys',
             'description': 'Gentoo-keys manager program',
             'epilog': '''Caution: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
@@ -72,6 +75,7 @@ class CliBase(object):
         self.actions = None
         self.logger = None
         self.version = None
+        self.need_Action = True
 
 
     @staticmethod
@@ -240,29 +244,32 @@ class CliBase(object):
         parser.add_argument('-V', '--version', action = 'version',
                           version = self.version)
 
+        # Add any additional options to the command base
+        self._add_options(parser, self.cli_config['Base_Options'])
 
-        subparsers = parser.add_subparsers(
-            title='Subcommands',
-            description='Valid subcommands',
-            help='Additional help')
-        for name in self.cli_config['Available_Actions']:
-            actiondoc = self.cli_config['Action_Map'][name]['desc']
-            try:
-                text = actiondoc.splitlines()[0]
-            except AttributeError:
-                text = ""
-            action_parser = subparsers.add_parser(
-                name,
-                help=text,
-                description=actiondoc,
-                formatter_class=argparse.RawDescriptionHelpFormatter)
-            action_parser.set_defaults(action=name)
-            options = self.cli_config['Action_Map'][name]['options']
-            self._add_options(action_parser, options)
+        if self.cli_config['Available_Actions']:
+            subparsers = parser.add_subparsers(
+                title='Subcommands',
+                description='Valid subcommands',
+                help='Additional help')
+            for name in self.cli_config['Available_Actions']:
+                actiondoc = self.cli_config['Action_Map'][name]['desc']
+                try:
+                    text = actiondoc.splitlines()[0]
+                except AttributeError:
+                    text = ""
+                action_parser = subparsers.add_parser(
+                    name,
+                    help=text,
+                    description=actiondoc,
+                    formatter_class=argparse.RawDescriptionHelpFormatter)
+                action_parser.set_defaults(action=name)
+                options = self.cli_config['Action_Map'][name]['options']
+                self._add_options(action_parser, options)
 
         parsed_args = parser.parse_args(argv)
         action = getattr(parsed_args, 'action', None)
-        if not action:
+        if self.need_Action and not action:
             parser.print_usage()
             sys.exit(1)
         elif action in ['---general---', '----keys-----', '----seeds----']:
@@ -297,8 +304,8 @@ class CliBase(object):
         if not self.config.defaults['homedir']:
             self.config.defaults['homedir'] = os.path.expanduser('~')
         if not os.access(self.config['logdir'], os.W_OK):
-            self.config['logdir'] = ensure_dirs(
-                os.path.join(self.config['user-dir'], 'logs'))
+            self.config.options['logdir'] = os.path.join(self.config['userconfigdir'], 'logs')
+            ensure_dirs(self.config.options['logdir'])
         # establish our logger and update it in the imported files
         self.logger = set_logger(self.cli_config['prog'], self.config['logdir'], args.debug,
             dirmode=int(self.config.get_key('permissions', 'directories'),0),
@@ -312,6 +319,7 @@ class CliBase(object):
         if args.config:
             self.logger.debug("Main: run; Found alternate config request: %s"
                 % args.config)
+        self.logger.debug("Main: run; Using config: %s" % self.config['config'])
 
         # check if a -C, --category was input
         # if it was, check if the category is listed in the [seeds]
@@ -324,6 +332,10 @@ class CliBase(object):
 
 
     def run(self, args):
+        '''Run the action selected
+
+        @param args: list of argumanets to parse
+        '''
         # establish our actions instance
         self.actions = self.cli_config['Actions'](self.config, self.output_results, self.logger)
 

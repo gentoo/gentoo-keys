@@ -112,6 +112,8 @@ class SeedHandler(object):
                 nicks = os.listdir(catdir)
             for nick in nicks:
                 seed_path = os.path.join(catdir, nick)
+                if not os.path.isdir(seed_path):
+                    continue
                 gkey_path = os.path.join(seed_path, 'gkey.seeds')
                 seed = None
                 try:

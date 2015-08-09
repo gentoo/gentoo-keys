@@ -40,7 +40,7 @@ class Main(CliBase):
             'Actions':  Actions,
             'Available_Actions': Available_Actions,
             'Action_Map': Action_Map,
-            'Base_Options': Available_Actions.copy(),
+            'Base_Options': Available_Actions[:],
             'prog': 'gkeys-gpg',
             'description': 'Gentoo-keys gpg command wrapper',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''

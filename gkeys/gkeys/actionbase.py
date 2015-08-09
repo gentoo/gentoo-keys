@@ -85,6 +85,16 @@ class ActionBase(object):
         self.category = cat
         catdir = os.path.join(keyring, cat)
         self.logger.debug(_unicode("ACTIONS: _set_category; catdir = %s") % catdir)
+        self._set_trust(cat)
         return catdir
 
 
+    def _set_trust(self, cat):
+        trust = self.config.get_key('trust-model', cat)
+        if trust in [None]:
+            trust = 'auto'
+        if 'trust-model' in self.config.defaults['gpg_defaults']:
+            index = self.config.defaults['gpg_defaults'].index('trust-model')
+            self.config.defaults['gpg_defaults'][index+1] = trust
+        else:
+            self.config.defaults['gpg_defaults'].extend(['--trust-model', trust])

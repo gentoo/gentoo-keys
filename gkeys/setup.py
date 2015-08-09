@@ -83,8 +83,8 @@ setup(
     maintainer_email='gkeys@gentoo.org',
     url="https://wiki.gentoo.org/wiki/Project:Gentoo-keys",
     download_url='',
-    packages=['gkeys'],
-    scripts=['bin/gkeys'],
+    packages=['gkeys', 'gkeysgpg'],
+    scripts=['bin/gkeys', 'bin/gkeys-gpg'],
     data_files=[
         (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys.conf']),
         (os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'etc/gkeys/'), ['etc/gkeys.conf.sample']),

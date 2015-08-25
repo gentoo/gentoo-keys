@@ -82,7 +82,8 @@ class GKeysConfig(GPGConfig):
             'keyring': None,
             'type': 'clearsign',
         }
-        self.defaults['verify-keyring'] = ''
+        self.defaults['verify-keyring'] = 'gentoo'
+        self.defaults['verify-nick'] = 'gkeys'
         self.defaults['verify-seeds'] = {}
 
 

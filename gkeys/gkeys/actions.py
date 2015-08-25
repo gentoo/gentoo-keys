@@ -660,7 +660,7 @@ class Actions(ActionBase):
         if not args.filename:
             return (False, ['Please provide a signed file.'])
         if not args.category:
-            args.category = self.config.get_key('verify_keyring')
+            args.category = self.config.get_key('verify-keyring')
             self.logger.debug(_unicode(
                 "ACTIONS: verify; keyring category not specified, using default: %s")
                 % args.category)
@@ -685,6 +685,7 @@ class Actions(ActionBase):
     def _verify(self, args, key, messages=None):
         if messages == None:
             messages = []
+        self.category = args.category
         filepath, signature  = args.filename, args.signature
         timestamp_path = None
         isurl = success = verified = False

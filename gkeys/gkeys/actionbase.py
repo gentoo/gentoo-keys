@@ -80,7 +80,9 @@ class ActionBase(object):
 
     def _set_category(self, cat):
         keyring = self.config.get_key('keyring')
-        if "foo-bar'd" in keyring:
+        if not keyring:
+            raise
+        if not cat:
             raise
         self.category = cat
         catdir = os.path.join(keyring, cat)

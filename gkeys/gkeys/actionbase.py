@@ -81,9 +81,9 @@ class ActionBase(object):
     def _set_category(self, cat):
         keyring = self.config.get_key('keyring')
         if not keyring:
-            raise
+            raise Exception("No keyring set.")
         if not cat:
-            raise
+            raise Exception("No category set.")
         self.category = cat
         catdir = os.path.join(keyring, cat)
         self.logger.debug(_unicode("ACTIONS: _set_category; catdir = %s") % catdir)

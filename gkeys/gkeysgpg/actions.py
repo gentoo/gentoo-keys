@@ -77,6 +77,7 @@ class Actions(ActionBase):
 
         '''
         @param args: argparse.parse_args instance
+        @params argv: original command line args
         '''
         key = None
         if args.dash: # stdin arg
@@ -155,13 +156,29 @@ class Actions(ActionBase):
         return (results.returncode, results)
 
 
-    def sign(self, args):
-        '''Sign a file'''
-        print("Made it to the --sign option :)")
-        gkeyargs = Args()
-        gkeyargs.filename = args.sign
-        gkeys = gkeyActions(self.config, self.output, self.logger)
-        return gkeys.sign(gkeyargs)
+    def sign(self, args, argv):
+        '''Sign a file using gnupg's gpg command, replacing the current process'''
+        cmd = ['usr/bin/gpg']
+        cmd.extend(argv)
+        for stream in (sys.__stdout__, sys.__stderr__):
+            stream.flush()
+
+        try:
+            pid = os.fork()
+            if pid == 0:
+                # A second fork is required in order to create an
+                # "orphan" process that will be reaped by init.
+                pid = os.fork()
+                if pid == 0:
+                    os.setsid()
+                os._exit(0)
+
+            os.waitpid(pid, 0)
+            os.execv(cmd[0], cmd)
+        except Exception:
+            traceback.print_exc()
+        finally:
+            os._exit(1)
 
 
     def _committer_search(self, data):

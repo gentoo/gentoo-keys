@@ -54,10 +54,8 @@ def set_logger(namespace=None, logpath='', level=None,
             '%s-%s.log' % (namespace, time.strftime('%Y%m%d-%H:%M')))
         file_handler = logging.FileHandler(logname)
         if level:
-            #print "Setting cli log level", level, log_levels[level]
             file_handler.setLevel(log_levels[level])
         else:
-            #print "Create file handler which logs even debug messages"
             file_handler.setLevel(log_levels['DEBUG'])
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)

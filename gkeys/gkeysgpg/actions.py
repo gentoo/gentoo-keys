@@ -12,6 +12,7 @@
 
 from __future__ import print_function
 
+import re
 import sys
 
 if sys.version_info[0] >= 3:
@@ -26,7 +27,7 @@ from snakeoil.demandload import demandload
 
 from gkeys.actions import Actions as gkeyActions
 from gkeys.actionbase import ActionBase
-from gkeys.base import Args
+from pyGPG.gpg import GPG
 
 demandload(
     "json:load",
@@ -36,15 +37,6 @@ demandload(
 
 
 Action_Map = OrderedDict([
-    ('sign', {
-        'func': 'sign',
-        'options': ['nick', 'name', 'fingerprint', ],
-        'desc': '''Sign a file''',
-        'long_desc': '''Sign a file with the designated gpg key.
-    The default sign settings can be set in gpg.conf.  These settings can be
-    overridden on the command line using the 'nick', 'name', 'fingerprint' options''',
-        'example': '''gkeys-gpg --sign foo''',
-        }),
     ('verify', {
         'func': 'verify',
         'options': [],
@@ -59,7 +51,7 @@ Action_Map = OrderedDict([
         }),
 ])
 
-Available_Actions = ['sign', 'verify']
+Available_Actions = ['verify']
 
 
 class Actions(ActionBase):
@@ -154,31 +146,6 @@ class Actions(ActionBase):
         self.logger.debug("gpg returncode: \n%s\n" %str(results.returncode))
         self.logger.debug("gpg stderr results: \n%s\n" %str(results.stderr_out))
         return (results.returncode, results)
-
-
-    def sign(self, args, argv):
-        '''Sign a file using gnupg's gpg command, replacing the current process'''
-        cmd = ['usr/bin/gpg']
-        cmd.extend(argv)
-        for stream in (sys.__stdout__, sys.__stderr__):
-            stream.flush()
-
-        try:
-            pid = os.fork()
-            if pid == 0:
-                # A second fork is required in order to create an
-                # "orphan" process that will be reaped by init.
-                pid = os.fork()
-                if pid == 0:
-                    os.setsid()
-                os._exit(0)
-
-            os.waitpid(pid, 0)
-            os.execv(cmd[0], cmd)
-        except Exception:
-            traceback.print_exc()
-        finally:
-            os._exit(1)
 
 
     def _committer_search(self, data):

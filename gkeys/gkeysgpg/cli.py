@@ -45,7 +45,8 @@ class Main(CliBase):
             'description': 'Gentoo-keys gpg command wrapper',
             'epilog': '''CAUTION: adding UNTRUSTED keys can be HAZARDOUS to your system!'''
         }
-        self.cli_config['Base_Options'].extend(["dash", "statusfd"])
+        self.cli_config['Base_Options'].extend(["armor", "clearsign", "dash",
+            "detachsign", "statusfd", "user"])
         self.cli_config['Base_Options'].extend(KEY_OPTIONS)
         self.cli_config['Base_Options'].extend(["category"])
         self.version = __version__
@@ -101,23 +102,38 @@ class Main(CliBase):
             help='fill me in')
 
     @staticmethod
+    def _option_armor(parser=None):
+        parser.add_argument('-a', '--armor', dest='armor',
+            action='store_true',
+            help='Create ASCII armored output.  The default is to create the binary OpenPGP format.')
+
+    @staticmethod
     def _option_clearsign(parser=None):
-        parser.add_argument('--clearsign', dest='clearsign', default=None,
+        parser.add_argument('--clearsign', dest='clearsign',
+            action='store_true', default=None,
             help='make a clear text signature')
 
     @staticmethod
     def _option_detachsign(parser=None):
-        parser.add_argument('-b', '--detach-sign', dest='detachsign', default=None,
+        parser.add_argument('-b', '--detach-sign', dest='detachsign',
+            action='store_true', default=None,
             help='make a detached signature')
 
     @staticmethod
     def _option_sign(parser=None):
-        parser.add_argument('-s', '--sign', dest='sign', default=None,
+        parser.add_argument('-s', '--sign', dest='sign',
+            action='store_true', default=None,
             help='make a signature')
 
     @staticmethod
+    def _option_user(parser=None):
+        parser.add_argument('-u', '--local-user', dest='user', default=None,
+            help='Use name as the key to sign with.')
+
+    @staticmethod
     def _option_verify(parser=None):
-        parser.add_argument('--verify', dest='verify', default=None,
+        parser.add_argument('--verify', dest='verify',
+            action='store_true', default=None,
             help='verify a signature')
 
 ### These are for gpg command compatibilty only

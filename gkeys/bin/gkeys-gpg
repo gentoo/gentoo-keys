@@ -28,6 +28,14 @@ import os
 import sys
 
 
+if '--verify' not in sys.argv:
+    # we are not verifying now, just call out to the normal
+    # gpg with args exactly as we were called with
+    sys.argv[0] = '/usr/bin/gpg'
+    os.execvp('/usr/bin/gpg', sys.argv)
+    sys.exit(1)
+
+
 # This block ensures that ^C interrupts are handled quietly.
 try:
     import signal

@@ -6,7 +6,7 @@ from collections import OrderedDict
 from gkeygen.actions import Action_Map, Available_Actions
 
 
-__version__ = '0.1'
+__version__ = '0.2'
 __license__ = 'GPLv2'
 
 

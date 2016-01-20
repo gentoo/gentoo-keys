@@ -702,6 +702,9 @@ class Actions(ActionBase):
                     "not supplied, using current directory ./%s") % filepath)
         if args.timestamp:
             timestamp_path = filepath + ".timestamp"
+            climit = 60
+        else:
+            climit = 0
         sig_path = None
         if isurl:
             from sslfetch.connections import Connector
@@ -719,7 +722,7 @@ class Actions(ActionBase):
             self.logger.debug(
                 _unicode("ACTIONS: verify; timestamp path: %s") % timestamp_path)
             success, signedfile, timestamp = fetcher.fetch_file(
-                url, filepath, timestamp_path)
+                url, filepath, timestamp_path, climit=climit)
             if not success:
                 messages.append(_unicode("File %s cannot be retrieved.") % filepath)
             elif '.' + url.rsplit('.', 1)[1] not in EXTENSIONS:

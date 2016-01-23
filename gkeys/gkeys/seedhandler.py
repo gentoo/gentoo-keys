@@ -137,7 +137,7 @@ class SeedHandler(object):
                         seeds.add(nick, GKEY(**key))
         except OSError as error:
             self.logger.debug("SeedHandler: load_category; OSError for %s" % catdir)
-            self.logger.debug("Error was: %s" % str(error))
+            self.logger.exception("Error was: %s" % str(error))
         self.seeds = seeds
         return seeds
 

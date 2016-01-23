@@ -246,10 +246,10 @@ class Seeds(object):
         '''Class error logging function'''
         if debug:
             self.logger.debug("Seed: Error processing seed file %s" % self.filename)
-            self.logger.debug("Seed: Error was: %s" % str(err))
+            self.logger.exception("Seed: Error was: %s" % str(err))
         else:
             self.logger.error("Seed: Error processing seed file %s" % self.filename)
-            self.logger.error("Seed: Error was: %s" % str(err))
+            self.logger.exception("Seed: Error was: %s" % str(err))
 
 
     def _seeds2json(self, seeds):

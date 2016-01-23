@@ -712,9 +712,15 @@ class Actions(ActionBase):
                  'info': self.logger.info,
                  'debug': self.logger.debug,
                  'error': self.logger.error,
+                 'exception': self.logger.exception,
+                 # we want any warnings to be printed to the terminal
+                 # so assign it to logging.error
+                 'warning': self.logger.error,
                  'kwargs-info': {},
                  'kwargs-debug': {},
                  'kwargs-error': {},
+                 'kwargs-exception': {},
+                 'kwargs-warning': {},
             }
             fetcher = Connector(connector_output, None, "Gentoo Keys")
             self.logger.debug(

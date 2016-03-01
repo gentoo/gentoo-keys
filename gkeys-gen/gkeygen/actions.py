@@ -149,7 +149,7 @@ class Actions(object):
             ack = py_input("Continue?[y/n]: ").lower()
         if ack in ["n", "no"]:
             messages.extend(['', "\nKey generation aborted."])
-            return (False. messages)
+            return (False, messages)
         elif ack in ["y", "yes"]:
             # Set the environment to custom gpg directory
             os.environ['GNUPGHOME'] = gpghome

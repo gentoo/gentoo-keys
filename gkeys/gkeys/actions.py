@@ -407,6 +407,8 @@ class Actions(ActionBase):
                                 'encrypts': [],
                                 'authens': [],
                                 'final': False,
+                                'qualified_id_checks': [],
+                                'qualified_id_passed': False
                             }
                         if key.key is "SUB":
                             if key.sign_capable and key.passed_spec:
@@ -419,6 +421,9 @@ class Actions(ActionBase):
                                 pub_pass['authens'].append(key.passed_spec)
                                 if key.passed_spec:
                                     pub_pass['auth'] = True
+                        if key.id:
+                            pub_pass['qualified_id_checks'].append(key.id)
+                            pub_pass['qualified_id_passed'] = True
                         validity = key.validity.split(',')[0]
                         if not key.expire and not 'r' in validity:
                             failed['expired'].append(_unicode("%s <%s>: %s")
@@ -445,6 +450,9 @@ class Actions(ActionBase):
                         pub_pass['encrypt'] = True
                     if not pub_pass['sign']:
                         failed['sign'].append(_unicode("%s <%s>: %s")
+                            % (gkey.name, gkey.nick, pub_pass['key'].fingerprint))
+                    if not pub_pass['qualified_id_passed']:
+                        failed['qualified_id'].append(_unicode("%s <%s>: %s")
                             % (gkey.name, gkey.nick, pub_pass['key'].fingerprint))
                     if not pub_pass['encrypt']:
                         failed['encrypt'].append(_unicode("%s <%s>: %s")
@@ -483,6 +491,8 @@ class Actions(ActionBase):
             self.output([sorted(set(failed['expired']))], '\n Expiry keys:')
         if failed['warn']:
             self.output([sorted(set(failed['warn']))], '\n Expiry Warnings:')
+        if failed['qualified_id']:
+            self.output([sorted(set(failed['qualified_id']))], '\n Qualified IDs:')
         if failed['spec']:
             self.output([sorted(set(failed['spec']))], '\n Failed to pass SPEC requirements:')
         if failed['spec-approved']:
@@ -496,6 +506,7 @@ class Actions(ActionBase):
                 'No Encryption subkey...: %d' % len(set(failed['encrypt'])),
                 'Algorithm..............: %d' % len(set(failed['algo'])),
                 'Bit length.............: %d' % len(set(failed['bits'])),
+                'Qualified IDs..........: %d' % len(set(failed['qualified_id'])),
                 'Expiry.................: %d' % len(set(failed['expired'])),
                 'Expiry Warnings........: %d' % len(set(failed['warn'])),
                 'SPEC requirements......: %d' % len(set(failed['spec'])),
@@ -889,4 +900,3 @@ class Actions(ActionBase):
             msgs.append(keys[cat])
         del keys
         return (True, msgs)
-

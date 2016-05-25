@@ -1,0 +1,4 @@
+pygpgme
+gnupg
+http://dev.gentoo.org/~dolsen/releases/ssl-fetch/ssl-fetch-0.4.tar.gz/#egg=ssl-fetch
+snakeoil >= 0.6.5

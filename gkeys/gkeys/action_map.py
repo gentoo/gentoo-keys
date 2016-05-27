@@ -15,7 +15,7 @@ from collections import OrderedDict
 
 
 Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed',
-    'list-seed', 'list-seedfiles', 'remove-seed']
+    'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
 
 Key_Actions = ['----keys-----', 'check-key', 'installed',
     'install-key', 'list-key', 'refresh-key', 'remove-key',
@@ -430,5 +430,3 @@ Found Failures:
 ''',
         }),
 ])
-
-

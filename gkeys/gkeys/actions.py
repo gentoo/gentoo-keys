@@ -153,10 +153,10 @@ class Actions(ActionBase):
         self.logger.debug(_unicode("ACTIONS: moveseed; gkey: %s")
             % _unicode(searchkey))
         if not self.seeds:
-            self.seeds = self.load_seeds(args.category)
+            self.seeds = self.seedhandler.load_seeds(args.category)
         kwargs = self.seedhandler.build_gkeydict(args)
         sourcekeys = self.seeds.list(**kwargs)
-        dest = self.load_seeds(args.destination)
+        dest = self.seedhandler.load_seeds(args.destination)
         destkeys = dest.list(**kwargs)
         messages = []
         if len(sourcekeys) == 1 and destkeys == []:

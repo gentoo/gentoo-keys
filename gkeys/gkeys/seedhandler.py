@@ -67,7 +67,8 @@ class SeedHandler(object):
                 else:
                     keyinfo[attr] = value
             except AttributeError:
-                pass
+                if attr in GKEY._fields:
+                    keyinfo[attr] = None
         return keyinfo
 
     def load_seeds(self, seedfile=None, filepath=None, refresh=False):

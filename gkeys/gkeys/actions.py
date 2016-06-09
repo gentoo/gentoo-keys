@@ -96,7 +96,19 @@ class Actions(ActionBase):
         messages.append("")
         messages.append("Fetch operation completed")
         return (False not in success, messages)
-
+   
+    def updateseed(self, args):
+        '''Updates seeds of a selected file'''
+        self.logger.debug(_unicode("ACTIONS: updateseed; args: %s")
+            % _unicode(args))
+        fetch_success, fetch_messages = self.fetchseed(args)
+        if fetch_success is not True:
+            return (False, fetch_messages)
+        install_success, install_messages = self.installkey(args)
+        if install_success is not True:
+            return (False, install_messages)
+        messages = fetch_messages + [install_messages]
+        return (True, messages)
 
     def addseed(self, args):
         '''Add or replace a key in the selected seed file'''

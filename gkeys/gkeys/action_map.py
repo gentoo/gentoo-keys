@@ -15,7 +15,8 @@ from collections import OrderedDict
 
 
 Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed',
-    'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
+    'update-seed', 'list-seed', 'list-seedfiles', 'move-seed',
+    'remove-seed']
 
 Key_Actions = ['----keys-----', 'check-key', 'installed',
     'install-key', 'list-key', 'send-key', 'refresh-key', 'remove-key',
@@ -378,6 +379,22 @@ Found Failures:
          category, nick.....: gentoo gkeys
 
     Fetch operation completed
+''',
+         }),
+    ('update-seed', {
+        'func': 'updateseed',
+        'options': ['category', 'nick', '1file', 'dest', 'signature',
+            'timestamp'],
+        'desc': '''Update the selected seed file(s)''',
+        'long_desc': '''Update the selected seed file(s)''',
+        'example': '''$ gkeys update-seed -C gentoo-devs
+
+ Gkey task results:
+     Verification succeeded.: /home/brian/gpg-test/seeds/gentoo-devs.seeds
+     Key info...............: Gentoo-Linux Gentoo-keys Project Signing Key <gkeys>, 0xA41DBBD9151C3FC7
+         category, nick.....: gentoo gkeys
+
+    Update operation completed
 ''',
          }),
     ('list-seed', {

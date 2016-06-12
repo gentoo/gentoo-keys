@@ -1,4 +1,4 @@
-#
+
 #-*- coding:utf-8 -*-
 
 """
@@ -96,19 +96,41 @@ class Actions(ActionBase):
         messages.append("")
         messages.append("Fetch operation completed")
         return (False not in success, messages)
-   
+
     def updateseed(self, args):
-        '''Updates seeds of a selected file'''
+        '''Updates seeds of a selected file or all categories if no args are given'''
         self.logger.debug(_unicode("ACTIONS: updateseed; args: %s")
             % _unicode(args))
+        messages = []
+        success = True
+        if not args.category:
+            '''Update all available categories'''
+            seed_categories = list(self.config.defaults['seeds'])
+            category_msgs = []
+            for seed_category in seed_categories:
+                self.seeds = None
+                custom_args = args
+                custom_args.category = seed_category
+                category_success, messages = self.updateseed(custom_args)
+                category_msgs.extend(messages)
+            return (True, category_msgs)
+        self.output('', "Fetching seeds for %s category.\n" %args.category)
         fetch_success, fetch_messages = self.fetchseed(args)
         if fetch_success is not True:
-            return (False, fetch_messages)
-        install_success, install_messages = self.installkey(args)
-        if install_success is not True:
-            return (False, install_messages)
-        messages = fetch_messages + [install_messages]
-        return (True, messages)
+            success = False
+            messages = fetch_messages
+            self.output('', "Fetch failed.\n")
+        else:
+            self.output('', "Fetch succeeded.\n")
+            self.output('', "Installing or Refreshing keys for %s category." %args.category)
+            install_success, install_messages = self.installkey(args)
+            if install_success is not True:
+                self.output('', "Update failed.\n")
+                success = False
+            else:
+                self.output('', "Update succeeded.\n")
+            messages = fetch_messages + ["Update operation:"]  + [install_messages]
+        return (success, messages)
 
     def addseed(self, args):
         '''Add or replace a key in the selected seed file'''
@@ -313,7 +335,6 @@ class Actions(ActionBase):
                 self.gpg.set_keydir(gkey.keydir, "recv-keys")
                 self.gpg.set_keyseedfile()
                 seeds = self.gpg.seedfile.seeds
-                #print(seeds)
                 if seeds:
                     self.logger.debug("ACTIONS: installkey; found installed seeds:"
                         "\n %s" % seeds)

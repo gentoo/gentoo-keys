@@ -114,41 +114,23 @@ class Actions(ActionBase):
                 category_success, messages = self.updateseed(custom_args)
                 category_msgs.extend(messages)
             return (True, category_msgs)
-        print("Fetching seeds for %s category.\n" %args.category)
-        success, old_gkeys = self.listseed(args)
+        self.output('', "Fetching seeds for %s category.\n" %args.category)
         fetch_success, fetch_messages = self.fetchseed(args)
         self.seeds = None
         if fetch_success is not True:
             success = False
             messages = fetch_messages
-            print("Fetch failed.\n")
+            self.output('', "Fetch failed.\n")
         else:
-            print("Fetch succeeded.\n")
-            print("Installing or Refreshing keys for %s category." %args.category)
+            self.output('', "Fetch succeeded.\n")
+            self.output('', "Installing or Refreshing keys for %s category." %args.category)
             install_success, install_messages = self.installkey(args)
             if install_success is not True:
-                print("Update failed.\n")
+                self.output('', "Update failed.\n")
                 success = False
             else:
-                print("Update succeeded.\n")
-            messages = fetch_messages + [" Update operation:"] + [install_messages]
-            success, new_gkeys = self.listseed(args)
-            added_gkeys, changed_gkeys, removed_gkeys  = self.seedhandler.compare_seeds(old_gkeys, new_gkeys)
-            print("Updated revoked GKeys:")
-            for gkey in changed_gkeys:
-                self.output(['', changed_gkeys])
-            else:
-                print("No GKeys were revoked")
-            print("Added GKeys:")
-            for gkey in added_gkeys:
-                self.output(['', added_gkeys])
-            else:
-                print("No GKeys were added")
-            print("Removed GKeys:")
-            for gkey in removed_gkeys:
-                self.output(['', added_gkeys])
-            else:
-                print("No GKeys were removed")
+                self.output('', "Update succeeded.\n")
+            messages = fetch_messages + ["Update operation:"]  + [install_messages]
         return (success, messages)
 
     def addseed(self, args):

@@ -385,8 +385,8 @@ Found Failures:
         'func': 'updateseed',
         'options': ['category', 'nick', '1file', 'dest', 'signature',
             'timestamp'],
-        'desc': '''Update the selected seed file(s)''',
-        'long_desc': '''Update the selected seed file(s)''',
+        'desc': '''Update the selected seed file(s) or all categories if no arguments are given''',
+        'long_desc': '''Update the selected seed file(s) or all categories if no arguments are given''',
         'example': '''$ gkeys update-seed -C gentoo-devs
 
  Gkey task results:
@@ -394,7 +394,8 @@ Found Failures:
      Key info...............: Gentoo-Linux Gentoo-keys Project Signing Key <gkeys>, 0xA41DBBD9151C3FC7
          category, nick.....: gentoo gkeys
 
-    Update operation completed
+    Fetch operation completed
+     Completed
 ''',
          }),
     ('list-seed', {

@@ -71,6 +71,29 @@ class SeedHandler(object):
                     keyinfo[attr] = None
         return keyinfo
 
+    def compare_seeds(self, seeds1, seeds2) :
+        '''Compares two seed lists and returns the differences
+
+        @param seeds1: set of seeds to be compared
+        @param seeds2: set of seeds to be compared
+        @return added_gkeys: list of keys that are included in seed2 but not seed1
+        @return changed_gkeys: list of keys that are included in seed1 and seed2 but have been altered
+        '''
+        old_gkeys = seeds1[1]
+        new_gkeys = seeds2[1]
+        changed_gkeys = []
+        added_gkeys = []
+        if old_gkeys:
+            for new_gkey in new_gkeys:
+                for old_gkey in old_gkeys:
+                    if new_gkey.nick == old_gkey.nick and new_gkey != old_gkey:
+                        changed_gkeys.append(new_gkey)
+                if new_gkey not in old_gkeys and new_gkey not in changed_gkeys:
+                    added_gkeys.append(new_gkey)
+        else:
+            added_gkeys = new_gkeys
+        return(added_gkeys, changed_gkeys)
+
     def load_seeds(self, seedfile=None, filepath=None, refresh=False):
         '''Load seed file
 

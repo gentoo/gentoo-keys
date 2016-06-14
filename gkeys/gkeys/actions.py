@@ -115,7 +115,9 @@ class Actions(ActionBase):
                 category_msgs.extend(messages)
             return (True, category_msgs)
         self.output('', "Fetching seeds for %s category.\n" %args.category)
+        success, old_gkeys = self.listseed(args)
         fetch_success, fetch_messages = self.fetchseed(args)
+        self.seeds = None
         if fetch_success is not True:
             success = False
             messages = fetch_messages
@@ -129,7 +131,21 @@ class Actions(ActionBase):
                 success = False
             else:
                 self.output('', "Update succeeded.\n")
-            messages = fetch_messages + ["Update operation:"]  + [install_messages]
+            messages = fetch_messages + [" Update operation:"] + [install_messages]
+            success, new_gkeys = self.listseed(args)
+            added_gkeys, changed_gkeys  = self.seedhandler.compare_seeds(old_gkeys, new_gkeys)
+            self.output('', "Updated revoked GKeys:")
+            if changed_gkeys:
+                for gkey in changed_gkeys:
+                    self.output(['', changed_gkeys])
+            else:
+                self.output('', "No GKeys were revoked")
+            self.output('', "Added GKeys:")
+            if added_gkeys:
+                for gkey in added_gkeys:
+                    self.output(['', added_gkeys])
+            else:
+                self.output('', "No GKeys were added")
         return (success, messages)
 
     def addseed(self, args):

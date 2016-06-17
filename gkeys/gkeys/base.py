@@ -17,10 +17,20 @@ from __future__ import print_function
 import argparse
 import os
 import sys
+import copy
 
 from gkeys.fileops import ensure_dirs
 from gkeys.log import log_levels, set_logger
+from gkeys.gkey import GKEY
 
+if sys.version_info[0] >= 3:
+    from urllib.request import urlopen
+    py_input = input
+    _unicode = str
+else:
+    from urllib2 import urlopen
+    py_input = raw_input
+    _unicode = unicode
 
 if sys.version_info[0] >= 3:
     unicode = str
@@ -291,6 +301,10 @@ class CliBase(object):
         for opt in options:
             getattr(self, '_option_%s' % opt)(parser)
 
+    def warning_output(self, info):
+        ''' We don't want this message to be spammed 4 times everytime gkeys is run'''
+        if "Re-fetch cycle timeout of" not in info:
+            print(info)
 
     def setup(self, args, configs):
         '''Set up the args and configs passed in
@@ -352,7 +366,59 @@ class CliBase(object):
         '''
         # establish our actions instance
         self.actions = self.cli_config['Actions'](self.config, self.output_results, self.logger)
-
+        # check for seed update
+        from sslfetch.connections import Connector
+        connector_output = {
+             'info': self.logger.info,
+             'debug': self.logger.debug,
+             'error': self.logger.error,
+             'exception': self.logger.exception,
+             'warning': self.warning_output,
+             'kwargs-info': {},
+             'kwargs-debug': {},
+             'kwargs-error': {},
+             'kwargs-exception': {},
+             'kwargs-warning': {},
+        }
+        fetcher = Connector(connector_output, None, "Gentoo Keys")
+        successes = []
+        up_to_date = True
+        categories = list(self.config.defaults['seeds'])
+        '''Attemp to download seed and seed.sig files for each available category'''
+        for category in categories:
+            filepath = self.config.defaults['seedsdir'] + "/" + category + ".seeds"
+            timestamp_path = filepath + ".timestamp"
+            url = self.config.defaults['seedurls'][category]
+            success, signedfile, timestamp = fetcher.fetch_file(
+                url, filepath, timestamp_path)
+            if timestamp != "":
+                up_to_date = False
+            successes.append(success)
+            url += ".sig"
+            filepath += ".sig"
+            success, signedfile, timestamp = fetcher.fetch_file(
+                url, filepath, timestamp_path)
+            if timestamp != "":
+                up_to_date = False
+            successes.append(success)
+        if False not in successes and not up_to_date:
+            print("Seeds need to be updated")
+            ack = None
+            while ack not in ("y", "yes", "n", "no"):
+                ack = py_input("Would you like to update the seeds now? (y/n) ").lower()
+            if ack in ("y", "yes"):
+                custom_args = copy.copy(args)
+                for attr in GKEY._fields:
+                    if attr != "debug":
+                        custom_args.attr = None
+                custom_args.category = None
+                custom_args.action = "update-seed"
+                print("Updating seeds")
+                self.run(custom_args)
+        elif False not in successes:
+            print("Seeds are up to date")
+        else:
+            print("Seed update check failed, check your internet connection.")
         # run the action
         func = getattr(self.actions, '%s'
             % self.cli_config['Action_Map'][args.action]['func'])

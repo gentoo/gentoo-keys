@@ -127,6 +127,21 @@ class Actions(object):
         self.output = output
         self.logger = logger
 
+    def configure_config_file(self,args, gpghome):
+        '''Creates the config file'''
+        newgpgconfpath = os.path.join(gpghome, 'gpg.conf')
+        defaultpath = '/usr/share/gnupg/gpg-conf.skel'
+        file_exists = False
+        while not file_exists:
+            skelconfpath = py_input("Path of default gpg configuration file to use (default: %s) " %defaultpath)
+            if len(skelconfpath) <= 0:
+                skelconfpath = defaultpath
+            file_exists = os.path.exists(skelconfpath)
+        shutil.copy(skelconfpath, newgpgconfpath)
+        with open(newgpgconfpath, 'a') as conf:
+            for line in urlopen(self.config.get_key('gpg-urls', args.spec)):
+                conf.write(_unicode(line.decode('utf-8'))) 
+
 
     def genkey(self, args):
         '''Generate a gpg key using a spec file'''
@@ -158,12 +173,7 @@ class Actions(object):
             self.output(["\n* Creating gpg folder at %s" % gpghome_full_path])
             ensure_dirs(gpghome)
             # Copy default gpg-conf.skel and append glep63 requirements
-            self.output(["* Creating gpg.conf file at %s" % gpghome_full_path])
-            newgpgconfpath = os.path.join(gpghome, 'gpg.conf')
-            shutil.copy('/usr/share/gnupg/gpg-conf.skel', newgpgconfpath)
-            with open(newgpgconfpath, 'a') as conf:
-                for line in urlopen(self.config.get_key('gpg-urls', args.spec)):
-                    conf.write(_unicode(line.decode('utf-8')))
+            self.configure_config_file(args, gpghome)
             # Key generation
             ctx = gpgme.Context()
             self.logger.info("MAIN: _action_genkey: Generating GPG key...")

@@ -366,7 +366,7 @@ class CliBase(object):
         '''
         # establish our actions instance
         self.actions = self.cli_config['Actions'](self.config, self.output_results, self.logger)
-        # check for seed update 
+        # check for seed update
         from sslfetch.connections import Connector
         connector_output = {
              'info': self.logger.info,
@@ -418,7 +418,11 @@ class CliBase(object):
         elif False not in successes:
             print("Seeds are up to date")
         else:
-            print("Seed update check failed, check your internet connection.") 
+<<<<<<< HEAD
+            print("Seed update check failed, check your internet connection.")
+=======
+            print("Seed update check failed, check your internet connection.")
+>>>>>>> b9e64a9... gkeys actions: Added automatic seeds,keys update capability
         # run the action
         func = getattr(self.actions, '%s'
             % self.cli_config['Action_Map'][args.action]['func'])

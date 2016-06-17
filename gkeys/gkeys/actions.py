@@ -133,19 +133,22 @@ class Actions(ActionBase):
                 print("Update succeeded.\n")
             messages = fetch_messages + [" Update operation:"] + [install_messages]
             success, new_gkeys = self.listseed(args)
-            added_gkeys, changed_gkeys  = self.seedhandler.compare_seeds(old_gkeys, new_gkeys)
+            added_gkeys, changed_gkeys, removed_gkeys  = self.seedhandler.compare_seeds(old_gkeys, new_gkeys)
             print("Updated revoked GKeys:")
-            if changed_gkeys:
-                for gkey in changed_gkeys:
-                    self.output(['', changed_gkeys])
+            for gkey in changed_gkeys:
+                self.output(['', changed_gkeys])
             else:
                 print("No GKeys were revoked") 
             print("Added GKeys:")
-            if added_gkeys:
-                for gkey in added_gkeys:
-                    self.output(['', added_gkeys])
+            for gkey in added_gkeys:
+                self.output(['', added_gkeys])
             else:
                 print("No GKeys were added")
+            print("Removed GKeys:")
+            for gkey in removed_gkeys:
+                self.output(['', added_gkeys])
+            else:
+                print("No GKeys were removed")
         return (success, messages)
 
     def addseed(self, args):

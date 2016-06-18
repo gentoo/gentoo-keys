@@ -749,7 +749,6 @@ class Actions(ActionBase):
             messages.append(_unicode("Using config defaults..: %s %s")
                 % (args.category, args.nick))
             return self.verify(args, messages)
-
         return self._verify(args, key, messages)
 
 
@@ -838,6 +837,8 @@ class Actions(ActionBase):
                         break
                     else:
                         sig_path = None
+            elif signature:
+                sig_path = os.path.abspath(signature)
         self.logger.info("Verifying file...")
         verified = False
         results = self.gpg.verify_file(key, sig_path, filepath)

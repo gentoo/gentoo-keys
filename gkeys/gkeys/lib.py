@@ -273,6 +273,22 @@ class GkeysGPG(GPG):
         self.logger.info('GPG return code: ' + str(result.returncode))
         return result
 
+    def send_keys(self, gkey):
+        '''Send gkey to keyserver
+        @param gkey: the gkey to be sent to the server
+        @return: GKEY_CHECK instance
+        '''
+        self.config.defaults['gpg_defaults'].append('--no-permission-warning')
+        self.set_keyserver()
+        self.set_keydir(gkey.keydir, 'send-keys', reset=True)
+        self.set_keyring('pubring.gpg', 'send-keys', reset=False)
+        self.set_keyseedfile(refresh=True)
+        self.logger.debug("LIB: send-keys, gkey: %s" % str(gkey))
+        self.logger.debug("** Calling runGPG with Running 'gpg %s --send-keys' for: %s"
+            % (' '.join(self.config.get_key('tasks', 'send-keys')), str(gkey)))
+        result = self.runGPG(task='send-keys', inputfile='')
+        self.logger.info('GPG return code: ' + str(result.returncode))
+        return result
 
     def check_keys(self, keydir, keyid, result=None):
         '''Check specified or all keys based on the seed type

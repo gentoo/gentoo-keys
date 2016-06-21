@@ -96,7 +96,7 @@ class Actions(ActionBase):
         messages.append("")
         messages.append("Fetch operation completed")
         return (False not in success, messages)
-   
+
     def updateseed(self, args):
         '''Updates seeds of a selected file or all categories if no args are given'''
         self.logger.debug(_unicode("ACTIONS: updateseed; args: %s")
@@ -138,7 +138,7 @@ class Actions(ActionBase):
             for gkey in changed_gkeys:
                 self.output(['', changed_gkeys])
             else:
-                print("No GKeys were revoked") 
+                print("No GKeys were revoked")
             print("Added GKeys:")
             for gkey in added_gkeys:
                 self.output(['', added_gkeys])
@@ -254,7 +254,7 @@ class Actions(ActionBase):
         self.logger.debug(_unicode("ACTIONS: sendkey; args: %s")
             % _unicode(args))
         seeds = self.seedhandler.load_category(args.category, refresh=True)
-        self.category = args.category
+        self._set_category(args.category)
         results = {}
         kwargs = self.seedhandler.build_gkeydict(args)
         keyresults = seeds.list(**kwargs)
@@ -572,7 +572,7 @@ class Actions(ActionBase):
                     if args.email in ['expiry']:
                         uid = ''
                         if gkey.uid:
-                            uids = gkey.uid                            
+                            uids = gkey.uid
                             uid = self.keyhandler.find_email(uids, self.config.get_key('prefered_address'))
                         self.logger.debug(_unicode('The valid uid is: %s') % uid)
                         days_limit = int(self.config.get_key('days_limit'))

@@ -18,7 +18,7 @@ Seed_Actions = ['----seeds----', 'add-seed', 'fetch-seed',
     'list-seed', 'list-seedfiles', 'move-seed', 'remove-seed']
 
 Key_Actions = ['----keys-----', 'check-key', 'installed',
-    'install-key', 'list-key', 'refresh-key', 'remove-key',
+    'install-key', 'list-key', 'send-key', 'refresh-key', 'remove-key',
     'search-key', 'spec-check']
 
 General_Actions = ['---general---', 'list-cats', 'sign','verify']
@@ -174,6 +174,15 @@ Gpg info.: pub   4096R/825533CBF6CD6C97 2014-10-03 [expires: 2017-09-17]
  Gkey task results:
     Done.''',
          }),
+    ('send-key', {
+        'func': 'sendkey',
+        'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys',
+            'keydir', 'keyring'],
+        'desc': '''Uploads the selected gpg key''',
+        'long_desc': '''Uploads the selected gpg key''',
+        'example': '''gkeys send-key -C gentoo -n gkeys''',
+         }),
+
     ('move-key', {
         'func': 'movekey',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keys',

@@ -194,6 +194,33 @@ class Actions(ActionBase):
         return (False, messages)
 
 
+    def sendkey(self, args):
+        '''Send selected key(s) to the server'''
+        if not args.category:
+            return (False, ["Please specify seeds type."])
+        self.logger.debug(_unicode("ACTIONS: sendkey; args: %s")
+            % _unicode(args))
+        seeds = self.seedhandler.load_category(args.category, refresh=True)
+        self.category = args.category
+        results = {}
+        kwargs = self.seedhandler.build_gkeydict(args)
+        keyresults = seeds.list(**kwargs)
+        if keyresults:
+            self.output('', '\n sending keys...')
+        else:
+            return (False, ["Key(s) not found"])
+        for gkey in sorted(keyresults):
+            self.logger.info(_unicode("Sending key %s, %s")
+                % (gkey.nick, gkey.pub_keyid))
+            self.output('', _unicode("  %s: %s")
+                % (gkey.name, ', '.join(gkey.pub_keyid)))
+            self.logger.debug(_unicode("ACTIONS: sendkey; gkey = %s")
+                % _unicode(gkey))
+            results[gkey.keydir] = self.gpg.send_keys(gkey)
+        return (True, ['Completed'])
+
+
+
     def listkey(self, args):
         '''Pretty-print the selected gpg key'''
         # get confirmation

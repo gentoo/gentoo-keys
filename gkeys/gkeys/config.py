@@ -59,6 +59,7 @@ class GKeysConfig(GPGConfig):
             self.defaults['configdir'] = self.defaults['userconfigdir']
             self.defaults['config']= os.path.join(
                 self.defaults['userconfigdir'], 'gkeys.conf')
+            self.defaults['template_path'] = '/usr/share/gkeys/templates'
             if not os.path.exists(self.defaults['config']):
                 self.defaults['configdir'] = path([self.root, EPREFIX, '/etc/gkeys'])
                 self.defaults['config'] = '%(configdir)s/gkeys.conf'
@@ -85,6 +86,7 @@ class GKeysConfig(GPGConfig):
         self.defaults['verify-keyring'] = 'gentoo'
         self.defaults['verify-nick'] = 'gkeys'
         self.defaults['verify-seeds'] = {}
+        self.defaults['days_limit'] = 30
 
 
     def read_config(self, filename=None):
@@ -98,7 +100,7 @@ class GKeysConfig(GPGConfig):
             self.defaults[key] = self._sub_(self.defaults[key])
         defaults = OrderedDict()
         # Add only the defaults we want in the configparser
-        for key in ['gkeysdir', 'homedir', 'keyring', 'sign-keydir', 'logdir',
+        for key in ['userconfigdir', 'gkeysdir', 'homedir', 'keyring', 'sign-keydir', 'logdir',
             'seedsdir', 'keyserver']:
             defaults[key] = self.defaults[key]
         if filename == None:
@@ -137,4 +139,3 @@ class GKeysConfig(GPGConfig):
                 return super(GKeysConfig, self)._get_(key, subkey)
         else:
             return super(GKeysConfig, self)._get_(key, subkey)
-

@@ -296,7 +296,12 @@ class CliBase(object):
             args = self.parse_args(args)
         if args.config:
             self.config.defaults['config'] = args.config
-            self.config.read_config()
+            self.config.defaults['configdir'] = os.path.dirname(args.config)
+            if args.email:
+                configs = [self.config.defaults['config'], os.path.abspath(os.path.join(self.config.defaults['configdir'], "email.conf"))]
+                self.config.read_config(configs)
+            else:
+                self.config.read_config()
         else:
             self.config.read_config(configs)
 

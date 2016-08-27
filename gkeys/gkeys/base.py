@@ -222,6 +222,15 @@ class CliBase(object):
         parser.add_argument('-u', '--uid', dest='uid', nargs='+', default=None,
             help='The user ID, gpg key uid')
 
+    @staticmethod
+    def _option_email(parser=None):
+        parser.add_argument('-E', '--email', dest='email', default=None,
+            help='Email parameter for sending email reminders')
+
+    @staticmethod
+    def _option_user(parser=None):
+        parser.add_argument('-U', '--user', dest='user', default=None,
+            help='User parameter for service login')
 
     def parse_args(self, argv):
         '''Parse a list of aruments

@@ -11,6 +11,9 @@
 """
 import os
 import sys
+import re
+
+from string import Template
 
 from snakeoil.demandload import demandload
 
@@ -108,3 +111,42 @@ class KeyHandler(object):
 
         self.logger.debug(_unicode("KeyHandler: key_search; keys = %s") % str(keys))
         return keys
+
+    @staticmethod
+    def is_expiring(keys, days_limit=30):
+        '''Check if any of the keys is within the days_limit'''
+        is_exp = False
+        for key in keys:
+            for specs in keys[key]:
+                if specs.days > days_limit*(-1) and specs.days < days_limit:
+                    is_exp = True
+                    break
+        return is_exp
+
+    @staticmethod
+    def set_template(template_path):
+        '''Read the template file and returns the template message'''
+        with open(template_path, 'r') as file_contents:
+            content = file_contents.read()
+        message_template = Template(content)
+        return message_template
+
+    @staticmethod
+    def generate_template(message_template, keyprints, specprint):
+        '''Substitute the print variables in the template'''
+        message = message_template.substitute(key_print=keyprints, spec_print=specprint)
+        return message
+
+    @staticmethod
+    def find_email(uids, prefered_address=None):
+        '''Find the email address from the uid by prioritizing the prefered address'''
+        if type(prefered_address) is not str:
+            uids = [uids[0]]
+        for uid in uids:
+            match = re.findall(r'[\w\.-]+@[\w\.-]+', uid)
+            uid = ''
+            if match:
+                uid = match[0]
+            if prefered_address and uid.endswith(prefered_address):
+                return uid
+        return uid

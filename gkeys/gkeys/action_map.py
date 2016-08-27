@@ -275,7 +275,7 @@ Do you really want to remove dolsen?[y/n]: y
     ('spec-check', {
         'func': 'speccheck',
         'options': ['category', 'nick', 'name', 'fingerprint', 'keyid', 'keys',
-            'keydir', 'keyring'],
+            'keydir', 'keyring', 'email', 'user'],
         'desc': '''Check if keys meet specifications requirements''',
         'long_desc': '''Check if keys meet specifications requirements''',
         'example': '''$ gkeys spec-check -C gentoo -n gkeys

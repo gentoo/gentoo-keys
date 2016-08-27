@@ -30,6 +30,7 @@ from collections import defaultdict
 from gkeys.actionbase import ActionBase
 from gkeys.gkey import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn
+from gkeys.mail import Emailer
 
 from snakeoil.demandload import demandload
 
@@ -241,7 +242,7 @@ class Actions(ActionBase):
                 else:
                     print(_unicode("           %s") % line)
                 c += 1
-            self.logger.debug(_unicode("data output:\n") + str(result))
+            self.logger.debug(_unicode("data output:\n") + _unicode(result))
         return (True, result)
 
 
@@ -382,6 +383,17 @@ class Actions(ActionBase):
         results = {}
         failed = defaultdict(list)
         self.output('', '\n Checking keys...')
+        '''Login email'''
+        if args.email in ['expiry']:
+            if args.user:
+                email_user = self.config.get_key(args.user)
+            else:
+                email_user = self.config.get_key('login_gentoo')
+            emailer = Emailer(email_user, self.logger)
+            template_path = os.path.join(self.config.get_key('template_path'), "expiry_template")
+            message_template = self.keyhandler.set_template(template_path)
+            self.logger.debug(_unicode('Emailer started with login: %s') \
+                % _unicode(email_user['login_email']))
         for gkey in sorted(keyresults):
             self.logger.info(_unicode("Checking key %s, %s")
                 % (gkey.nick, gkey.keys))
@@ -395,9 +407,10 @@ class Actions(ActionBase):
                 results = self.gpg.speccheck(gkey.keydir, key)
                 for g in results:
                     pub_pass = {}
+                    key_print = ''
                     for key in results[g]:
                         self.output('', key.pretty_print())
-
+                        key_print += '\n\n' + key.pretty_print()
                         if key.key is "PUB":
                             pub_pass = {
                                 'key': key,
@@ -476,7 +489,25 @@ class Actions(ActionBase):
                     sdata = convert_pf(pub_pass, ['pub', 'sign', 'final'])
                     sdata = convert_yn(sdata, ['auth', 'encrypt'])
                     self.output('', SPECCHECK_SUMMARY % sdata)
-
+                    '''Email reminder code'''
+                    if args.email in ['expiry']:
+                        uid = ''
+                        if gkey.uid:
+                            uids = gkey.uid                            
+                            uid = self.keyhandler.find_email(uids, self.config.get_key('prefered_address'))
+                        self.logger.debug(_unicode('The valid uid is: %s') % uid)
+                        days_limit = int(self.config.get_key('days_limit'))
+                        self.logger.debug(_unicode('Days_limit for expiry is: %s') \
+                            % _unicode(days_limit))
+                        is_exp = self.keyhandler.is_expiring(results, days_limit)
+                        if is_exp and uid:
+                            self.logger.debug(_unicode('Process for emailing started'))
+                            message = self.keyhandler.generate_template(message_template, \
+                                key_print, SPECCHECK_SUMMARY % sdata)
+                            emailer.send_email(uid, message)
+        if args.email in ['expiry']:
+            emailer.email_quit()
+            self.logger.debug(_unicode('Emailer quit'))
         if failed['revoked']:
             self.output([sorted(set(failed['revoked']))], '\n Revoked keys:')
         if failed['invalid']:
@@ -515,7 +546,6 @@ class Actions(ActionBase):
                 '=============================',
                 'SPEC Approved..........: %d' % len(set(failed['spec-approved'])),
             ])
-
 
     def removekey(self, args):
         '''Remove an installed key'''

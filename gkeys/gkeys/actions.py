@@ -650,7 +650,6 @@ class Actions(ActionBase):
             keyresults = seeds.list(**kwargs)
         self.output('', '\n Removing keys...')
         success = True
-        #print(keyresults)
         for gkey in sorted(keyresults):
             if kwargs['nick'] != '*' and  kwargs['nick'] not in gkey.nick:
                 messages.append(_unicode("%s does not seem to be a valid key.")

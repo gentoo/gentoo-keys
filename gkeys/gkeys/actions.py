@@ -13,6 +13,7 @@
 
 from __future__ import print_function
 
+import itertools
 import os
 import sys
 
@@ -360,7 +361,7 @@ class Actions(ActionBase):
             self.output([failed['invalid']], '\n Invalid keys:\n')
         if failed['sign']:
             self.output([failed['sign']], '\n No signing capable subkeys:\n')
-        return (len(failed) <1,
+        return (not any(itertools.chain.from_iterable(failed.values())),
             ['\nFound:\n-------', 'Expired: %d' % len(failed['expired']),
                 'Revoked: %d' % len(failed['revoked']),
                 'Invalid: %d' % len(failed['invalid']),

@@ -758,6 +758,8 @@ class Actions(ActionBase):
                             break
                         else:
                             signature = None
+        elif signature is not None and os.path.exists(signature):
+            sig_path = signature
         else:
             filepath = os.path.abspath(filepath)
             self.logger.debug(

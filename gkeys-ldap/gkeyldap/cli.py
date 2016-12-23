@@ -25,6 +25,7 @@ class Main(CliBase):
         @param config: optional GKeysConfig instance, For API use
         @param print_results: optional boolean, for API use
         """
+        CliBase.__init__(self)
         self.root = root or "/"
         self.config = config or GKeysConfig(root=root)
         self.config.options['print_results'] = print_results

@@ -6,8 +6,6 @@ cwd=$(pwd)
 source ${cwd}/update-seeds.conf
 source ${cwd}/testpath
 
-eval `keychain --noask --eval ${SSH_KEY} ${GPG_KEY}`
-
 die(){ echo "$@" 1>&2; exit 1; }
 success(){ echo "$@"; exit 0; }
 

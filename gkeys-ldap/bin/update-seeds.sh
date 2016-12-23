@@ -66,7 +66,7 @@ cd ${GKEY_SEEDS_DIR}
 git add ${GKEY_SEEDS}  || die " *** Failed to add modified ${GKEYS_SEEDS} file"
 git add ${GKEY_SEEDS}.${GKEYS_SIG} || die " *** Failed to add ${GKEYS_SEEDS}.sig file"
 git commit -m "${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
-git push origin master || die " *** git push failed"
+git push --signed origin master || die " *** git push failed"
 cd ..
 
 echo "Committing changes to api repo..."
@@ -76,7 +76,7 @@ cd ${API_DIR}
 git add ${API_SEEDS}  || die " *** Failed to add modified ${GKEYS_SEEDS} file"
 git add ${API_SEEDS}.${GKEYS_SIG} || die " *** Failed to add ${GKEYS_SEEDS}.sig file"
 git commit -m "${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
-git push origin master || die " *** git push failed"
+git push --signed origin master || die " *** git push failed"
 
 echo "Pushing the log file to ${LOG_UPLOAD_URL}"
 LOG_FILE=$( cat "${LOG_DIR}/gkeys-ldap-lastlog" )

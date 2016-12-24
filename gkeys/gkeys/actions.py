@@ -830,8 +830,10 @@ class Actions(ActionBase):
             nicks = [args.nick]
         else:
             nicks = args.nick
+        args.category = 'sign'
         # load our installed signing keys db
         self.seeds = self.seedhandler.load_category('sign', nicks)
+        self.category = args.category
         if not self.seeds.seeds:
             return (False, ['No installed keys, try installkey action.', ''])
         keydir  = self.config.get_key("sign", "keydir")

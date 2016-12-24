@@ -95,8 +95,8 @@ class ActionBase(object):
         trust = self.config.get_key('trust-model', cat)
         if trust in [None]:
             trust = 'auto'
-        if 'trust-model' in self.config.defaults['gpg_defaults']:
-            index = self.config.defaults['gpg_defaults'].index('trust-model')
+        if '--trust-model' in self.config.defaults['gpg_defaults']:
+            index = self.config.defaults['gpg_defaults'].index('--trust-model')
             self.config.defaults['gpg_defaults'][index+1] = trust
         else:
             self.config.defaults['gpg_defaults'].extend(['--trust-model', trust])

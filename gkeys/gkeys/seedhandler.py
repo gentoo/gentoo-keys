@@ -186,6 +186,7 @@ class SeedHandler(object):
             for seed in [seeds]:
                 seedurl = self.config.get_key('seedurls', seed)
                 seedpath = self.config.get_key('seeds', seed)
+                self.logger.debug("Seed URL/seed path...: %s, %s" % (seedurl, seedpath))
                 if seedurl and seedpath and http_check.match(seedurl):
                     urls.extend([(seed, seedurl, seedpath)])
                 else:

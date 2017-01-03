@@ -63,7 +63,7 @@ echo "Committing changes to gkey-seeds repo..."
 cd ${GKEY_SEEDS_DIR}
 git add ${GKEY_SEEDS}  || die " *** Failed to add modified ${GKEYS_SEEDS} file"
 git add ${GKEY_SEEDS}.${GKEYS_SIG} || die " *** Failed to add ${GKEYS_SEEDS}.sig file"
-git commit -m "${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
+git commit -S -m"${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
 git push --signed origin master || die " *** git push failed"
 cd ..
 
@@ -73,7 +73,7 @@ cp ${GKEY_SEEDS_DIR}/${GKEY_SEEDS}.${GKEYS_SIG} ${API_DIR}/${API_SEEDS}.${GKEYS_
 cd ${API_DIR}
 git add ${API_SEEDS}  || die " *** Failed to add modified ${GKEYS_SEEDS} file"
 git add ${API_SEEDS}.${GKEYS_SIG} || die " *** Failed to add ${GKEYS_SEEDS}.sig file"
-git commit -m "${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
+git commit -S -m "${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
 git push --signed origin master || die " *** git push failed"
 
 echo "Pushing the log file to ${LOG_UPLOAD_URL}"

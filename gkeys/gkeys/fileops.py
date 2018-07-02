@@ -1,4 +1,6 @@
 import os
+import shutil
+
 from snakeoil.osutils import (ensure_dirs as snakeoil_ensure_dirs)
 
 
@@ -61,3 +63,29 @@ def updatefiles(config, logger, category=None, filename = None):
         raise
         return False
     return True
+
+
+def updateseeds(config, logger, src, dst):
+    if not src or not dst:
+        logger.error("MAIN: updateseeds();  source and/or destination not supplied")
+        return False
+    try:
+        if os.path.exists(dst):
+            logger.debug(
+                "MAIN: updateseeds(); Removing 'old' seed file: %s"
+                % dst)
+            os.unlink(dst)
+        if os.path.exists(src):
+            logger.debug(
+                "MAIN: updateseeds(); Moving new seed file to: "
+                "%s" % dst)
+            shutil.move(src, dst)
+    except IOError:
+        raise
+        return False
+    return True
+
+
+def rm_files(config, logger, files, lock=None):
+    pass
+

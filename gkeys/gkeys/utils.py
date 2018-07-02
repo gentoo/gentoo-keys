@@ -39,6 +39,8 @@ try:
 except AttributeError:
     StringTypes = [str]
 
+Y_N = ("y", "yes", "n", "no")
+
 
 def encoder(text, _encoding_):
     return codecs.encode(text, _encoding_, 'replace')
@@ -159,6 +161,13 @@ def path(path_elements):
         pathname = pathname[:-1]
 
     return pathname
+
+
+def get_ack(prompt_msg, accepted=Y_N):
+    ack = None
+    while ack not in accepted:
+        ack = py_input(prompt_msg).lower()
+    return ack
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import sys
 
 from collections import OrderedDict
 
@@ -10,6 +11,13 @@ from gkeys.action_map import Action_Map, Available_Actions
 
 __version__ = '0.2'
 __license__ = 'GPLv2'
+
+if sys.version_info[0] >= 3:
+    py_input = input
+    _unicode = str
+else:
+    py_input = raw_input
+    _unicode = unicode
 
 
 subdata = OrderedDict()

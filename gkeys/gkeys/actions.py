@@ -15,18 +15,11 @@ from __future__ import print_function
 
 import itertools
 import os
-import sys
-
-if sys.version_info[0] >= 3:
-    py_input = input
-    _unicode = str
-else:
-    py_input = raw_input
-    _unicode = unicode
 
 
 from collections import defaultdict
 
+from gkeys import _unicode, py_input
 from gkeys.actionbase import ActionBase
 from gkeys.gkey import GKEY
 from gkeys.checks import SPECCHECK_SUMMARY, convert_pf, convert_yn

@@ -131,6 +131,12 @@ class CliBase(object):
             help='Use CASE matching in searches')
 
     @staticmethod
+    def _option_fetcthonly(parser=None):
+        parser.add_argument('--fetchonly',
+            dest='fetchonly', default=False,
+            help="Only fetch the seed file if there is an update or doesn't exist locally")
+
+    @staticmethod
     def _option_file(parser=None):
         parser.add_argument('-F', '--file', dest='filename', default=None,
             nargs='+',

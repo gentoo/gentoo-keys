@@ -17,12 +17,15 @@ import re
 from snakeoil.demandload import demandload
 
 from gkeys.gkey import GKEY
+from gkeys.lock import LockDir
 from gkeys.seed import Seeds, decoder
 
 demandload(
     "json:load",
     "gkeys.exception:UpdateDbError",
     "gkeys.fileops:ensure_dirs",
+    "gkeys.fetch:Fetch",
+    "sslfetch.connections:get_timestamp",
 )
 
 
@@ -34,6 +37,8 @@ class SeedHandler(object):
         self.fingerprint_re = re.compile('[0-9A-Fa-f]{40}')
         self.finerprint_re2 = re.compile('[0-9A-Fa-f]{4}( [0-9A-Fa-f]{4}){9}')
         self.seeds = None
+        self.seedsdir_lock = None
+        self.update_lock = None
 
 
     def new(self, args, checkgkey=False):
@@ -70,10 +75,10 @@ class SeedHandler(object):
                 if attr in GKEY._fields:
                     keyinfo[attr] = None
         return keyinfo
-    
+
     def compare_seeds(self, seeds1, seeds2) :
         '''Compares two seed lists and returns the differences
-        
+
         @param seeds1: set of seeds to be compared
         @param seeds2: set of seeds to be compared
         @return added_gkeys: list of keys that are included in seed2 but not seed1
@@ -98,7 +103,7 @@ class SeedHandler(object):
                 if old_gkey not in new_gkeys and old_gkey not in old_changed_gkeys:
                     removed_gkeys.append(old_gkey)
         else:
-            added_gkeys = new_gkeys 
+            added_gkeys = new_gkeys
         return(added_gkeys, changed_gkeys, removed_gkeys)
 
     def compare_seeds(self, seeds1, seeds2) :
@@ -181,7 +186,8 @@ class SeedHandler(object):
                     with open(gkey_path, 'r') as fileseed:
                         seed = load(fileseed)
                 except IOError as error:
-                    self.logger.debug("SeedHandler: load_category; IOError loading seed file %s." % gkey_path)
+                    self.logger.debug("SeedHandler: load_category; IOError loading seed file %s."
+                                      % gkey_path)
                     self.logger.debug("Error was: %s" % str(error))
                 if seed:
                     for nick in sorted(seed):
@@ -206,6 +212,7 @@ class SeedHandler(object):
         '''Fetch new seed files
 
         @param seeds: list of seed nicks to download
+        @param args: argparse namespace instance
         @param verified_dl: Function pointer to the Actions.verify()
                 instance needed to do the download and verification
         '''
@@ -224,20 +231,45 @@ class SeedHandler(object):
         except KeyError:
             pass
         succeeded = []
-        seedsdir = self.config.get_key('seedsdir')
+        seedsdir = os.path.join(self.config.get_key('seedsdir'))
+        updatedir = os.path.join(seedsdir, "__updates__")
         mode = int(self.config.get_key('permissions', 'directories'),0)
-        ensure_dirs(seedsdir, mode=mode)
+        ensure_dirs(updatedir, mode=mode)
+        self.update_lock = LockDir(updatedir)
+        self.update_lock.write_lock()
+        fetcher = Fetch(self.logger)
         for (seed, url, filepath) in urls:
-            verify_info = self.config.get_key('verify-seeds', seed).split()
-            args.category = verify_info[0]
-            args.nick = verify_info[1]
-            args.filename = url
-            args.signature = None
-            args.timestamp = True
-            args.destination = filepath
-            verified, messages_ = verified_dl(args)
-            succeeded.append(verified)
-            messages.append(messages_)
+            tmppath = os.path.join(updatedir, os.path.split(filepath)[-1])
+            # use the real timestamp file for the dl timestamp
+            tpath = filepath + ".timestamp"
+            # verify the re-fetch cycle timer
+            if fetcher.verify_cycle(tpath, climit=60):
+                timestamp = get_timestamp(filepath + ".timestamp")
+                success, msgs = fetcher.fetch_url(url, tmppath, timestamp=timestamp)
+                messages.extend(msgs)
+                if success:
+                    verify_info = self.config.get_key('verify-seeds', seed).split()
+                    args.category = verify_info[0]
+                    args.nick = verify_info[1]
+                    args.filename = url
+                    args.signature = tmppath + ".timestamp"
+                    #args.timestamp = True
+                    args.destination = tmppath
+                    verified, messages_ = verified_dl(args)
+                    messages.append(messages_)
+                if verified and not args.fetchonly:
+                    self.seedsdir_lock = LockDir(seedsdir)
+                    if updateseeds(tmppath, filepath) and updateseeds(args.signature, tpath):
+                        self.logger.info("Updated seed file...: %s ... OK" % (filepath))
+                        succeeded.append(verified)
+                    else:
+                        self.logger.info("Updating seed file...: %s ... Failed" % (filepath))
+                        succeeded.append(False)
+                    self.seedsdir_lock.unlock()
+                else:
+                    # sha512sum the 2 files
+                    pass
+        self.update_lock.unlock()
         return (succeeded, messages)
 
     def check_gkey(self, args):

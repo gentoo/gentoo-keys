@@ -29,6 +29,7 @@ from snakeoil.demandload import demandload
 
 demandload(
     "gkeys.base:Args",
+    "gkeys.fetch:Fetch",
     "json:load",
 )
 
@@ -718,9 +719,7 @@ class Actions(ActionBase):
 
     def installed(self, args):
         '''Lists the installed key directories'''
-        if args.category:
-            keyring = self.config.get_key('keyring')
-        else:
+        if not args.category:
             return (False, ["Please specify a category."])
         catdir = self._set_category(args.category)
         self.logger.debug("ACTIONS: installed; catdir = %s" % catdir)
@@ -818,45 +817,10 @@ class Actions(ActionBase):
             climit = 0
         sig_path = None
         if isurl:
-            from sslfetch.connections import Connector
-            connector_output = {
-                 'info': self.logger.info,
-                 'debug': self.logger.debug,
-                 'error': self.logger.error,
-                 'exception': self.logger.exception,
-                 # we want any warnings to be printed to the terminal
-                 # so assign it to logging.error
-                 'warning': self.logger.error,
-                 'kwargs-info': {},
-                 'kwargs-debug': {},
-                 'kwargs-error': {},
-                 'kwargs-exception': {},
-                 'kwargs-warning': {},
-            }
-            fetcher = Connector(connector_output, None, "Gentoo Keys")
-            self.logger.debug(
-                _unicode("ACTIONS: verify; fetching %s signed file ") % filepath)
-            self.logger.debug(
-                _unicode("ACTIONS: verify; timestamp path: %s") % timestamp_path)
-            success, signedfile, timestamp = fetcher.fetch_file(
-                url, filepath, timestamp_path, climit=climit)
-            if not success:
-                messages.append(_unicode("File %s cannot be retrieved.") % filepath)
-            elif '.' + url.rsplit('.', 1)[1] not in EXTENSIONS:
-                if not signature:
-                    success_fetch = False
-                    for ext in EXTENSIONS:
-                        sig_path = filepath + ext
-                        if isurl:
-                            signature = url + ext
-                            self.logger.debug(
-                                _unicode("ACTIONS: verify; fetching %s signature ")
-                                % signature)
-                            success_fetch, sig, timestamp = fetcher.fetch_file(signature, sig_path)
-                        if success_fetch:
-                            break
-                        else:
-                            signature = None
+            fetcher = Fetch(self.logger)
+            success, msgs = fetcher.fetch_url(url, filepath, signature, timestamp_path=timestamp_path,
+                                                  climit=climit)
+            messages.extend(msgs)
         elif signature is not None and os.path.exists(signature):
             sig_path = signature
         else:
@@ -864,9 +828,8 @@ class Actions(ActionBase):
             self.logger.debug(
                 _unicode("ACTIONS: verify; local file %s") % filepath)
             success = os.path.isfile(filepath)
-            if (not signature
+            if (success and not signature
                 and '.' + filepath.rsplit('.', 1)[-1] not in EXTENSIONS):
-                success_fetch = False
                 for ext in EXTENSIONS:
                     sig_path = filepath + ext
                     sig_path = os.path.abspath(sig_path)

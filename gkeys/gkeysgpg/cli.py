@@ -56,7 +56,7 @@ class Main(CliBase):
     def __call__(self, args=None):
         """Main class call function
 
-        @param args: Optional list of argumanets to parse and action to run
+        @param args: Optional list of arguments to parse and action to run
                      Defaults to sys.argv[1:]
         """
         if args:
@@ -72,7 +72,7 @@ class Main(CliBase):
     def run(self, args):
         '''Run the gpg command option
 
-        @param args: list of argumanets to parse
+        @param args: list of arguments to parse
         '''
         # establish our actions instance
         self.actions = self.cli_config['Actions'](self.config, self.output_results, self.logger)

@@ -19,13 +19,13 @@ from collections import OrderedDict
 
 if sys.version_info[0] >= 3:
     from urllib.request import urlopen
-    py_input = input
-    _unicode = str
 else:
     from urllib2 import urlopen
-    py_input = raw_input
-    _unicode = unicode
 
+from gkeys import (
+    py_input,
+    _unicode,
+)
 from gkeys.fileops import ensure_dirs
 from gkeys import log
 
@@ -140,7 +140,7 @@ class Actions(object):
         shutil.copy(skelconfpath, newgpgconfpath)
         with open(newgpgconfpath, 'a') as conf:
             for line in urlopen(self.config.get_key('gpg-urls', args.spec)):
-                conf.write(_unicode(line.decode('utf-8'))) 
+                conf.write(_unicode(line.decode('utf-8')))
 
 
     def genkey(self, args):

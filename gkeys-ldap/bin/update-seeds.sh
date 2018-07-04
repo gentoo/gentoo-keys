@@ -1,6 +1,9 @@
 #!/bin/sh
 # $Id: update-seeds.sh,v 0.2.1 2014/10/12 dolsen Exp $
 
+FORCE=${1}
+HAS_UPDATES=false
+
 # configuration to run from a checkout with a custom config
 cwd=$(pwd)
 source ${cwd}/update-seeds.conf
@@ -46,6 +49,9 @@ gkeys-ldap update-seeds -C gentoo-devs || die "Seed file generation failed... ab
 
 echo " *** Checking if seed files are up-to-date"
 if ! diff -q ${GKEYS_DIR}/${GKEYS_SEEDS} ${GKEY_SEEDS_DIR}/${GKEY_SEEDS} > /dev/null ;then
+    HAS_UPDATES=true
+fi
+if [[ "${FORCE}" == "force" || ${HAS_UPDATES} ]] ; then
     echo " *** Spotted differences"
     echo " *** Updating old seeds with a new one"
     # copy seeds to gkey-seeds

@@ -779,7 +779,7 @@ class Actions(ActionBase):
         if not keys:
             return (False, ['No installed keys found, try installkey action.'])
         key = self.seedhandler.seeds.nick_search(args.nick)
-        if not key:
+        if not key and not self.verify_recursion:
             if args.nick:
                 messages.append(_unicode(
                     "Failed to find.........: %s in category: %s")
@@ -788,7 +788,15 @@ class Actions(ActionBase):
             args.nick = self.config.get_key('verify-nick')
             messages.append(_unicode("Using config defaults..: %s %s")
                 % (args.category, args.nick))
+            self.verify_recursion = True
             return self.verify(args, messages)
+        elif self.verify_recursion:
+            messages.append(_unicode(
+                "Failed to find.........: %s in category: %s")
+                % (args.category, args.nick))
+            messages.append("    ...giving up")
+            self.verify_recursion = False
+            return (False, ['No installed verification keys found, try installkey action.'])
         return self._verify(args, key, messages)
 
 

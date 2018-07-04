@@ -43,6 +43,7 @@ class ActionBase(object):
         self._keyhandler = None
         self._gpg = None
         self.category = None
+        self.verify_recursion = False
 
 
     @property

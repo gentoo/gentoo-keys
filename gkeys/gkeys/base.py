@@ -63,6 +63,7 @@ class Args(object):
         self.status = False
         self.timestamp = None
         self.uid = None
+        self.fetchonly = None
 
 
 class CliBase(object):
@@ -131,7 +132,7 @@ class CliBase(object):
             help='Use CASE matching in searches')
 
     @staticmethod
-    def _option_fetcthonly(parser=None):
+    def _option_fetchonly(parser=None):
         parser.add_argument('--fetchonly',
             dest='fetchonly', default=False,
             help="Only fetch the seed file if there is an update or doesn't exist locally")
@@ -375,6 +376,7 @@ class CliBase(object):
         func = getattr(self.actions, '%s'
             % self.cli_config['Action_Map'][args.action]['func'])
         self.logger.debug('Main: run; Found action: %s' % args.action)
+        self.logger.debug('Main: run; args: %s' % str(args.__dict__))
         success, results = func(args)
         if not results:
             print("No results found.  Check your configuration and that the",

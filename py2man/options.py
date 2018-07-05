@@ -28,6 +28,8 @@ The path to an alternate config file''',
 The logging level to set for the logfile''',
     'dest': '''.IP "-d \\fIDESTINATION\\fR, --dest \\fIDESTINATION"
 The category name of the seed file being added to.''',
+    'email': '''.IP "-E \\fIEMAIL\\fR, --email \\fIEMAIL"
+Email parameter for sending email reminders.''',
     'exact': '''.IP "-e, --exact"
 Use CASE matching in searches''',
     'file': '''.IP "-F \\fIFILENAME\\fR, --file \\fIFILENAME"
@@ -77,6 +79,7 @@ SHORT_OPTS = OrderedDict({
     'cleanseed': '[\\fB\\-\\-cleanseed\\fR]',
     'dest': '[\\fB\\-d\\fR \\fIDESTINATION\\fR]',
     'exact': '[\\fB\\-e\\fR]',
+    'email': '[\\fB\\-E\\fR]',
     'file': '[\\fB\\-F\\fR \\fIFILENAME\\fR]',
     '1file': '[\\fB\\-F\\fR \\fIFILENAME\\fR]',
     'fingerprint': '[\\fB\\-f\\fR \\fIFINGERPRINT\\fR [\\fIFINGERPRINT\\fR ...]]',

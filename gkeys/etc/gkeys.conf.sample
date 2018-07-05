@@ -51,6 +51,13 @@ directories: 0o775
 files: 0o002
 
 
+[keyrings]
+# configured locations of keyrings
+gentoo: %(gkeysdir)s/keyrings/gentoo
+gentoo-devs: %(gkeysdir)s/keyrings/gentoo-devs
+user: %(homedir)s/.gnupg
+
+
 [seeds]
 
 # file is a json text file of: nick, name, keydir, fingerprint

@@ -9,7 +9,7 @@ from collections import OrderedDict
 from gkeys.action_map import Action_Map, Available_Actions
 
 
-__version__ = '0.2'
+__version__ = '0.3'
 __license__ = 'GPLv2'
 
 if sys.version_info[0] >= 3:
@@ -32,5 +32,5 @@ the GPG keys used for validation on users and Gentoo's infrastracutre servers.
 Gentoo Keys is able to verify GPG keys used for Gentoo's release media,
 such as installation CD's, Live DVD's, packages and other GPG signed documents.''',
     'sub-cmds': subdata,
-    'authors': ['Brian Dolbec <dolsen@gentoo.org>', 'Pavlos Ratis <dastergon@gentoo.org>'],
+    'authors': ['Brian Dolbec <dolsen@gentoo.org>', 'Pavlos Ratis <dastergon@gentoo.org>', 'aeroniero33 <justthisthing@gmail.com>'],
 }

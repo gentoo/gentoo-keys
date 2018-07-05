@@ -24,6 +24,7 @@ demandload(
     "json:load",
     "gkeys.exception:UpdateDbError",
     "gkeys.fileops:ensure_dirs",
+    "gkeys.fileops:updateseeds",
     "gkeys.fetch:Fetch",
     "sslfetch.connections:get_timestamp",
 )
@@ -170,9 +171,10 @@ class SeedHandler(object):
         if category == 'sign':
             catdir = self.config.get_key('sign-keydir')
         else:
-            keyrings = self.config.get_key('keyring')
-            catdir = os.path.join(keyrings, category)
-        self.logger.debug("SeedHandler: load_category; catdir = %s" % catdir)
+            #keyrings = self.config.get_key('keyring')
+            #catdir = os.path.join(keyrings, category)
+            catdir = self.config.get_key('keyrings', category)
+        self.logger.debug("SeedHandler: load_category; catdir = %s", catdir)
         try:
             if not nicks:
                 nicks = os.listdir(catdir)
@@ -185,11 +187,14 @@ class SeedHandler(object):
                 try:
                     with open(gkey_path, 'r') as fileseed:
                         seed = load(fileseed)
+                    self.logger.debug("SeedHandler: load_category; loaded seed file %s.",
+                                      gkey_path)
                 except IOError as error:
-                    self.logger.debug("SeedHandler: load_category; IOError loading seed file %s."
-                                      % gkey_path)
+                    self.logger.debug("SeedHandler: load_category; IOError loading seed file %s.",
+                                      gkey_path)
                     self.logger.debug("Error was: %s" % str(error))
                 if seed:
+                    self.logger.debug("SeedHandler: load_category; processing seeds: %s", seed)
                     for nick in sorted(seed):
                         key = seed[nick]
                         # GKEY class change auto-update
@@ -206,6 +211,7 @@ class SeedHandler(object):
             self.logger.debug("SeedHandler: load_category; OSError for %s" % catdir)
             self.logger.exception("Error was: %s" % str(error))
         self.seeds = seeds
+        self.logger.debug("SeedHandler: load_category; seeds loaded: %s", seeds)
         return seeds
 
     def fetch_seeds(self, seeds, args, verified_dl=None):
@@ -231,44 +237,40 @@ class SeedHandler(object):
         except KeyError:
             pass
         succeeded = []
-        seedsdir = os.path.join(self.config.get_key('seedsdir'))
+        seedsdir = os.path.dirname(self.config.get_key('seeds', seeds))
         updatedir = os.path.join(seedsdir, "__updates__")
         mode = int(self.config.get_key('permissions', 'directories'),0)
         ensure_dirs(updatedir, mode=mode)
         self.update_lock = LockDir(updatedir)
         self.update_lock.write_lock()
-        fetcher = Fetch(self.logger)
         for (seed, url, filepath) in urls:
             tmppath = os.path.join(updatedir, os.path.split(filepath)[-1])
             # use the real timestamp file for the dl timestamp
             tpath = filepath + ".timestamp"
-            # verify the re-fetch cycle timer
-            if fetcher.verify_cycle(tpath, climit=60):
-                timestamp = get_timestamp(filepath + ".timestamp")
-                success, msgs = fetcher.fetch_url(url, tmppath, timestamp=timestamp)
-                messages.extend(msgs)
-                if success:
-                    verify_info = self.config.get_key('verify-seeds', seed).split()
-                    args.category = verify_info[0]
-                    args.nick = verify_info[1]
-                    args.filename = url
-                    args.signature = tmppath + ".timestamp"
-                    #args.timestamp = True
-                    args.destination = tmppath
-                    verified, messages_ = verified_dl(args)
-                    messages.append(messages_)
-                if verified and not args.fetchonly:
-                    self.seedsdir_lock = LockDir(seedsdir)
-                    if updateseeds(tmppath, filepath) and updateseeds(args.signature, tpath):
-                        self.logger.info("Updated seed file...: %s ... OK" % (filepath))
-                        succeeded.append(verified)
-                    else:
-                        self.logger.info("Updating seed file...: %s ... Failed" % (filepath))
-                        succeeded.append(False)
-                    self.seedsdir_lock.unlock()
+            verify_info = self.config.get_key('verify-seeds', seed).split()
+            args.category = verify_info[0]
+            args.nick = verify_info[1]
+            args.filename = url
+            args.signature = tmppath + ".sig"
+            args.timestamp = tpath
+            args.destination = tmppath
+            args.fetchonly = False
+            verified, messages_ = verified_dl(args)
+            messages.append(messages_)
+            if verified and not args.fetchonly:
+                self.seedsdir_lock = LockDir(seedsdir)
+                if (updateseeds(self.config, self.logger, tmppath, filepath) and
+                    updateseeds(self.config, self.logger, args.signature, tpath)
+                ):
+                    self.logger.info("Updated seed file...: %s ... OK" % (filepath))
+                    succeeded.append(verified)
                 else:
-                    # sha512sum the 2 files
-                    pass
+                    self.logger.info("Updating seed file...: %s ... Failed" % (filepath))
+                    succeeded.append(False)
+                self.seedsdir_lock.unlock()
+            else:
+                # sha512sum the 2 files
+                pass
         self.update_lock.unlock()
         return (succeeded, messages)
 

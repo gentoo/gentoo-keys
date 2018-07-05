@@ -51,7 +51,7 @@ def set_logger(namespace=None, logpath='', level=None,
         ensure_dirs(logpath, mode=dirmode, fatal=True)
         os.umask(filemask)
         logname = os.path.join(logpath,
-            '%s-%s.log' % (namespace, time.strftime('%Y%m%d-%H:%M')))
+            '%s-%s.log' % (namespace, time.strftime('%Y%m%d-%H')))
         file_handler = logging.FileHandler(logname)
         if level:
             file_handler.setLevel(log_levels[level])
@@ -66,7 +66,7 @@ def set_logger(namespace=None, logpath='', level=None,
     #Console_handler.setFormatter(formatter)
     logger.addHandler(Console_handler)
     #print "File logger suppose to be initialized", logger, Console_handler
-    logger.debug("Loggers initialized")
+    logger.debug("==== Loggers initialized ==== time: %s", time.strftime('%Y%m%d-%H:%M:%S') )
 
     return logger
 

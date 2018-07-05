@@ -832,6 +832,7 @@ class Actions(ActionBase):
             fetcher = Fetch(self.logger)
             success, msgs = fetcher.fetch_url(url, filepath, signature, timestamp_path=timestamp_path,
                                                   climit=climit)
+            sig_path = fetcher.sig_path
             messages.extend(msgs)
         elif signature is not None and os.path.exists(signature):
             sig_path = signature

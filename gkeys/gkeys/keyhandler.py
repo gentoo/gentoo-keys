@@ -75,10 +75,11 @@ class KeyHandler(object):
 
 
     def determine_keys(self, args, default_cat=None):
+        self.logger.debug(_unicode("KeyHandler: determine_keys; args.category = %s"), args.category or default_cat)
         seeds = self.seedhandler.load_category(args.category or default_cat)
         keyring = self.config.get_key('keyring')
         catdir = os.path.join(keyring, args.category)
-        self.logger.debug(_unicode("KeyHandler: determine_keys; catdir = %s") % catdir)
+        self.logger.debug(_unicode("KeyHandler: determine_keys; catdir = %s"), catdir)
         kwargs = self.seedhandler.build_gkeydict(args)
         return (catdir, seeds.list(**kwargs))
 
@@ -88,10 +89,12 @@ class KeyHandler(object):
         results = {}
         search_args = [x for x in KEY_OPTIONS if getattr(args, x)]
         if args.category:
+            self.logger.debug(_unicode("KeyHandler: key_search; args.category = %s"), args.category)
             self.seedhandler.load_category(args.category)
             results[args.category] = self.seedhandler.key_search(args, search_args)
         else:
             for cat in sorted(self.config.get_key('seeds')):
+                self.logger.debug(_unicode("KeyHandler: key_search; cat = %s"), cat)
                 self.seedhandler.load_category(cat)
                 found = self.seedhandler.key_search(args, search_args)
                 if found:

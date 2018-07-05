@@ -834,6 +834,9 @@ class Actions(ActionBase):
                                                   climit=climit)
             sig_path = fetcher.sig_path
             messages.extend(msgs)
+            if not success:
+                self.logger.debug(_unicode("ACTIONS: _verify; File not downloaded, exiting... %s"), filepath)
+                return (False, messages)
         elif signature is not None and os.path.exists(signature):
             sig_path = signature
         else:

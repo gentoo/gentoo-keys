@@ -284,6 +284,7 @@ class Actions(ActionBase):
         kwargs = self.seedhandler.build_gkeydict(args)
         keyresults = seeds.list(**kwargs)
         for key in sorted(keyresults):
+            self.logger.debug("ACTIONS: listkey; key/keydir:" + str(key.keydir))
             if args.fingerprint:
                 result = self.gpg.list_keys(key.keydir, kwargs['fingerprint'])
             else:
@@ -775,6 +776,7 @@ class Actions(ActionBase):
             self.logger.debug(_unicode(
                 "ACTIONS: verify; keyring category not specified, using default: %s")
                 % args.category)
+        self.logger.debug(_unicode("ACTIONS: verify; keyring category: %s"), args.category)
         keys = self.seedhandler.load_category(args.category)
         if not keys:
             return (False, ['No installed keys found, try installkey action.'])
@@ -788,6 +790,7 @@ class Actions(ActionBase):
             args.nick = self.config.get_key('verify-nick')
             messages.append(_unicode("Using config defaults..: %s %s")
                 % (args.category, args.nick))
+            self.logger.debug(_unicode("ACTIONS: verify; going recursive... %s, %s"), args.category, args.nick)
             self.verify_recursion = True
             return self.verify(args, messages)
         elif self.verify_recursion:
@@ -808,6 +811,7 @@ class Actions(ActionBase):
         timestamp_path = None
         isurl = success = verified = False
         if filepath.startswith('http'):
+            self.logger.debug(_unicode("ACTIONS: _verify; supplied url, using current directory ./%s"), filepath)
             isurl = True
             url = filepath
             filepath = args.destination
@@ -824,6 +828,8 @@ class Actions(ActionBase):
         else:
             climit = 0
         sig_path = None
+        get_sig = signature is not None
+        self.logger.debug(_unicode("ACTIONS: _verify; supplied signature %s"), signature)
         if isurl:
             fetcher = Fetch(self.logger)
             success, msgs = fetcher.fetch_url(url, filepath, signature, timestamp_path=timestamp_path,
@@ -851,7 +857,7 @@ class Actions(ActionBase):
                         sig_path = None
             elif signature:
                 sig_path = os.path.abspath(signature)
-        self.logger.info("Verifying file...")
+        self.logger.info("Verifying file... %s, %s, %s", key, sig_path, filepath)
         verified = False
         results = self.gpg.verify_file(key, sig_path, filepath)
         keyid = key.keyid[0]

@@ -88,8 +88,8 @@ class GkeysGPG(GPG):
 
 
     def set_keydir(self, keydir, task, fingerprint=True, reset=True):
-        self.logger.debug("basedir: %s, keydir: %s" % (self.basedir, keydir))
         self.keydir = pjoin(self.basedir, keydir)
+        self.logger.debug("GkeysGPG.set_keydir; keydir: %s, task: %s, self.keydir: %s" % (keydir, task, self.keydir))
         self.task = task
         if reset:
             self.config.options['tasks'][task] = self.config.defaults['tasks'][task][:]
@@ -98,7 +98,7 @@ class GkeysGPG(GPG):
             task_value.append('--fingerprint')
         task_value.extend(['--homedir', self.keydir])
         self.config.options['tasks'][task].extend(task_value)
-        self.logger.debug("set_keydir: New task options: %s" %str(self.config.options['tasks'][task]))
+        self.logger.debug("GkeysGPG.set_keydir; New task options: %s" %str(self.config.options['tasks'][task]))
         return
 
 
@@ -147,6 +147,8 @@ class GkeysGPG(GPG):
                     fingerprint, gkey.name))
             result = self.runGPG(task='recv-keys', inputfile=fingerprint)
             self.logger.info('GPG return code: ' + str(result.returncode))
+            self.logger.debug("LIB: add_key; fingerprint: %s. type: %s", fingerprint, type(fingerprint))
+            self.logger.debug("LIB: add_key; gkey.keys: %s. type: %s", gkey.keys, [type(key) for key in gkey.keys])
             if result.fingerprint in gkey.keys:
                 result.failed = False
                 message = "Fingerprints match... Import successful: "
@@ -254,6 +256,7 @@ class GkeysGPG(GPG):
             self.logger.debug("LIB: list_keys(), invalid keydir parameter: %s"
                 % str(keydir))
             return []
+        self.logger.debug("LIB: list_keys(), keydir parameter: %s"% str(keydir))
         if fingerprint:
             task = 'list-key'
             target = fingerprint

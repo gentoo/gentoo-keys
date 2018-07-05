@@ -827,8 +827,6 @@ class Actions(ActionBase):
             climit = 60
         else:
             climit = 0
-        sig_path = None
-        get_sig = signature is not None
         self.logger.debug(_unicode("ACTIONS: _verify; supplied signature %s"), signature)
         if isurl:
             fetcher = Fetch(self.logger)

@@ -1,7 +1,14 @@
 #!/bin/bash
 # $Id: update-seeds.sh,v 0.2.1 2014/10/12 dolsen Exp $
 
-FORCE=${1}
+set -o pipefail
+
+if [ -z "${1}" ]; then
+    FORCE='NO'
+else
+    FORCE=${1}
+fi
+
 HAS_UPDATES=false
 
 # configuration to run from a checkout with a custom config
@@ -49,10 +56,13 @@ gkeys-ldap update-seeds -C gentoo-devs || die "Seed file generation failed... ab
 
 echo " *** Checking if seed files are up-to-date"
 if ! diff -q "${GKEYS_DIR}/${GKEYS_SEEDS}" "${GKEY_SEEDS_DIR}/${GKEY_SEEDS}" > /dev/null ;then
+    echo "*** Detected a diff, HAS_UPDATES=true"
+    HAS_UPDATES=true
+elif [[ "${FORCE}" == "force" ]] ; then
     HAS_UPDATES=true
 fi
-if [[ "${FORCE}" == "force" || "${HAS_UPDATES}" ]] ; then
-    echo " *** Spotted differences"
+
+if [[ "${HAS_UPDATES}" ]] ; then
     echo " *** Updating old seeds with a new one"
     # copy seeds to gkey-seeds
     echo "  ... cp ${GKEYS_SEEDS} ${API_DIR}/${API_SEEDS}"
@@ -69,7 +79,7 @@ echo "Committing changes to gkey-seeds repo..."
 cd "${GKEY_SEEDS_DIR}" || die " *** Failed to change directory... exiting"
 git add "${GKEY_SEEDS}"  || die " *** Failed to add modified ${GKEYS_SEEDS} file"
 git add "${GKEY_SEEDS}.${GKEYS_SIG}" || die " *** Failed to add ${GKEYS_SEEDS}.sig file"
-git commit -S -m"${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
+git commit -S -m "${GKEYS_COMMIT_MSG}" || die " *** Failed to commit updates"
 git push --signed origin master || die " *** git push failed"
 cd ..
 

@@ -3,7 +3,7 @@ import os
 
 from snakeoil import fileutils
 from snakeoil import osutils
-from catalyst.fileops import ensure_dirs
+from gkeys.fileops import ensure_dirs
 
 
 LockInUse = osutils.LockException

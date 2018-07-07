@@ -327,7 +327,7 @@ class CliBase(object):
         if args.config:
             self.config.defaults['config'] = args.config
             self.config.defaults['configdir'] = os.path.dirname(args.config)
-            if args.email:
+            if getattr(args, 'email', False):
                 configs = [self.config.defaults['config'], os.path.abspath(os.path.join(self.config.defaults['configdir'], "email.conf"))]
                 self.config.read_config(configs)
             else:

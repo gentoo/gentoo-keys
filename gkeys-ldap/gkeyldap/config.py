@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 
 # Redundancy -- ldap{1,2,3,4}
-default_server = ['ldap://ldap%d.gentoo.org' % i for i in xrange(1,5)]
+default_server = ['ldap://ldap%d.gentoo.org' % i for i in range(1,5)]
 # add uid to the results so you don't have to
 # separate it out of the results tuple[0] value
 default_fields = ['uid', 'cn', 'mail', 'gentooStatus', 'gpgfingerprint']

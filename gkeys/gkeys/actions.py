@@ -452,6 +452,8 @@ class Actions(ActionBase):
         catdir, keyresults = self.keyhandler.determine_keys(args)
         self.logger.debug(_unicode("ACTIONS: speccheck; catdir = %s") % catdir)
         results = {}
+        unique_pass = {}
+        unique_fail = {}
         failed = defaultdict(list)
         self.output('', '\n Checking keys...')
         '''Login email'''
@@ -552,9 +554,20 @@ class Actions(ActionBase):
                             pub_pass['final'] = False
                             break
                     if pub_pass['final']:
+                        if gkey.name in unique_fail:
+                            unique_fail.pop(gkey.name)
+                        if gkey.name not in unique_pass:
+                            unique_pass[gkey.name] = []
+                        if spec not in unique_pass[gkey.name]:
+                            unique_pass[gkey.name].append(spec)
                         if spec not in failed['spec-approved']:
                             failed['spec-approved'].append(spec)
                     else:
+                        if gkey.name not in unique_pass:
+                            if gkey.name not in unique_fail:
+                                unique_fail[gkey.name] = []
+                            if spec not in unique_fail[gkey.name]:
+                                unique_fail[gkey.name].append(spec)
                         if spec not in failed['spec']:
                             failed['spec'].append(spec)
                     sdata = convert_pf(pub_pass, ['pub', 'sign', 'final'])
@@ -601,21 +614,38 @@ class Actions(ActionBase):
             self.output([sorted(set(failed['spec']))], '\n Failed to pass SPEC requirements:')
         if failed['spec-approved']:
             self.output([sorted(set(failed['spec-approved']))], '\n SPEC Approved:')
+        fkeys = []
+        pkeys = []
+        if unique_fail:
+            fkeys = sorted(unique_fail)
+            failed['unique-fail'] = []
+            for k in fkeys:
+                failed['unique-fail'].extend(unique_fail[k])
+            self.output([failed['unique-fail']], '\n Unique SPEC Failed by name:')
+        if unique_pass:
+            pkeys = sorted(unique_pass)
+            #failed['unique-pass'] = []
+            #for k in pkeys:
+            #    failed['unique-pass'].extend(unique_pass[k])
+            #self.output([failed['unique-pass']], '\n Unique SPEC Passed:')
+
 
         return (len(failed) <1,
             ['\nFound Failures:\n-------',
-                'Revoked................: %d' % len(set(failed['revoked'])),
-                'Invalid................: %d' % len(set(failed['invalid'])),
-                'No Signing subkey......: %d' % len(set(failed['sign'])),
-                'No Encryption subkey...: %d' % len(set(failed['encrypt'])),
-                'Algorithm..............: %d' % len(set(failed['algo'])),
-                'Bit length.............: %d' % len(set(failed['bits'])),
-                'Qualified IDs..........: %d' % len(set(failed['qualified_id'])),
-                'Expiry.................: %d' % len(set(failed['expired'])),
-                'Expiry Warnings........: %d' % len(set(failed['warn'])),
-                'SPEC requirements......: %d' % len(set(failed['spec'])),
-                '=============================',
-                'SPEC Approved..........: %d' % len(set(failed['spec-approved'])),
+                'Revoked..................: %d' % len(set(failed['revoked'])),
+                'Invalid..................: %d' % len(set(failed['invalid'])),
+                'No Signing subkey........: %d' % len(set(failed['sign'])),
+                'No Encryption subkey.....: %d' % len(set(failed['encrypt'])),
+                'Algorithm................: %d' % len(set(failed['algo'])),
+                'Bit length...............: %d' % len(set(failed['bits'])),
+                'Qualified IDs............: %d' % len(set(failed['qualified_id'])),
+                'Expiry...................: %d' % len(set(failed['expired'])),
+                'Expiry Warnings..........: %d' % len(set(failed['warn'])),
+                'SPEC requirements........: %d' % len(set(failed['spec'])),
+                'SPEC Approved............: %d' % len(set(failed['spec-approved'])),
+                '===============================',
+                'Unique approved by name..: %d' % len(pkeys),
+                'Unique failed by name....: %d' % len(fkeys),
             ])
 
     def removekey(self, args):

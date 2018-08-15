@@ -51,18 +51,17 @@ SPEC_STAT = ['', '','', False, False, False, False, False, False, False, False,
 # and approved options, limits
 TEST_SPEC = {
     'bits': {
-        'DSA': 2048,
         'RSA': 2048,
         },
-    'expire': 5 * 365,      # in days
+    'expire': 900,      # in days
     'subkeys': {        # warning/error mode
         'encrypt': {
             'mode': 'notice',
-            'expire': 5 * 365,
+            'expire': 900,
             },
         'sign': {
             'mode': 'error',
-            'expire': 5 * 365,
+            'expire': 900,
             },
         },
     'algorithms': ['DSA', 'RSA', '1', '2', '3', '17'],

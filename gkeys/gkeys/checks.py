@@ -64,7 +64,7 @@ TEST_SPEC = {
             'expire': 900,
             },
         },
-    'algorithms': ['DSA', 'RSA', '1', '2', '3', '17'],
+    'algorithms': ['RSA', '1', '2', '3'],
     'versions': ['4'],
     'qualified_id': '@gentoo.org',
 }
@@ -302,8 +302,8 @@ class KeyChecks(object):
 
 
     def _test_bits(self, data, stats):
-        bits = int(data.keylength)
         if data.pubkey_algo in TEST_SPEC['algorithms']:
+            bits = int(data.keylength)
             if bits >= TEST_SPEC['bits'][ALGORITHM_CODES[data.pubkey_algo]]:
                 stats[SPEC_INDEX['bits']] = True
             else:

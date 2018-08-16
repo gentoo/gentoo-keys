@@ -62,7 +62,7 @@ elif [[ "${FORCE}" == "force" ]] ; then
     HAS_UPDATES=true
 fi
 
-if [[ "${HAS_UPDATES}" ]] ; then
+if [[ ${HAS_UPDATES} == true ]] ; then
     echo " *** Updating old seeds with a new one"
     # copy seeds to gkey-seeds
     echo "  ... cp ${GKEYS_SEEDS} ${API_DIR}/${API_SEEDS}"
